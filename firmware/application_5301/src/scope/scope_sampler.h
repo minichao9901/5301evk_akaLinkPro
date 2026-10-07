@@ -53,7 +53,7 @@ static inline uint8_t scope_sampler_needs_service(void) { return scope_sampler_g
  * （HID CMD_RTT action 10，与 RTT 桥同一个开关）；带上就强制本会话用 RISC-V 后端。
  * DEF 包里回报的是**生效值**，所以主机能据此判断走的是哪条路。 */
 #define SCOPE_FLAG_RISCV     0x40U
-#define SCOPE_FLAG_FAST_BATCH 0x80U /* 单字 SWD、<=3 us：最多连续 16 拍，包边界返回 */
+#define SCOPE_FLAG_FAST_BATCH 0x80U /* 单字 SWD、<=3 us：通常 16 拍；2 us 档为 64 拍并跨包继续 */
 
 typedef struct
 {

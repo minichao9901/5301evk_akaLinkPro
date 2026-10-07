@@ -1,4 +1,4 @@
-# HSS 亚微秒周期协议（尚未上板测速）
+# HSS 亚微秒周期协议（已实测 STM32F103CB）
 
 旧 HID 0x32 action 7 保持不变：u32 周期单位 µs，包 version=1，时间戳单位 µs。
 新增 action 10 CONFIG_TICKS，字段布局与 action 7 相同，周期单位改为 24 MHz tick。
@@ -30,9 +30,11 @@ w11 低 16 位为周期原始单位；与旧状态一样，长周期在这个紧
 
 STATUS word 0 bit 3 advertises `SCOPE_FLAG_FAST_BATCH` (configuration flags bit 7).
 When requested for a direct single-word SWD plan at <=72 ticks (3 µs), one poll
-handles at most 16 samples, still waiting for each deadline. It returns at a packet
-boundary, buffer starvation, error, or control request. Interrupts remain enabled;
-main-loop services can be delayed by roughly 16 periods plus sample/interrupt cost.
+handles at most 16 samples and returns at packet boundaries. The tight 48-tick
+period (2 µs) use up to 64 samples and keep the budget across packet boundaries.
+All samples still wait for their deadlines. Buffer starvation, errors or control
+requests return promptly. Interrupts remain enabled; other main-loop services
+can be delayed by at most 128 us nominal plus sample/interrupt cost.
 JTAG, multi-span, and slower plans retain the scalar scheduler. Disable bit 7 for
 A/B measurements. This changes service cadence, not the nominal sampling period.
 
@@ -67,3 +69,8 @@ than 179 seconds. A USB completion counts a packet; it does not certify applicat
 receipt. Host receipt uses its own monotonic arrival window. Startup and post-STOP
 drain must be excluded from both rates. The two windows have small HID boundary
 skew, so their difference alone cannot be interpreted as an exact loss count.
+
+M0 now uses an independent aligned 64-byte scratch buffer while stopped. Queued
+USB DATA packets are never used as benchmark destinations, and posted-read
+pointers are cleared before the scratch buffer leaves scope. Running benchmarks
+are rejected before link initialization.

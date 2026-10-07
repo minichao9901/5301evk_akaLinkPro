@@ -869,6 +869,14 @@ static int scope_start_now(void)
  * 🚨 要先自己把链路拉起来 —— 网页的「标定真实速率」是在**启动推流之前**点的。 */
 static void scope_run_bench(void)
 {
+    /* Never measure into a USB-owned packet. A stopped stream can still have
+     * all packet slots queued, and M0 does not need a TX buffer at all. */
+    if (s_running)
+    {
+        s_bench_err = -5;
+        s_bench_valid = 1U;
+        return;
+    }
     if (s_nspans == 0U)
     {
         s_bench_err = -3;
@@ -884,33 +892,8 @@ static void scope_run_bench(void)
         if (rc != 0) { s_bench_err = rc; s_bench_valid = 1U; return; }
     }
 
-    /* 采样进行中不接受标定：标定样本会写进**正在填的包缓冲**，把在飞的数据流
-     * 污染掉（bench 只测时间不验值，恰恰没人会发现）。先 STOP 再标定 —— 这本来
-     * 就是文档口径（网页的「标定真实速率」在启动推流**之前**点）。 */
-    if (s_running)
-    {
-        s_bench_err = -5;
-        s_bench_valid = 1U;
-        return;
-    }
-
-    /* 落点必须是**真实存在**的包缓冲：s_fill_buf 的合法值里有 0xFF 这个"没有缓冲"
-     * 哨兵（8 个包全在飞时点标定就会撞上），拿它当下标取到的是 &s_pkt[255] ——
-     * 越界指针，而下面会按 s_bench_iters（上限 100000）持续往里写。
-     * 先要到缓冲再取址；要不到就如实报错，绝不写越界地址。 */
-    if (s_fill_buf >= SCOPE_TX_BUFS)
-    {
-        s_fill_buf = scope_alloc_buf();
-        s_fill_n = 0U;
-    }
-    if (s_fill_buf >= SCOPE_TX_BUFS)
-    {
-        s_bench_err = -5;                  /* -5 = 没有空闲包缓冲（等主机把 0x83 读走） */
-        s_bench_valid = 1U;
-        return;
-    }
-
-    uint8_t *dst = &s_pkt[s_fill_buf][SCOPE_HDR];
+    uint8_t dst[SCOPE_MAX_VARS * 8U] __attribute__((aligned(4)));
+    s_pipe_dst = NULL;
 
     uint32_t t0 = mchtmr_now();
     int32_t err = 0;
@@ -920,6 +903,7 @@ static void scope_run_bench(void)
         if (scope_sample_bytes(dst) != 0) { err = -4; }
     }
     s_bench_ticks = mchtmr_now() - t0;
+    s_pipe_dst = NULL; /* The posted-read destination must not outlive this stack. */
     s_bench_err = err;
     s_bench_valid = 1U;
     /* 热路径上不再逐拍测这个值（见 scope_sample_once 的说明），标定时补一次 */
@@ -1001,10 +985,13 @@ void scope_sampler_poll(void)
 
     /* Keep interrupts enabled. Only amortize main-loop services for an explicitly
      * enabled, bounded single-word session; slower/multi-span/JTAG plans stay scalar.
-     * STOP/configuration/reset requests interrupt the deadline wait. Packet boundaries
-     * return promptly so other bridges and queued DAP commands are serviced. */
-    uint8_t budget = ((s_flags & SCOPE_FLAG_FAST_BATCH) && s_pipe_ok &&
-                      s_backend == SCOPE_BE_SWD && s_period_ticks <= 72U) ? 16U : 1U;
+     * STOP/configuration/reset requests interrupt the deadline wait. Only the 2 us
+     * mode keeps its remaining budget across packet boundaries: an extra main-loop
+     * visit there costs samples even when reads and USB throughput have headroom. */
+    uint8_t batched = ((s_flags & SCOPE_FLAG_FAST_BATCH) && s_pipe_ok &&
+                       s_backend == SCOPE_BE_SWD && s_period_ticks <= 72U);
+    uint8_t tight = batched && s_period_ticks <= 48U;
+    uint8_t budget = batched ? (tight ? 64U : 16U) : 1U;
     while (budget-- != 0U)
     {
         if (scope_sample_once() != 0)
@@ -1033,7 +1020,7 @@ void scope_sampler_poll(void)
             s_dropped++;
             s_t_time += s_time_step;
         }
-        if (budget == 0U || s_fill_n == 0U || s_fill_buf >= SCOPE_TX_BUFS) { return; }
+        if (budget == 0U || s_fill_buf >= SCOPE_TX_BUFS || (!tight && s_fill_n == 0U)) { return; }
         do
         {
             if (!s_running || s_usb_reset_req || s_start_req || s_bench_req) { return; }
