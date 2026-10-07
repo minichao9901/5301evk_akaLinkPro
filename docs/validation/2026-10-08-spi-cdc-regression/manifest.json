@@ -1,0 +1,57 @@
+{
+  "createdAt": "2026-10-07T20:59:26.325298+00:00",
+  "baseline": {
+    "probe": "ef4808b",
+    "web": "88d3eaa"
+  },
+  "fixBase": {
+    "probe": "6c82edd",
+    "web": "0bf30f7"
+  },
+  "artifacts": {
+    "firmware/application_5301/build_dfu_evklite/output/akaLinkPro_App.elf": {
+      "bytes": 1715448,
+      "sha256": "1c69dbed8e34a94e235d1a01bd3111bf8fdb55a8a318208cc8550326f20af0cf"
+    },
+    "script_test/stm32f103_spi_tx/fw.elf": {
+      "bytes": 159696,
+      "sha256": "9d8beec01e09dcca0b4a1e063c4bb489ecd536da8318713075eb79f8a1efbc0a"
+    },
+    "script_test/hpm6800evk_rtt_flood/fw.elf": {
+      "bytes": 348180,
+      "sha256": "07d662b8301906a3235a74ce9b1444312256887882f6ead7c9210bb5dab64fa1"
+    },
+    "build/regression/spi-cdc/baseline.elf": {
+      "bytes": 1687580,
+      "sha256": "720b70499542d2418339614803a79db853fac9173ba5e99f8f0cb448166926b2"
+    },
+    "tools/target-firmware/stm32f103_dbgstress/fw.elf": {
+      "bytes": 189280,
+      "sha256": "eaa07aa96e99d8e021f867a4d2d08e7eaab213145a6f570e29cc25e7135c71ce"
+    },
+    "tools/target-firmware/stm32f103_scope/fw.elf": {
+      "bytes": 160964,
+      "sha256": "0dce6952d7d92beee8a0faafd2ff087735c5e28c73bfb5082816a73eb1f3675d"
+    },
+    "tools/selftest/fixtures/dbg-locals-arm.elf": {
+      "bytes": 118000,
+      "sha256": "2ed364d1b222b1d8e44dd193a9e8cba085f1425ed5ca2fa1d68ca5a6e0ff8227"
+    }
+  },
+  "targetRestore": {
+    "bytes": 524288,
+    "originalSha256": "c2ed64c452949005c057cb0d0e58c1dde508e7296962022d4f88aabd56faba98",
+    "readbackSha256": "c2ed64c452949005c057cb0d0e58c1dde508e7296962022d4f88aabd56faba98",
+    "exactMatch": true
+  },
+  "checks": {
+    "finalFullFlow": "20 pass / 0 fail, after initial 60 MHz downgrade failure",
+    "debugStress": "82 pass / 0 fail; no GDB oracle comparison",
+    "adc": "317 pass / 0 fail; 61 captures, no controlled overflow",
+    "host": "make test-host exit 0",
+    "offline": "make test-offline retry exit 0; native-close mock updated",
+    "sram": "20 KiB exact match at 1/2/4/10/20/36/45/60 MHz",
+    "pages": "8 page suites pass; SPI tab-order assertion updated and rerun 168 pass / 0 fail"
+  },
+  "logNormalization": "日志仅统一换行并去除行末空白；原始未格式化日志保留于测试输出目录。JSON 测量记录未改写。"
+}

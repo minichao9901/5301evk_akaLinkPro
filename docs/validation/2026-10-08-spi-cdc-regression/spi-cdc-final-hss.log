@@ -1,0 +1,44 @@
+F103ZE: backing up original Flash before flashing the 72 MHz scope fixture.
+core    : 72 MHz
+board   : ze  (512KB flash / 64KB RAM)
+   text	   data	    bss	    dec	    hex	filename
+   3384	      4	   4160	   7548	   1d7c	E:\web-serial-rtt-tools\tools\target-firmware\stm32f103_scope\build-72mhz\fw.elf
+
+被采样变量（nm 实测地址/大小）：
+  20001030 00000001 B g_pulse
+  2000000c 00000002 B g_far_sq100
+  2000102c 00000002 B g_pair_a
+  2000102e 00000002 B g_pair_b
+  20001040 00000002 B g_sq5k
+  20000008 00000004 B g_far_cnt
+  20001010 00000004 B g_isr_count
+  20000000 00000004 D g_lfsr
+  20001044 00000004 B g_tick
+  20001038 00000008 B g_ramp64
+  20001014 00000018 B g_pack
+  08000000 00000040 R g_vectors
+  2000000e 00001000 B g_hole
+
+产物： E:\web-serial-rtt-tools\tools\target-firmware\stm32f103_scope\build-72mhz\fw.elf
+       E:\web-serial-rtt-tools\tools\target-firmware\stm32f103_scope\build-72mhz\fw.bin (3388 B)
+
+{"cfg":{"period":2,"draw":true,"adaptive":true},"valid":true,"dt":5.004057,"produced":2480811,"skipped":21217,"usb":0,"errors":0,"yields":0,"received":2480372,"probeHz":495759.9403843721,"webHz":495667.95227824553,"dropPercent":0.8479921088013403,"maxMainThreadLagMs":5,"bad":0,"checked":2788760,"counterBackwards":0,"maxCounterStep":1,"reordered":0,"periodTicks":48}
+{"cfg":{"period":2.25,"draw":true,"adaptive":true},"valid":true,"dt":5.004056458333333,"produced":2221958,"skipped":2068,"usb":0,"errors":0,"yields":0,"received":2220592,"probeHz":444031.36105703574,"webHz":443772.25763851294,"dropPercent":0.0929845244614946,"maxMainThreadLagMs":4.9000000059604645,"bad":0,"checked":2496864,"counterBackwards":0,"maxCounterStep":1,"reordered":0,"periodTicks":54}
+{"cfg":{"period":3,"draw":true,"adaptive":true},"valid":true,"dt":5.008055458333334,"produced":1669323,"skipped":30,"usb":0,"errors":0,"yields":0,"received":1669784,"probeHz":333327.578715661,"webHz":333683.1797919739,"dropPercent":0.0017971034286936316,"maxMainThreadLagMs":9.400000005960464,"bad":0,"checked":1877732,"counterBackwards":0,"maxCounterStep":1,"reordered":0,"periodTicks":72}
+{"cfg":{"period":1,"draw":true,"adaptive":true},"valid":true,"dt":5.004056,"produced":2480178,"skipped":21851,"usb":0,"errors":0,"yields":0,"received":2480372,"probeHz":495633.54207067227,"webHz":495667.95227824553,"dropPercent":0.8733312043945134,"maxMainThreadLagMs":8.799999997019768,"bad":0,"checked":2788016,"counterBackwards":0,"maxCounterStep":1,"reordered":0,"periodTicks":48}
+{"cfg":{"period":2,"draw":true,"adaptive":true,"vars":["g_pack.f_sin","g_pack.f_tri","g_pack.i_tick","g_pack.u_ramp","g_pack.i_sq1k","g_pack.u_cnt","g_pack.i_saw","g_pack.u_hi"]},"valid":true,"dt":5.004056875,"produced":415091,"skipped":2086936,"usb":0,"errors":0,"yields":0,"received":415118,"probeHz":82950.89571698764,"webHz":82955.57642718137,"dropPercent":83.40981132497771,"maxMainThreadLagMs":6.700000002980232,"bad":0,"checked":466554,"counterBackwards":0,"maxCounterStep":1,"reordered":0,"periodTicks":48}
+{"cfg":{"period":20,"draw":true,"adaptive":true,"vars":["g_pack.f_sin","g_pack.f_tri","g_pack.i_tick","g_pack.u_ramp","g_pack.i_sq1k","g_pack.u_cnt","g_pack.i_saw","g_pack.u_hi"]},"valid":true,"dt":5.004055375,"produced":250203,"skipped":0,"usb":0,"errors":0,"yields":0,"received":250162,"probeHz":50000.04621251818,"webHz":49991.407046281645,"dropPercent":0,"maxMainThreadLagMs":7.199999988079071,"bad":0,"checked":281512,"counterBackwards":0,"maxCounterStep":1,"reordered":0,"periodTicks":480}
+{"cfg":{"period":3,"draw":true,"adaptive":true,"vars":["g_pack.u_hi"]},"valid":true,"dt":5.008055916666667,"produced":1669320,"skipped":33,"usb":0,"errors":0,"yields":0,"received":1669784,"probeHz":333326.9491749385,"webHz":333456.6150773839,"dropPercent":0.001976813771562995,"maxMainThreadLagMs":7.399999991059303,"bad":0,"checked":1876616,"counterBackwards":0,"maxCounterStep":1,"reordered":0,"periodTicks":72}
+┌─────────┬──────────┬─────────────┬─────────┬─────────────┬──────────┬────────────┬─────┐
+│ (index) │ periodUs │ effectiveUs │ kHz     │ skipPercent │ usbDrops │ readErrors │ bad │
+├─────────┼──────────┼─────────────┼─────────┼─────────────┼──────────┼────────────┼─────┤
+│ 0       │ 2        │ 2           │ 495.76  │ 0.84799     │ 0        │ 0          │ 0   │
+│ 1       │ 2.25     │ 2.25        │ 444.031 │ 0.09298     │ 0        │ 0          │ 0   │
+│ 2       │ 3        │ 3           │ 333.328 │ 0.0018      │ 0        │ 0          │ 0   │
+│ 3       │ 1        │ 2           │ 495.634 │ 0.87333     │ 0        │ 0          │ 0   │
+│ 4       │ 2        │ 2           │ 82.951  │ 83.40981    │ 0        │ 0          │ 0   │
+│ 5       │ 20       │ 20          │ 50      │ 0           │ 0        │ 0          │ 0   │
+│ 6       │ 3        │ 3           │ 333.327 │ 0.00198     │ 0        │ 0          │ 0   │
+└─────────┴──────────┴─────────────┴─────────┴─────────────┴──────────┴────────────┴─────┘
+Read calibration 1.490 us; starting recommendation 3 us (verify capture counters).
+Results and original Flash backup: E:\web-serial-rtt-tools\tmp\spi-cdc-final-hss

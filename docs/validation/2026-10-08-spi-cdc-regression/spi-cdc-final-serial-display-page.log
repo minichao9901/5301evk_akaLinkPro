@@ -1,0 +1,55 @@
+{
+  "history": {
+    "ms": 67.70000000298023,
+    "rawBytes": 2064384,
+    "nodes": 1,
+    "chars": 132075,
+    "lines": 2098,
+    "layouts": 1
+  },
+  "burst": {
+    "expected": 15466496,
+    "receivedBeforeManual": 15466496,
+    "recorded": 15466496,
+    "heartbeats": 12,
+    "maxGap": 85.09999999403954,
+    "hiddenWrites": 0,
+    "suppressed": true,
+    "pending": 64192,
+    "manualChars": 132204,
+    "terminalPending": 0,
+    "ansiPending": 64192,
+    "cleared": true,
+    "errors": []
+  },
+  "sustained": {
+    "expected": 2611200,
+    "recorded": 2611200,
+    "received": 2611200,
+    "heartbeats": 448,
+    "maxGap": 33.30000001192093,
+    "hiddenWrites": 0,
+    "phases": [
+      {
+        "requestedKBps": 200,
+        "high": true,
+        "recovered": true,
+        "ms": 2987.4000000059605
+      },
+      {
+        "requestedKBps": 512,
+        "high": true,
+        "recovered": true,
+        "ms": 2973.8999999910593
+      },
+      {
+        "requestedKBps": 1024,
+        "high": true,
+        "recovered": true,
+        "ms": 3016.2000000029802
+      }
+    ],
+    "errors": []
+  },
+  "regularPassed": 25
+}

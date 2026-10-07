@@ -1,0 +1,84 @@
+{
+  "controls": {
+    "started": {
+      "running": true,
+      "mode": 3,
+      "lsb": true,
+      "disabled": true,
+      "state": "运行中 · 正常\nSPI 接收 4.0 KB · 转入 CDC 4.0 KB\n丢弃 0 B · FIFO 溢出 0 · DMA 错误 0\n循环缓冲 16.0 KB · 待转发 0 B · CDC 待发送 0 B"
+    },
+    "stopped": true,
+    "disconnected": true,
+    "tabs": [
+      [
+        "serial",
+        "串口助手"
+      ],
+      [
+        "terminal",
+        "终端"
+      ],
+      [
+        "rtt",
+        "RTT Viewer"
+      ],
+      [
+        "rttcdc",
+        "RTT 转发"
+      ],
+      [
+        "scope",
+        "J-Scope 波形"
+      ],
+      [
+        "flash",
+        "烧录器"
+      ],
+      [
+        "dbg",
+        "调试器"
+      ],
+      [
+        "spi",
+        "USB→SPI/QSPI"
+      ],
+      [
+        "panel",
+        "SPI/QSPI 屏"
+      ],
+      [
+        "spicdc",
+        "SPI→USB"
+      ],
+      [
+        "i2c",
+        "USB→I2C"
+      ],
+      [
+        "analog",
+        "USB→ADC / DAC"
+      ],
+      [
+        "gen",
+        "工程生成"
+      ]
+    ],
+    "duplicates": [],
+    "errors": []
+  },
+  "stream": {
+    "shown": true,
+    "cleared": true,
+    "paused": true,
+    "resumed": true,
+    "high": true,
+    "recovered": true,
+    "received": 4915200,
+    "recorded": 4915200,
+    "beats": 104,
+    "maxGap": 23.700000002980232,
+    "bytes": 8206,
+    "chars": 8242,
+    "errors": []
+  }
+}

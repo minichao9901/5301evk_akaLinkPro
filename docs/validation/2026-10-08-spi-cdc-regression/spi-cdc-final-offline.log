@@ -1,0 +1,86 @@
+node tools/dev/check-syntax.mjs
+✅ 语法检查通过：295 个模块（app/ + bridge/ + tools/ 全部，自动遍历，不用维护白名单）
+node tools/dev/check-liquid.mjs
+OK  81 个 Markdown 都没有 Liquid 地雷（{{ / {%）
+pwsh -NoProfile -Command "Write-Host 'syntax + liquid check ok'"
+syntax + liquid check ok
+node tools/selftest/probe-status.test.mjs
+PASS probe status: idle / serial / mock / single / shared / switching / failure
+node tools/selftest/probe-manager.test.mjs
+probe-manager: serialized setup, coexistence, cancellation, busy flash, failed release PASS
+probe-manager: cross-tab release cancels queued Web Lock acquisition PASS
+probe-manager: preemption drains cancelled reconnect without waiting for its own queue PASS
+node tools/selftest/probe-feature-registry.test.mjs
+probe-feature-registry: one descriptor wires new clients, USB ownership, coexistence and guarded handoff PASS
+node tools/selftest/hid-channel.test.mjs
+hid-channel: shared response queue, handle reference ownership, independent devices and close cancellation PASS
+hid-channel: timeout and close settle a response even while sendReport is stalled PASS
+hid-channel: timed-out shared channel quarantines late replies until native write and reply settle PASS
+hid-channel: native close failure retains shared registration for retry; duplicate close coalesces PASS
+node tools/selftest/probe-bus.test.mjs
+目标: web-serial-rtt-tools/probe-bus（Node 的 BroadcastChannel，进程内等价"同源页签"）
+
+── 1. 请求让出 → 对方执行并回执 ──
+  PASS  对方执行了让出动作（1 次）
+  PASS  理由原样传过去：「烧录 demo.elf」
+  PASS  报告"协调可用"
+  PASS  认识 1 个同伴（asked=1）
+  PASS  收到 1 个回执（acked=1）
+  PASS  没等到上限就返回（263 ms）
+
+── 2. 没有同伴：不干等 ──
+  PASS  没人应答（asked=0 acked=0）
+  PASS  只在很短的窗口里等（80 ms，不占满 settle/waitMs）
+
+── 3. 同伴磨蹭：请求方有上限，不会被拖住 ──
+  PASS  请求方 624 ms 就回来了（waitMs=600，不被对方的 3 s 拖住）
+  PASS  活着的同伴没释放时，禁止继续认领
+
+── 4. 让出动作抛异常：不能谎报已释放 ──
+  PASS  失败原因返回请求方
+  PASS  失败不能算成已释放
+
+── 6. 同伴关页签（会喊 bye）：立刻从名单里去掉 ──
+  PASS  先认识 1 个同伴（peers=1）
+  PASS  bye 立刻把它去掉（peers=0）
+  PASS  之后不再为它白等（asked=0，80 ms）
+
+── 7. "冻结页签"（没喊 bye 也没应答）：两轮之后除名，不再白等 ──
+  PASS  第一轮照旧喊它并等满上限（asked=1 acked=0）
+  PASS  第一轮不除名（它可能只是刚好在忙）
+  PASS  第二轮确认它不在，除名（ghosts=1）
+  PASS  除名后不再为它白等（asked=0，80 ms）
+
+── 8. 环境里没有 BroadcastChannel：静默降级 ──
+  PASS  认得出环境不支持
+  PASS  返回"不支持"，不抛错、不等待
+
+✅ probe-bus：21 通过 / 0 失败
+node tools/selftest/probe-cross-tab.test.mjs
+probe-cross-tab: simultaneous acquisition has one winner, later handoff drains the previous owner PASS
+probe-cross-tab: passive HID command responses serialize across tab handles and closing cancels a lock waiter PASS
+node tools/selftest/probe-integration.test.mjs
+probe-integration: real entry points serialize setup, coexist on disjoint resources, cancel queued START and protect flash PASS
+probe-integration: unknown firmware stop cannot be bypassed by a later feature PASS
+probe-integration: manual release and managed takeover share one complete USB close PASS
+probe-integration: firmware START pending retains ownership until STOP completion is confirmed PASS
+probe-integration: cancelling during backend preparation cannot create a later debug session PASS
+node tools/selftest/usb-device.test.mjs
+usb-device: shared lifecycle, endpoint exclusion, interface refs, guarded reset, alias identity PASS
+usb-device: native timeout retains ownership and prevents late lifecycle races PASS
+usb-device: failed setup retains requests, later exclusive reconnect recovers abandoned handles PASS
+usb-device: physical unplug invalidates canonical handle before same-serial reconnect PASS
+usb-device: duplicate and unacquired close are harmless to remaining peers PASS
+node tools/selftest/usb-transports.test.mjs
+usb-transports: DAP disconnect/legacy cleanup preserve independent SPI interface PASS
+file:///E:/web-serial-rtt-tools/app/rtt/dap-webusb.js:72
+  const timeout = new Promise((_, rej) => { t = setTimeout(() => rej(new Error(`${what} 超时（${ms}ms）：探针没响应`)), ms); });
+                                                                     ^
+
+Error: 等待采样接口读退出 超时（1500ms）：探针没响应
+    at Timeout.<anonymous> (file:///E:/web-serial-rtt-tools/app/rtt/dap-webusb.js:72:70)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+
+Node.js v24.13.1
+make: *** [Makefile:689: test-probe] Error 1

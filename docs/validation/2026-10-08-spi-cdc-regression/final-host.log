@@ -1,0 +1,36 @@
+python script_test/riscv_jtag_host_test.py
+JTAG block pipeline: 1072 target/host alignment and guarded-length cases, 256 cached scan-count cases, N+4 scans, final SBCS errors rejected PASS
+JTAG production C: sticky DTM recovery, no write replay, unknown SBCS rejected, block restart and 32-sample pipeline boundaries PASS
+python script_test/service_gate_host_test.py
+Production idle gates: all running/control/reset/drain/ADC flags, non-consuming reads, late wake and main-loop wiring PASS
+python script_test/analog_host_test.py
+Analog production adapter: board CAPS, input bounds, SPI exclusion, quantization, initialization errors and pad restoration PASS
+python script_test/adc_stream_host_test.py
+Shared ADC DMA: finite count/ring wrap, SPI/core exclusion, two slots, overflow, END/reset/restart PASS (1108 transfers)
+python script_test/adc_cache_host_test.py
+ADC production cache barrier: all offsets, zero/small/full blocks, wrap, aligned spans and no neighbor invalidation PASS
+python script_test/bus_periodic_host_test.py
+periodic virtual timer and protocol boundaries PASS
+Periodic production engine: MCU cadence, groups, delays, overflow, stop/reset, stale ACK, priority yield PASS
+python script_test/scope_host_test.py
+scope host tests: protocol units, pipeline, packet boundary, limits, bounded batching, stop/error, rollover, USB ownership/starvation, DAP yield, multi-span PASS
+python script_test/rtt_stop_host_test.py
+RTT STOP: queued START cancelled, active RdOff flushed before stopping, completion published PASS
+python script_test/spi_drain_host_test.py
+SPI drain: bounded short responses, ring backpressure, disabled bridge drops pending hw reinit, capability signature PASS
+python script_test/spi_adc_owner_host_test.py
+SPI/ADC: poisoned NOLOAD initialization, complete gate reset, failed claim preserves DMA, delayed IN/OUT completion fence PASS
+python script_test/spi_cdc_host_test.py
+SPI CDC production math: DMA edge/IRQ epochs, wrap, partial tails, CDC backpressure, bounded chunks and exact loss accounting PASS
+python script_test/spi_cdc_service_host_test.py
+SPI CDC production service: deferred START/STOP/reset, failure cleanup, CDC owner conflict, DMA wrap/content, bounded copying, in-flight USB protection, overflow/fault/restart and unsupported boards PASS
+python script_test/cdc_source_host_test.py
+CDC production handoff: UART/RTT/SPI, latest line-coding reapply, separate DMA restart, no USB in-flight ring reset PASS
+python script_test/target_switch_host_test.py
+TARGET guard: live RTT/scope rejected, idle switch accepted PASS
+python script_test/test_scope_hss_test.py
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.003s
+
+OK

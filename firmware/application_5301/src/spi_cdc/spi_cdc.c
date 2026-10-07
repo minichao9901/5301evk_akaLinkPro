@@ -139,9 +139,12 @@ static int32_t start(void)
 static void forward(void)
 {
     uint32_t budget = 4096U;
+    /* Snapshot once: chasing continuously arriving DMA bytes turns the byte
+     * budget into a ~1.8ms wait at 18MHz and starves the next scope/DAP poll.
+     * New arrivals remain in DMA storage for the next main-loop turn. */
+    s_received = written();
+    s_dropped += spi_cdc_trim(s_received, &s_read, s_size);
     while (budget) {
-        s_received = written();
-        s_dropped += spi_cdc_trim(s_received, &s_read, s_size);
         uint32_t lock = disable_global_irq(CSR_MSTATUS_MIE_MASK);
         uint32_t n = spi_cdc_chunk(s_received, s_read, s_size, chry_ringbuffer_get_free(&g_uartrx), budget);
         if (n) { chry_ringbuffer_write(&g_uartrx, s_receive + s_read % s_size, n); }

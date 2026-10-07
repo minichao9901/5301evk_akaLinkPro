@@ -51,6 +51,8 @@ static struct {struct {uint32_t FUNC_CTL;}PAD[32];} fake_ioc;
 #define HPM_IOC (&fake_ioc)
 static uint8_t ring[16384],source,claimed,other_owner;
 static unsigned fail_stage,releases,parks,enabled,dma_active,produced,fifo_status;
+static unsigned arrival_on_write;
+static void produce(unsigned n);
 static void (*tc_cb)(DMA_Type*,uint32_t,void*),(*error_cb)(DMA_Type*,uint32_t,void*);
 static struct {uint32_t used;uint8_t data[32768];}g_uartrx;
 static uint32_t disable_global_irq(uint32_t m){(void)m;return 0;}
@@ -81,7 +83,7 @@ static void dma_mgr_enable_dma_irq_with_priority(dma_resource_t *r,unsigned p){(
 static void dma_mgr_enable_channel(dma_resource_t *r){assert(r->base);dma_active=1;}
 static uint32_t chry_ringbuffer_get_free(void *p){(void)p;return sizeof(g_uartrx.data)-g_uartrx.used;}
 static uint32_t chry_ringbuffer_get_used(void *p){(void)p;return g_uartrx.used;}
-static void chry_ringbuffer_write(void *p,const uint8_t *b,uint32_t n){(void)p;assert(n<=1024&&n<=chry_ringbuffer_get_free(p));memcpy(g_uartrx.data+g_uartrx.used,b,n);g_uartrx.used+=n;}
+static void chry_ringbuffer_write(void *p,const uint8_t *b,uint32_t n){(void)p;assert(n<=1024&&n<=chry_ringbuffer_get_free(p));memcpy(g_uartrx.data+g_uartrx.used,b,n);g_uartrx.used+=n;if(arrival_on_write)produce(arrival_on_write);}
 static uint32_t spi_get_interrupt_status(void *p){(void)p;return fifo_status;}
 static void spi_clear_interrupt_status(void *p,uint32_t bits){(void)p;fifo_status&=~bits;}
 #endif
@@ -111,6 +113,11 @@ int main(void){
   for(unsigned i=0;i<257;i++)assert(g_uartrx.data[i]==(uint8_t)(k*257+i));g_uartrx.used=0;
  }
  assert(s_received==25700&&s_forwarded==25700&&!s_dropped);
+ // DMA keeps receiving while copying. Yield after the entry snapshot rather
+ // than chasing incoming bytes until the 4KiB budget has been filled.
+ produce(100);arrival_on_write=50;spi_cdc_poll();arrival_on_write=0;
+ assert(g_uartrx.used==100&&s_received==25800&&produced==25850);
+ g_uartrx.used=0;spi_cdc_poll();assert(g_uartrx.used==50&&s_read==25850);g_uartrx.used=0;
  // USB owns this entire ring: never overwrite its in-flight bytes.
  g_uartrx.used=sizeof(g_uartrx.data);memset(g_uartrx.data,0xa5,sizeof(g_uartrx.data));produce(20000);spi_cdc_poll();
  assert(s_received-s_read==8192&&s_dropped==11808);

@@ -1,0 +1,18 @@
+{
+  "startedAt": "2026-10-07T20:09:42.820Z",
+  "board": "ze",
+  "cpuMHz": 72,
+  "requestedClockMHz": 60,
+  "periods": [
+    2,
+    2.25,
+    3
+  ],
+  "seconds": 5,
+  "elfPath": "tools/target-firmware/stm32f103_scope/build-72mhz/fw.elf",
+  "deviceId": "0x10036414",
+  "flashKiB": 512,
+  "backupPath": "E:\\web-serial-rtt-tools\\tmp\\spi-cdc-current-hss\\original-flash.bin",
+  "backupSha256": "3df127ba327b990772f3b603743c57a689b448357ae819790948df8a0a128ab6",
+  "elfSha256": "5342e35f2515edd41759dcdc4501751cac9322aaa54889da816561ea096fc463"
+}

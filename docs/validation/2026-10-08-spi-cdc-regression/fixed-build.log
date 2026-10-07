@@ -1,0 +1,26 @@
+[make] building APP ...
+-- Application: E:/Share/github/akaLinkPro/firmware/application_5301
+-- Board (custom board): hpm5301evklite from E:/Share/github/akaLinkPro/firmware/application_5301/boards
+-- Found toolchain: gnu (E:\sdk_env_v1.11.0\toolchains\rv32imac_zicsr_zifencei_multilib_b_ext-win)
+-- hpm_sdk: 1.11.0 (E:\sdk_env_v1.11.0\hpm_sdk)
+-- GNU ld linker script: E:/Share/github/akaLinkPro/firmware/application_5301/linker/flash_dfu_app.ld
+-- Configuring done
+-- Generating done
+-- Build files have been written to: E:/Share/github/akaLinkPro/firmware/application_5301/build_dfu_evklite
+[1/3] Building C object CMakeFiles/app.dir/src/spi_cdc/spi_cdc.c.obj
+<command-line>: warning: "FLASH_XIP" redefined
+<command-line>: note: this is the location of the previous definition
+[2/3] Linking C executable output\akaLinkPro_App.elf
+E:/sdk_env_v1.11.0/toolchains/rv32imac_zicsr_zifencei_multilib_b_ext-win/bin/../lib/gcc/riscv32-unknown-elf/13.2.0/../../../../riscv32-unknown-elf/bin/ld.exe: warning: output\akaLinkPro_App.elf has a LOAD segment with RWX permissions
+Memory region         Used Size  Region Size  %age Used
+           FLASH:      161640 B       888 KB     17.78%
+             ILM:       31400 B       128 KB     23.96%
+             DLM:      114784 B     130304 B     88.09%
+        AHB_SRAM:       24896 B        32 KB     75.98%
+[pack app] ver=0.1 len=190384 (0x2E7B0) crc32=0xD19BE43A time=2026/10/08 04:34:28
+[pack app] out: E:/Share/github/akaLinkPro/firmware/application_5301/build_dfu_evklite/output/akaLinkPro_App_pack.bin / E:/Share/github/akaLinkPro/firmware/application_5301/build_dfu_evklite/output/akaLinkPro_App_pack.hex
+
+[3/3] Generating akaLinkPro_App.hex
+
+[build_dfu_evklite] APP image (flash this): build_dfu_evklite\output\akaLinkPro_App_pack.hex / _pack.bin (linked at 0x80020000, entry 0x80020100)
+[build_dfu_evklite] raw (no header): build_dfu_evklite\output\akaLinkPro_App.hex / .bin

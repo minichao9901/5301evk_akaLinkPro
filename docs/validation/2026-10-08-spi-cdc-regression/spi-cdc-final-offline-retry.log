@@ -1,0 +1,2529 @@
+node tools/dev/check-syntax.mjs
+✅ 语法检查通过：295 个模块（app/ + bridge/ + tools/ 全部，自动遍历，不用维护白名单）
+node tools/dev/check-liquid.mjs
+OK  81 个 Markdown 都没有 Liquid 地雷（{{ / {%）
+pwsh -NoProfile -Command "Write-Host 'syntax + liquid check ok'"
+syntax + liquid check ok
+node tools/selftest/probe-status.test.mjs
+PASS probe status: idle / serial / mock / single / shared / switching / failure
+node tools/selftest/probe-manager.test.mjs
+probe-manager: serialized setup, coexistence, cancellation, busy flash, failed release PASS
+probe-manager: cross-tab release cancels queued Web Lock acquisition PASS
+probe-manager: preemption drains cancelled reconnect without waiting for its own queue PASS
+node tools/selftest/probe-feature-registry.test.mjs
+probe-feature-registry: one descriptor wires new clients, USB ownership, coexistence and guarded handoff PASS
+node tools/selftest/hid-channel.test.mjs
+hid-channel: shared response queue, handle reference ownership, independent devices and close cancellation PASS
+hid-channel: timeout and close settle a response even while sendReport is stalled PASS
+hid-channel: timed-out shared channel quarantines late replies until native write and reply settle PASS
+hid-channel: native close failure retains shared registration for retry; duplicate close coalesces PASS
+node tools/selftest/probe-bus.test.mjs
+目标: web-serial-rtt-tools/probe-bus（Node 的 BroadcastChannel，进程内等价"同源页签"）
+
+── 1. 请求让出 → 对方执行并回执 ──
+  PASS  对方执行了让出动作（1 次）
+  PASS  理由原样传过去：「烧录 demo.elf」
+  PASS  报告"协调可用"
+  PASS  认识 1 个同伴（asked=1）
+  PASS  收到 1 个回执（acked=1）
+  PASS  没等到上限就返回（265 ms）
+
+── 2. 没有同伴：不干等 ──
+  PASS  没人应答（asked=0 acked=0）
+  PASS  只在很短的窗口里等（81 ms，不占满 settle/waitMs）
+
+── 3. 同伴磨蹭：请求方有上限，不会被拖住 ──
+  PASS  请求方 624 ms 就回来了（waitMs=600，不被对方的 3 s 拖住）
+  PASS  活着的同伴没释放时，禁止继续认领
+
+── 4. 让出动作抛异常：不能谎报已释放 ──
+  PASS  失败原因返回请求方
+  PASS  失败不能算成已释放
+
+── 6. 同伴关页签（会喊 bye）：立刻从名单里去掉 ──
+  PASS  先认识 1 个同伴（peers=1）
+  PASS  bye 立刻把它去掉（peers=0）
+  PASS  之后不再为它白等（asked=0，80 ms）
+
+── 7. "冻结页签"（没喊 bye 也没应答）：两轮之后除名，不再白等 ──
+  PASS  第一轮照旧喊它并等满上限（asked=1 acked=0）
+  PASS  第一轮不除名（它可能只是刚好在忙）
+  PASS  第二轮确认它不在，除名（ghosts=1）
+  PASS  除名后不再为它白等（asked=0，80 ms）
+
+── 8. 环境里没有 BroadcastChannel：静默降级 ──
+  PASS  认得出环境不支持
+  PASS  返回"不支持"，不抛错、不等待
+
+✅ probe-bus：21 通过 / 0 失败
+node tools/selftest/probe-cross-tab.test.mjs
+probe-cross-tab: simultaneous acquisition has one winner, later handoff drains the previous owner PASS
+probe-cross-tab: passive HID command responses serialize across tab handles and closing cancels a lock waiter PASS
+node tools/selftest/probe-integration.test.mjs
+probe-integration: real entry points serialize setup, coexist on disjoint resources, cancel queued START and protect flash PASS
+probe-integration: unknown firmware stop cannot be bypassed by a later feature PASS
+probe-integration: manual release and managed takeover share one complete USB close PASS
+probe-integration: firmware START pending retains ownership until STOP completion is confirmed PASS
+probe-integration: cancelling during backend preparation cannot create a later debug session PASS
+node tools/selftest/usb-device.test.mjs
+usb-device: shared lifecycle, endpoint exclusion, interface refs, guarded reset, alias identity PASS
+usb-device: native timeout retains ownership and prevents late lifecycle races PASS
+usb-device: failed setup retains requests, later exclusive reconnect recovers abandoned handles PASS
+usb-device: physical unplug invalidates canonical handle before same-serial reconnect PASS
+usb-device: duplicate and unacquired close are harmless to remaining peers PASS
+node tools/selftest/usb-transports.test.mjs
+usb-transports: DAP disconnect/legacy cleanup preserve independent SPI interface PASS
+usb-transports: Scope clean close preserves SPI; dirty close retains lease until exclusive recovery PASS
+usb-transports: SPI clean close preserves Scope; timed-out native OUT is tracked and cannot reset Scope PASS
+node tools/selftest/cdc-mode.test.mjs
+cdc-mode: shared receiver/source handoff, UART TX guard, optional pause ownership, unrelated ports, cancelled native open PASS
+node tools/selftest/spi-cdc.test.mjs
+SPI CDC: protocol bounds, signed status, deferred START/STOP, failed-stop fencing, late connect cancellation, shared receiver handoff and SWD coexistence PASS
+node tools/selftest/spi-teardown.test.mjs
+spi-teardown: EP11 drain preserves peer, cancels delivery/rearm, guards old firmware and timed-out OUT PASS
+spi-teardown: HID close failure retains handle and ownership until successful retry PASS
+node tools/selftest/bridge-memory.test.mjs
+bridge-memory: frontend retry rejects short reads; byte/word head and tail never manufacture zeros PASS
+node tools/selftest/bridge-rpc.test.mjs
+bridge-rpc: timeout/close/write failure retire the socket and queued requests; fresh connection stays aligned PASS
+node tools/selftest/spi-runner-lifecycle.test.mjs
+spi-runner-lifecycle: old success/error/one-shot cannot publish, stop or revive a new acquisition PASS
+node tools/selftest/i2c-lifecycle.test.mjs
+i2c-lifecycle: real-to-mock drains transactions, confirms disable and close, retains failed ownership and retries PASS
+node tools/selftest/recorder-lifecycle.test.mjs
+recorder-lifecycle: single picker/stop, close barrier, clean restart and stop during opening PASS
+recorder-lifecycle: write error survives stop, remains visible, stops later batches and recovers after close PASS
+recorder-lifecycle: unload stays protected through zero backlog and pending close PASS
+node tools/selftest/flash-lifecycle.test.mjs
+flash-lifecycle: preparation, duplicate click, disconnect ownership, cancellation and errors PASS
+flash-lifecycle: flash/IDCODE retain failed close ownership, recover before reopening, preserve both errors PASS
+node tools/selftest/flash-runner-abi.test.mjs
+flash-runner-abi: algorithm ABI and flash chunk geometry PASS
+node tools/selftest/dbg-lock.test.mjs
+dbg-lock: queued foreground work excludes background polling and releases after failure PASS
+node tools/selftest/dbg-view-lock.test.mjs
+dbg-view-lock: memory/watch entry points queue behind actions, internal refresh avoids nested lock PASS
+dbg source UI: latest request/location wins, stale file text never repaints current source PASS
+node tools/selftest/dbg-backend-lifecycle.test.mjs
+dbg-backend-lifecycle: ARM/RISC-V switch waits for old actions and disconnect before replacing session PASS
+dbg-backend-lifecycle: failed USB/DWT teardown retains backend and blocks takeover until retry PASS
+node tools/selftest/dap-register-ready.test.mjs
+dap-register-ready: timeout rejected before stale data read, ready handshake returns value PASS
+node tools/selftest/dap-disconnect.test.mjs
+dap-disconnect: drains memory lock, rejects late traffic, late timeout cannot recover closed session PASS
+node tools/selftest/probe-handoff.test.mjs
+probe-handoff: debugger cancels queue, drains action before close; flash releases debugger before USB cleanup PASS
+probe-handoff: shared standalone path drains local users once; failed STOP blocks acquisition; managed path is a no-op PASS
+node tools/selftest/probe-users.test.mjs
+probe-users: busy flash rejects takeover; same-page target readers stop; failed STOP aborts handoff PASS
+probe-users: passive HID connections cannot stop an engine owned by another page PASS
+probe-users: independent SPI coexists with target users; engine remains exclusive; reset guards cover CDC PASS
+node tools/selftest/probe-bus-failure.test.mjs
+probe-bus-failure: busy flash denial, successful retry, late reply identity PASS
+node tools/selftest/rtt-lifecycle.test.mjs
+rtt-lifecycle: stale successful/failed polls cannot publish, stop replacement or schedule old workers PASS
+rtt-lifecycle: target reset drains reader and cannot rescan a replacement session PASS
+rtt-lifecycle: failed connect retains its original error without duplicate cleanup PASS
+rtt-lifecycle: disconnect reports recording failure instead of saved success PASS
+node tools/selftest/rtt-cdc-lifecycle.test.mjs
+rtt-cdc-lifecycle: stop cancels pending start, waits for firmware STOP completion, propagates failure PASS
+node tools/selftest/scope-lifecycle.test.mjs
+scope-lifecycle: double start, cancellation during CONFIG/STATUS, STOP before USB drain PASS
+scope-lifecycle: STOP errors propagate while USB drains; rejected input does not send STOP PASS
+scope-lifecycle: HID close failure retains handle and ownership until successful retry PASS
+node tools/selftest/scope-watchdog.test.mjs
+scope-watchdog: slow packet cadence, fast failure, stale generation, discard mode PASS
+node tools/selftest/target-switch.test.mjs
+target-switch: active/pending scope and RTT forwarding cannot mutate global backend PASS
+node tools/selftest/dbg-dwt.test.mjs
+dbg-dwt: modes/alignment/capacity, ownership, readback rollback, reset, disconnect, architecture guards PASS
+node tools/selftest/dbg-backtrace.test.mjs
+dbg-backtrace: EHABI tables/opcodes, symbols, depth, faults/bounds, cycle, cancellation, exceptions, scan labeling PASS
+node tools/selftest/dbg-frame-locals.test.mjs
+dbg-frame-locals: real ARM GCC CFI/prologue/epilogue, DWARF4 locals, DWARF5 lists/scopes, frame registers, commands, faults, cancellation and stale ELF PASS
+node tools/selftest/dbg-frame-riscv.test.mjs
+dbg-frame-riscv: DWARF CFI x0-x31/PC columns, CFA/ra/SP, callee-saved rules, regx/bregx locals and bounded two-frame unwind PASS
+node tools/selftest/dbg-frame-contract.test.mjs
+dbg-frame-contract: fixed-input GDB contract, ELF/build binding, scopes/shadowing, aggregate comparison, no silent coverage loss PASS
+node tools/selftest/dbg-frame-hw-runner.test.mjs
+dbg-frame-hw-runner: checkpoints, read-only snapshots, stale-cache flow, strict M7 erratum recovery, rejection without stacked-PC/DFSR proof, target mismatch and cleanup PASS
+dbg-frame-hw-runner: XIP image cannot self-certify live target code; independent GDB proof required PASS
+node tools/selftest/dbg-watch-bt-ui.test.mjs
+dbg-watch-bt-ui: stable watch IDs, frame source navigation, safe text, stale state, button states, completions, HTML IDs PASS
+node tools/selftest/dbg-svd.test.mjs
+dbg-svd: official STM32F103xx.svd parsing, register address, field decode and malformed input PASS
+node tools/selftest/board-matrix.test.mjs
+board matrix ok: 4 active boards / 14 examples
+node tools/selftest/hw-random-flow.test.mjs
+hw-random-flow: seeded plans and F103CB/H743/HPM command routing PASS
+node tools/selftest/analog.test.mjs
+analog: parameter bounds, sampling quantization, ADC scale, preset waveforms, clipping rejection and CSV PASS
+node tools/selftest/analog-connect.test.mjs
+Analog connect: independent DAC capability, manager cancellation has no late session, failed HID close retains handle/ownership for retry PASS
+node tools/selftest/pin-map.test.mjs
+Pin maps: shared 40-pin data, firmware SDA/SCL agreement, ADC channel/QSPI/range, unknown/unsupported boards, escaped labels, lazy modal/keyboard/focus/reuse PASS
+node tools/selftest/adc-transport.test.mjs
+ADC shared Bulk: compact blocks, strict token/size/config, one native reader, fault/malformed block draining, END/restart PASS
+ADC pipeline: FIFO despite out-of-order promises, counted END/close fence, tail delivery, native disconnect retirement PASS
+ADC SPI handoff: one native OUT only, close guarded until native completion PASS
+ADC retirement: main/Worker native errors propagate; Worker idle IN passes to pump without a duplicate read PASS
+ADC Worker OUT: caller timeout keeps native request fenced until late completion PASS
+node tools/selftest/adc-scope.test.mjs
+ADC scope: bounded history/ring wrap, rising trigger/pretrigger, normal hold, CSV, pixel spike envelope PASS
+node tools/selftest/adc-measure.test.mjs
+ADC measurements: raw statistics, 8/10/12/16 bit, sine/pulse/fractional rate, DC/noise/short/unstable rejection, spikes, signed cursors PASS
+node tools/selftest/adc-view.test.mjs
+Analog page: HTML binding, ADC/DAC tab keyboard/accessibility, linked generator levels, coherent LUT, DC controls, clipping rejection, 1-2-5 time/div series, ADC partial-record time axis/freeze PASS
+node tools/selftest/adc-session.test.mjs
+ADC session: USB reader before START, finite/continuous stop, lost OPEN recovery, deferred CLOSE, failed STOP ownership/retry PASS
+ADC counted END: 32 native readers, finite/STOP/lost OPEN retire without orphan reads PASS
+ADC ownership: DAC cannot be unlocked by ADC STOP; native SPI OUT drains before cleanup PASS
+ADC shared buffer: one busy sample retires SPI/QSPI (ENABLE 0 + ABORT) and re-reads CAPS, no hard reject PASS
+ADC shared buffer: a buffer that never retires fails loudly and bounded, session stays reusable PASS
+ADC handover: cold start, delayed native OUT/IN, fresh CAPS fence, abandoned ADC CLOSE retries, control/USB failures PASS
+node tools/selftest/dac-protocol.test.mjs
+DAC reservation: capabilities, legacy fallback, HID sizes, coherent LUT, chunk ACK, STOP retry and cancellation during upload/START PASS
+DAC uncertain BEGIN: lost ACK recovered by STATUS/STOP, failed recovery retains ownership for retry PASS
+node tools/selftest/dac-generator.test.mjs
+DAC generator: linked min/max/Vp/Vpp/common-mode, phase, duty, all presets, coherent preview/upload, capability/clipping bounds PASS
+node tools/selftest/rtt.test.mjs
+== 1. 控制块定位（扫描 / 直接给地址）==
+  PASS  扫描找到控制块 0x20001000
+  PASS  按地址直取控制块
+  PASS  地址不对时报错（不会静默失败）
+  PASS  通道数解析 up=1 down=1
+  PASS  上行缓冲大小 1024
+  PASS  通道名读取（目标内存里的字符串）
+== 2. 上行读取 + RdOff 推进 ==
+  PASS  第一次读到数据
+  PASS  第二次读到空（RdOff 已推进，不会重复读）
+  PASS  后续数据正常
+== 3. 环形缓冲绕回（一次读要跨过缓冲末尾）==
+  PASS  绕回时也读到了数据（1800 字节）
+  PASS  没有解码垃圾（读到的都是真实字节）
+  PASS  第一条是 #0
+  PASS  最后一条格式正确
+== 3.5 错位读的"立刻重读"也必须按同样两段走（审查：老代码会读越界）==
+  PASS  构造出绕回读：rd=1000 +n=200 > size=1024
+  PASS  触发了重读（数据区共 4 次读，corrupt=false）
+  PASS  所有读都没跨过缓冲末端（越界读 0 次）
+  PASS  没把控制块签名当数据用掉
+  PASS  重读回来的就是真实数据："#0.......\n#1"
+== 3.6 目标自己打印 "SEGGER RTT" 不再被判错位读（审查：会把通道永久卡死）==
+  PASS  目标自己打印的这行照常读出："boot: SEGGER RTT ready\n"
+  PASS  第二轮没有新数据（不是卡在"重读同一段"上）
+  PASS  把整个控制块读回来的错位读仍然判 corrupt
+  PASS  而且 RdOff 没被推进（rd 仍为 0，下一轮原样重读）
+== 4. 过载/丢包的可观测信号 ==
+  PASS  读到整缓冲（1023 字节）→ full 信号为真
+  PASS  水位 level=1.000 也判为高位
+  PASS  读满/高位次数累计正确
+  PASS  1/4 水位不报警（level=0.25）
+  PASS  差值 = size-d = 624（实际 624）
+  PASS  累计丢失统计正确
+  PASS  SKIP 模式目标丢了 400 字节
+  PASS  SKIP 模式两个信号都不亮（预期行为）
+== 5. 下行写入（含非 4 字节对齐）==
+  PASS  写入 5 字节（实际 5）
+  PASS  目标侧读到了 hello 之外的原样命令
+  PASS  连续非对齐写入拼接正确
+  PASS  缓冲写满时只写进 255/512 字节（不假装成功）
+== 6. ELF 符号解析 ==
+  PASS  找到 _SEGGER_RTT
+  PASS  地址落在 S31 片内 RAM（0x2f05da08）
+        期望值对照：_SEGGER_RTT = 0x2f05da08 size=120
+  PASS  查不存在的符号返回 null
+== 7. HEX 解析（分隔符 = 字节边界）==
+  PASS  空格分隔
+  PASS  连写 6 位数字自动两两分组
+  PASS  0x 前缀 + 逗号
+  PASS  非法字符报错
+  PASS  连续串奇数位报错
+  PASS  连字符分隔
+  PASS  「0x1,0x2」是两个字节 01 02（不是 0x12）
+  PASS  「1 2」是两个字节 01 02
+  PASS  「A 5 F 0」是四个字节 0A 05 0F 00
+  PASS  「0x01 0x2 0x03」= 01 02 03（老代码报奇数位）
+  PASS  「01 3」= 01 03（一位数字当一位）
+  PASS  带 0x 的连续串仍然两位一组
+== 8. 内存访问锁：外部并发调用必须排队（审查：可重入快路径让互斥失效）==
+  PASS  A 持锁期间 _locked = true
+  PASS  并发调用排队而不交错（实际 A-start,A-end,B-start,B-end）
+  PASS  两条都拿到自己的返回值
+  PASS  结束后锁已释放
+  PASS  写路径里的回读校验没自锁死（ok）
+  PASS  写后确实回读校验了（回读走了私有版本）
+
+结果：55 通过 / 0 失败
+[dap] 写 0x20000000（4B）回读不一致，重写一次
+node tools/selftest/serial-display.test.mjs
+serial-display: bounded history, one scroll, UTF-8, pause/hidden recovery, ANSI backpressure and burst gate PASS
+node tools/selftest/gen-parity.mjs
+== 1. 默认参数 → 与 Python 工具产物逐字节相同 ==
+  PASS  产物清单（顺序 + 名字）
+  PASS  Makefile.jlink 逐字节相同（6043 B）
+  PASS  jlink_gdb.script 逐字节相同（1633 B）
+  PASS  Makefile.pyocd 逐字节相同（4497 B）
+  PASS  Makefile.openocd 逐字节相同（7493 B）
+  PASS  rtt_logger.py 逐字节相同（2363 B）
+  PASS  test_sram.bin 逐字节相同（20480 B）
+== 2. 换行符 ==
+  PASS  CRLF 模式下没有裸 LF
+  PASS  LF 模式下没有 CR
+  PASS  两种模式除了换行符完全一样
+  PASS  CRLF 比 LF 多出的字节数 = 行数
+== 3. 单项覆盖只改那一行 ==
+  PASS  行数不变
+  PASS  只改了 1 行（实际 1）
+  PASS  改的正是 JLINK_SPEED 那行
+  PASS  填了默认值 = 没填（逐字节）
+  PASS  OpenOCD 频率同样只改 1 行（实际 1）
+== 4. SRAM 测试图案 ==
+  PASS  大小 20480（实际 20480）
+  PASS  整文件都是 i % 256 递增图案
+  PASS  Size 可改（4096）
+== 5. ZIP 打包（自己解回来验）==
+  PASS  ZIP 比裸数据大（有头 + 目录）
+  PASS  EOCD 签名正确
+  PASS  条目数 6 = 6
+  PASS  中央目录签名正确
+  PASS  6 个文件都能从 ZIP 里原样解回来（43159 B）
+  PASS  同时间戳打包结果可复现
+== 6. .uvprojx 解析（拿真实工程文件试）==
+  PASS  器件 = STM32F103C8（实际 STM32F103C8）
+  PASS  内核 = Cortex-M3（实际 Cortex-M3）
+  PASS  Flash 起址 = 0x08000000（dash 写法也要认；实际 0x08000000）
+  PASS  Flash 大小 = 0x10000（实际 0x10000）
+  PASS  RAM = 0x20000000+0x5000（实际 0x20000000+0x5000）
+  PASS  TargetName = CubeMX_Config（实际 CubeMX_Config）
+  PASS  由器件推出的三项参数（按族映射，与 Python 工具一致）
+  PASS  表外型号按前缀归族
+  PASS  表内型号精确命中
+== 7. 4 项固定修正（页面默认就套；用户 2026-09-27 逐条采纳）==
+  PASS  共 4 项修正（实际 4）
+  PASS  ① RTT_SIZE 改成 0x2000
+  PASS  ① 没有残留 0x5000
+  PASS  ② clean-jlink 里没有删 *.log 那行
+  PASS  ② clean-jlink 本身还在、还删临时脚本
+  PASS  ③ openocd-rtt 用双引号 + 内层引号转义
+  PASS  ③ 整个 Makefile.openocd 里再没有 -c '…'
+  PASS  ④ 没有任何 jlink-swo 残留（目标/用法注释/.PHONY/help）
+  PASS  ④ JLinkSWOViewerCL 那行也删了
+  PASS  ④ .PHONY 里也清了
+  PASS  Makefile.jlink 少了 9 行（7 删除 + 2 改写：RTT_SIZE/.PHONY，实际 9）
+  PASS  新增/改写的行 = 2 行（RTT_SIZE + .PHONY，实际 2）
+  PASS  少的这些行全部属于这 4 项修正，没有误伤
+  PASS  Makefile.openocd 只换了 rtt 那一行
+  PASS  Makefile.pyocd 不受修正影响
+  PASS  jlink_gdb.script 不受修正影响
+  PASS  rtt_logger.py 不受修正影响
+  PASS  test_sram.bin 不受修正影响
+  PASS  用户把 RTT 范围填成 0x1000 时，修正不覆盖它
+  PASS  不传 fixes 时默认就套修正（页面行为）
+  PASS  模板对不上时抛错（不静默产出半成品）
+
+OK  55 通过 / 0 失败
+node tools/selftest/hid-proto.test.mjs
+== 1. 组包（对齐协议文档的字节位）==
+  PASS  payload 63 字节（Report ID 由 WebHID 单独传），实际 63
+  PASS  Data Length = 1+10 = 11，实际 11
+  PASS  Command = 0x31
+  PASS  action = 1（START）
+  PASS  目标地址小端 @payload[3..6]
+  PASS  搜索长度小端 @payload[7..10]
+  PASS  通道号 @payload[11]
+  PASS  其余字节补 0
+  PASS  查状态也是 10 字节 data（action=2）
+  PASS  Action 7（调参）data 同样以 action 开头，Data Length = 1+9 = 10（实际 10）
+  PASS  SWD 时钟 Hz @payload[3..6]
+  PASS  块读字节 @payload[7..8]
+  PASS  标志位(bit0=丢弃) / delay 覆盖=0xFF
+  PASS  简单查询：Data Length = 1，无数据
+== 2. 状态字解析 ==
+  PASS  word[0] 的四个位域
+  PASS  控制块/上行缓冲/已搬运
+  PASS  轮询次数 / 搬运次数
+  PASS  读错误 / RdOff 写错误
+  PASS  上次搬运字节 / 空环次数
+  PASS  让路次数 / 重扫次数
+  PASS  最近 DAP 命令/响应
+  PASS  返回码符号扩展（低 8 位 -3），实际 -3
+  PASS  块读字节 / 丢弃模式 / SWD 档位
+  PASS  rc=0 文案
+  PASS  rc=-3 文案
+  PASS  rc=-1/-2 文案
+  PASS  rc=-1 文案按后端分家
+  PASS  rc=-2 文案按后端分家
+  PASS  rc=-3 文案按后端分家
+  PASS  rc=-4 文案按后端分家
+== 3. 字符串回包 ==
+  PASS  型号解析：akaLink CMSIS-DAP
+== 4. 假探针：完整流程（没硬件也能验面板逻辑）==
+  PASS  mock 就绪
+  PASS  info() 有型号/SN
+  PASS  START 只是排队：第一次查还没 running（与真固件一致）
+  PASS  排队期间的返回码 = -100（固件哨兵值，不是错误），实际 -100
+  PASS  rc=-100 的文案是「启动中」而不是报错
+  PASS  下一拍就起来了，控制块 0x24000000
+  PASS  默认档位 45 MHz
+  PASS  运行时调参生效（60MHz / 2048B）
+  PASS  停止后不再运行
+  PASS  注入失败：rc=-3 且没跑起来（用于测错误提示）
+  PASS  错误文案能对上
+== 5. 常量与设备匹配 ==
+  PASS  HID usage page = 0xFF00
+  PASS  VID:PID = d28:204（akaLinkPro 复合设备）
+  PASS  payload = 64 - 1（Report ID）
+  PASS  命令码抽查
+  PASS  动作码与 api_param.c 一致：0,1,2,3,7,9
+== 6. 已授权设备里挑探针（别挑到触摸板）==
+  PASS  列表里有触摸板 → 仍然挑中 akaLinkPro
+  PASS  只有探针时正常挑中
+  PASS  没有探针时退回"按 usage page"（上层会提示可能选错）
+  PASS  列表为空/未定义 → null（不抛）
+  PASS  isProbe：探针 → true
+  PASS  isProbe：触摸板 → false（上层据此发警告）
+== 7. xfer 超时定时器：旧请求的残雷不许打掉在飞的新请求 ==
+  PASS  第一条正常返回（ok1）
+  PASS  第二条没被旧请求的超时残雷误杀（ok2）
+  PASS  请求结束后 _pending 已清空
+  PASS  真超时仍会报错（err3）
+  PASS  超时后 _pending 清空（通道等待迟到响应重新同步）
+  PASS  超时之后还能继续正常请求
+
+OK  59 通过 / 0 失败
+node tools/selftest/dwarf.test.mjs
+== 1. ELF 容器 ==
+  PASS  32 位 + 小端
+  PASS  .debug_info 存在
+  PASS  .debug_abbrev 存在
+  PASS  .debug_str 存在
+  PASS  没有 DWARF5 的 .debug_str_offsets（确认是 DWARF 4 的形态）
+  PASS  data() 长度与段表一致
+  PASS  符号表里有 g_pack 且是 OBJECT
+  PASS  g_pack 地址/大小 = 0x20001014 / 24 B
+  PASS  flash 里的 g_vectors 也在符号表里（后面要滤掉它）
+  PASS  垃圾字节 → 明确抛错
+  PASS  只有 ELF 头没有段表 → 明确抛错
+  PASS  looksLikeElf 认得真 ELF
+== 2. DWARF：靶子固件的 19 个通道（结构体展开 + 类型映射）==
+  PASS  走的是 DWARF 路径
+  PASS  DWARF 版本 = 4
+  PASS  CU 数 = 2（main.c / startup.c）
+  PASS  Dwarf.available 认得出调试信息
+  PASS  可采样通道数 = 19
+  PASS  g_lfsr             0x20000000 4B u32
+  PASS  g_far_cnt          0x20000008 4B u32
+  PASS  g_far_sq100        0x2000000c 2B i16
+  PASS  g_isr_count        0x20001010 4B u32
+  PASS  g_pack.f_sin       0x20001014 4B f32
+  PASS  g_pack.f_tri       0x20001018 4B f32
+  PASS  g_pack.i_tick      0x2000101c 4B i32
+  PASS  g_pack.u_ramp      0x20001020 2B u16
+  PASS  g_pack.i_sq1k      0x20001022 2B i16
+  PASS  g_pack.u_cnt       0x20001024 1B u8
+  PASS  g_pack.i_saw       0x20001025 1B i8
+  PASS  g_pack.rsv0        0x20001026 1B u8
+  PASS  g_pack.u_hi        0x20001028 4B u32
+  PASS  g_pair_a           0x2000102c 2B u16
+  PASS  g_pair_b           0x2000102e 2B u16
+  PASS  g_pulse            0x20001030 1B u8
+  PASS  g_ramp64           0x20001038 8B f64
+  PASS  g_sq5k             0x20001040 2B i16
+  PASS  g_tick             0x20001044 4B u32
+  PASS  g_pack 展开出 9 个成员（含保留字节 rsv0）
+  PASS  每个通道都带完整路径（g_pack.f_sin）
+  PASS  g_hole（4096 B 数组）被剔除并说明是数组
+  PASS  g_hole 不在可采样列表里
+  PASS  所有通道都落在 RAM 窗口内
+  PASS  rodata（SIN100）与向量表（g_vectors）都被滤掉
+  PASS  SCALARS 的 code 与协议表一致
+  PASS  类型表 8 种（u8/i8/u16/i16/u32/i32/f32/f64）
+== 3. 没有 DWARF 时的退化路径（符号表）==
+  PASS  source = symtab
+  PASS  g_pack 在列（24 B）但**类型未知**（要用户手选）
+  PASS  flash 里的符号被剔除并说明不在 RAM
+  PASS  _estack（栈顶符号）也被 RAM 窗口滤掉
+== 3.5. DWARF 5（GCC 11+ 默认）：间接表单 strx/addrx/line_strp ==
+  PASS  DWARF 5 直接解析成功（source=dwarf）
+  PASS  版本识别为 [5]
+  PASS  结构体成员展开出来了：g_v.tick, g_v.u_hi, g_v.f_sin, g_v.f_tri, g_v.i_sq1k, g_v.ramp
+  PASS  g_v.f_sin 类型正确（f32 4 B）
+  PASS  g_v.i_sq1k 有符号类型正确（i32）
+  PASS  普通全局标量也在列表里（g_updates / g_flag）
+  PASS  数组 g_tri_buf 被剔除并说明原因
+  PASS  可写节给出的窗口覆盖了夹具里的变量地址
+== 3.6. 解析不了时必须退回符号表（别整盘失败）==
+  PASS  坏文件 → 退回符号表（source=symtab）
+  PASS  退回时给出原因：DWARF 解析失败（.debug_abbrev 里没有 code 5（offset 12）—— 文件坏了？）：已退回符号表（类型要手选）
+  PASS  退回后照样列得出符号（4 个）
+== 3.7. RAM 窗口按 ELF 可写节自动识别（RISC-V 的 ILM/SRAM 不在 0x2xxxxxxx）==
+  PASS  STM32 的窗口仍然覆盖 0x20000000（0x20000000~0x40000000）
+  PASS  RISC-V 风格的 0x01200000 被认成 RAM（0x01200000~0x01200800 / 0x20000000~0x40000000）
+== 4. 真工程风格：多 CU + typedef 结构体 + DW_AT_specification ==
+  PASS  DWARF 4，走 DWARF 路径
+  PASS  g_bytes                        0x20000000 u32
+  PASS  g_loops                        0x20000004 u32
+  PASS  g_ms                           0x20000008 u32
+  PASS  _SEGGER_RTT.MaxNumUpBuffers    0x2000001c i32
+  PASS  _SEGGER_RTT.MaxNumDownBuffers  0x20000020 i32
+  PASS  追到了声明里的成员名（_SEGGER_RTT.acID）
+  PASS  _SEGGER_RTT.aUp（数组）也带原因列出
+  PASS  没有"无名变量"这种漏网（说明 specification 追上了）
+== 5. 稳健性：不崩、不乱、原因可读 ==
+  PASS  每个被剔除的条目都有原因文案
+  PASS  被优化掉的局部变量给出"没有固定地址"类原因
+  PASS  两次解析结果完全一致
+  PASS  RAM 窗口可配置（收窄后全部剔除并说明原因）
+== 6. 表单解析不能调不存在的方法（审查：DW_FORM_ref_sig8 → r.skip 崩溃）==
+  PASS  DW_FORM_ref_sig8 不抛异常
+  PASS  正好跳过 8 字节（bytes(8)，游标前进 8）
+  PASS  返回"解析不出值"而不是垃圾值
+  PASS  _value 用到的 reader 方法都存在（用了 u64/u32/u8/u16/bytes/sleb/uleb）
+
+✅ dwarf.test: 78 通过 / 0 失败
+node tools/selftest/scope-array.test.mjs
+scope-array: real DWARF 4/5, multidimensional strides, structure members, bounds, 8 MB lazy catalog, selection limits PASS
+node tools/selftest/scope-proto.test.mjs
+== 1. 采样计划（读计划 = 速率的最大杠杆）==
+  PASS  同一结构体的 8 个成员合并成 1 个 span
+  PASS  帧字节数 = 22（4+4+4+2+2+1+1+4）
+  PASS  span 覆盖 0x20001014..0x2000102c（24 B，含 2 B 空洞）
+  PASS  跨 4 KB 的两组 → 2 个 span
+  PASS  多一个 span 就更慢（模型上）
+  PASS  合并省掉 53% 的时间（相对逐变量读）
+  PASS  朴素写法（每个变量一次块读）一定更慢
+  PASS  空计划不炸
+  PASS  间隙 8 B 合并 / 30 B 不合并
+  PASS  合并阈值 = 12 B（固件 SCOPE_MERGE_GAP 同值；gap 12 并、13 不并）
+  PASS  超长跨度被 64 B 上限切开（3 个 span，各 8/8/8 B）
+  PASS  计划指纹与变量顺序无关
+  PASS  不同计划指纹不同
+  PASS  action 7 flags bit6 = 强制 RISC-V/JTAG
+  PASS  DISCARD/CDC_OFF 位与固件一致
+  PASS  DEF flags bit6 → **生效**后端 = RISC-V（不是你下发的那个）
+  PASS  DEF flags bit6 = 0 → SWD/ARM
+  PASS  目标类型切换走 HID **0x31** action 10（不是 0x32），Byte[3]=10 / Byte[4]=0|1
+  PASS  后端分档：SWD 1.55/11.19 µs vs RISC-V 2.97/31.08 µs
+  PASS  后端显示名
+  PASS  单字 f32 走快路径：模型 4.47 µs / 取用 1.55 µs（≈645 kHz）
+  PASS  模型贴住真机锚点：1/2/4/6/8 字 = 4.47 / 5.58 / 7.81 / 10.05 / 12.28 µs（实测 4.50 / 5.82 / 7.96 / 10.30 / 12.65）
+  PASS  快路径成本可覆盖（不同 SWD 时钟档）
+  PASS  单个 u16（半字）不走快路径 —— 固件要求整段正好 4 字节直读
+  PASS  地址没 4 字节对齐也不走快路径
+  PASS  两个单字（合并成 8 B span）不走快路径 —— 固件守卫是"只有一个 4 字节 span"
+  PASS  两个连续 u16（合成一个 4 B 字）仍可以走快路径
+== 2. 512 B 包编解码（四种包）==
+  PASS  DEF 包 = 512 B
+  PASS  HEAD 解析：kind/seq
+  PASS  DEF 字段逐个正确
+  PASS  DEF 里回报的 span 数（主机拿它和本地计划对账）
+  PASS  DEF 变量表（含类型码 → 名字）
+  PASS  打包写出 26 B
+  PASS  8 种类型打包→解码逐位相等
+  PASS  半包（不足一帧）解不出东西，也不抛异常
+  PASS  一帧的载荷解出 8 个值（余量被忽略）
+  PASS  两帧解出 16 个值（扁平数组：out[i*nv+k]）
+  PASS  第 2 帧的值与第 1 帧相同（同一份载荷）
+  PASS  DATA 包的 t_us / n / aux（载荷字节数）
+  PASS  STAT 包字段（含 dropped / SWD 档位 / 丢弃模式）
+  PASS  EVT 包字段
+  PASS  magic 错 → null
+  PASS  版本不匹配 → null
+  PASS  未知 kind → null
+  PASS  每包样本数 = floor(496/frameBytes)（32 B 时 15 个）
+== 3. 字节流 → 包（分片、垃圾、重同步）==
+  PASS  整块喂 → 5 个包
+  PASS  切成 100 B 碎片喂 → 还是 5 个包
+  PASS  碎片喂完缓冲区正好清空
+  PASS  开头 7 B 垃圾 → 重同步 1 次并找回 5 个包
+  PASS  重同步后第一个包还是 seq 0
+  PASS  半包不产出
+  PASS  补齐后立刻产出 1 个包
+== 4. 丢包 / 时间戳回绕 ==
+  PASS  连续序号不报警
+  PASS  跳号 → gap 且缺 2 个
+  PASS  重复序号 → dup
+  PASS  回退序号 → reorder（不算丢）
+  PASS  三类计数各自独立
+  PASS  正常前进
+  PASS  32 位回绕后被展开成单调递增
+  PASS  绕回后继续单调前进
+== 5. HID 0x32 控制面 ==
+  PASS  一条报文装下 8 个变量（55 ≤ 61 B）
+  PASS  action=7 / period_us 在 [1..4]
+  PASS  nvars 在 [6]
+  PASS  第 2 个变量的 addr/size/type 编码正确
+  PASS  9 个变量 → 明确报错（前端就该拦住）
+  PASS  状态字解析出对象
+  PASS  action 3 设 SWD 时钟报文（Hz 小端）
+  PASS  w0 的位域：nspans 与 nvars（与固件 scope_sampler_status 一致）
+  PASS  w0 bit1 = 0 → SWD/ARM 后端
+  PASS  w0 bit1 = 1 → 生效后端是 RISC-V/JTAG（web-handoff-riscv-scope.md 第 1 条）
+  PASS  -100 = "启动中"而不是错误
+  PASS  -3 的文案指向"变量表为空"
+  PASS  rc=0 正常
+  PASS  -2 的文案按后端分家
+  PASS  哨兵值 = -100（与固件一致）
+  PASS  触发配置报文 15 B（action+ch+mode+level+pre+post）
+== 6. 类型化缓冲 + LOD 金字塔 ==
+  PASS  f32 → Float32Array
+  PASS  i32 → Int32Array（不是 Float32：>2^24 的整数才不会被四舍五入）
+  PASS  大整数 0x1000000+12345 精确保存
+  PASS  浮点精确保存
+  PASS  每列 64 个样本 → 走 LOD（快路径）
+  PASS  包络抓到了 +100 的尖峰（max=99.56；sin 相位使实际值 ≈99.6）
+  PASS  包络抓到了谷底（min=-1.00）
+  PASS  LOD 包络是精确包络的超集（不会漏掉任何极值）
+  PASS  其中 64/64 列与精确值完全一致
+  PASS  每列 8 个样本 → 逐样本精确扫描（放大后取值必须精确）
+  PASS  精确模式下第 0 列与 exact() 完全一致
+  PASS  存满 10 个 → full
+  PASS  满了之后再来的帧计入 overrun（不静默丢）
+  PASS  实测速率 ≈ 10 kHz（实际 10000.0 Hz）
+  PASS  timeAt(5) ≈ 500 µs（实际 500.0）
+  PASS  显存占用统计含 LOD（56 B）
+  PASS  第一段内按本段实测间隔插值：timeAt(32)=320.0 µs（全局平均会算成 1748.7）
+  PASS  第二段内同样按本段间隔：timeAt(96)=3840.0 µs
+  PASS  跨段 Δt 用各自段的真实间隔（3520.0 µs，全局平均会算成 3497.3）
+  PASS  显示变换 v*scale+offset
+== 7. 触发（实时 + 离线重触发）==
+  PASS  "大于"阈值
+  PASS  "小于"阈值
+  PASS  上升沿要跨过阈值
+  PASS  下降沿要跨过阈值
+  PASS  "变化"判定
+  PASS  第一个样本不能算沿（没有前一个值）
+  PASS  离线重触发找到第一个上升沿（样本 10）
+  PASS  从上一个命中点继续找 → 下一个上升沿在 30
+  PASS  不触发模式返回 -1
+  PASS  条件永不满足返回 -1
+  PASS  预/后触发窗口 [5,14)
+  PASS  预触发不够时截断到 0 并标记 short
+  PASS  单次模式：命中一次后不再报
+  PASS  连续模式：每次都报（100 个样本里 5 个上升沿）
+== 8. 假探针端到端：配置 → 采样 → 包 → 解码 → 缓冲（逐点对账）==
+  PASS  CONFIG 回包 rc=0
+  PASS  假探针收到了周期与 8 个变量
+  PASS  首次启动回 -100（排队中）—— 与真固件同一个哨兵值
+  PASS  状态字里的 startRc 也是 -100
+  PASS  排队结束后返回 0
+  PASS  从 DEF 包里恢复了变量表（含类型）
+  PASS  包数对得上：1 DEF + 527 DATA + 8 STAT = 536
+  PASS  缓冲里正好 10000 个样本（实际 10000）
+  PASS  产出 10000 = 送达 10000（flush 后被丢的尾巴也补上了）
+  PASS  8 通道 × 10000 样本**逐点相等**（含 f64/u32/i32 精度）
+  PASS  实测速率 ≈ 10 kHz（10000.0 Hz）
+  PASS  timeAt(5000) ≈ 0.5 s（500.0 ms）
+  PASS  f32 正弦幅度在 ±1 内
+  PASS  dropEvery=1000 时假探针确实丢了 4 个样本
+  PASS  产出 = 送达 + 丢弃（账对得上）
+  PASS  解出来的样本数 = 送达数（4896）
+  PASS  stallAfter 复现"探针在跑但停在 50 个样本"（发出 2 个满包 = floor(50/19)）
+  PASS  启动失败 rc=-2 → 文案指向接线/供电
+== 7. tick 周期与 v1/v2 时间轴兼容 ==
+  PASS  2.25 µs 配置为 54 tick，使用新动作
+  PASS  假探针配置回报真实小数周期
+  PASS  v2 DEF 周期单位转换
+  PASS  满包边界时间间隔 = 124 × 小数周期
+  PASS  2.5 µs 配置为 60 tick，使用新动作
+  PASS  假探针配置回报真实小数周期
+  PASS  v2 DEF 周期单位转换
+  PASS  满包边界时间间隔 = 124 × 小数周期
+  PASS  2.75 µs 配置为 66 tick，使用新动作
+  PASS  假探针配置回报真实小数周期
+  PASS  v2 DEF 周期单位转换
+  PASS  满包边界时间间隔 = 124 × 小数周期
+  PASS  整数周期继续使用 action 7
+  PASS  v2 u32 tick 回绕约 179 秒处连续，先 unwrap 后换算
+  PASS  v2 STAT 不把 60 tick 当 60 µs
+  PASS  DATA aux 校验使用完整 u16，拒绝超长载荷
+
+✅ scope-proto.test: 144 通过 / 0 失败
+node tools/selftest/scope-rate.test.mjs
+scope-rate: aligned/page/clock budgets, backend recommendations, valid calibration identity, full-width metrics and stale response rejection PASS
+node tools/selftest/scope-transport.test.mjs
+scope-transport: rearm, ordering, bounded reads, stop/restart, decoder error, stall, disconnect PASS
+[scope] USB reset 失败，已关闭并重开数据端点：Failed to execute 'reset' on 'USBDevice': Unable to reset the device.
+scope-transport: stalled restart resets/retire reads; native reset failure recovers by close/reopen PASS
+scope-transport: replacing transport cannot orphan native reads on the same device PASS
+scope-transport: quiesce drains producer-completed reads without rearming or resetting normal captures PASS
+scope-transport: shared-load stop waits for observed throughput before stopping producer PASS
+scope-transport: exclusive WebUSB handle retires native reads with live CDC; shared-interface guard retained PASS
+node tools/selftest/scope-store-batch.test.mjs
+scope-store-batch: random u32 accuracy, unaligned payload, LOD, gaps, timestamps, full/overrun, short payload, reset PASS
+node tools/selftest/bridge-origin.test.mjs
+== 桥的 WebSocket 准入（Origin 白名单 + 口令）==
+  PASS  桥起来了，且白名单 Origin + 正确口令能握手成功
+  PASS  陌生 Origin 被拒（HTTP/1.1 403 Forbidden）
+  PASS  GitHub Pages 那个 Origin 是白名单（线上页面可用）
+  PASS  本机任意端口的页面也放行（本地静态服务器）
+  PASS  file:// 打开的页面（Origin: null）放行
+  PASS  不带 Origin 的非浏览器客户端（脚本/curl）放行
+  PASS  口令缺失被拒（HTTP/1.1 401 Unauthorized）
+  PASS  口令不对被拒（401）
+  PASS  口令走 ?token= 也行
+  PASS  口令走 Sec-WebSocket-Protocol: bearer.<token> 也行
+  PASS  非 /ws 路径不接受升级
+
+OK  11 通过 / 0 失败
+node tools/selftest/bridge-lifecycle.test.mjs
+== 1. cleanupAndExit：收到终止信号时干什么 ==
+  PASS  第一次调用：开始清理
+  PASS  收掉了当前后端（stop 调用 1 次）
+  PASS  日志里说明是哪个信号触发的：「[退出] 收到 SIGINT：先把调试器子进程收掉（不然会留下孤儿占着探针）……」
+  PASS  落地之后以 0 退出（exit(0)）
+  PASS  再来一个信号：只清一次（第二次直接忽略）
+== 2. 后端 stop()：真的把子进程收掉（用真子进程验）==
+  PASS  OpenOCD 后端：先起了个"赖着不走"的子进程（pid=27676）
+  PASS  OpenOCD 后端 stop() → 子进程真的退出了（taskkill /T /F，非 Windows 退回 child.kill()）
+  PASS  stop() 之后内部引用清空（不会残留半死状态）
+== 3. J-Link 后端 stop()：收子进程 + 删 logger 临时文件 ==
+  PASS  先造出"logger 在写临时文件"的现场
+  PASS  J-Link 后端 stop() → 子进程退出
+  PASS  logger 的 %TEMP% 日志被删掉（1.4MB/s 不删一小时就是 5GB）：rtt-bridge-selftest-1791406594738.log
+== 4. 主程序路径：直接跑桥时确实挂了退出钩子 ==
+  PASS  源码里三个终止信号 + exit 兜底都挂着
+  PASS  installExitHooks() 在"被当脚本跑"的那条路上被调用（import 时不起服务、不挂钩子）；--doctor 只跑预检
+  PASS  桥在 127.0.0.1:17456 起来了
+  PASS  横幅讲清了退出行为：「Ctrl+C 退出（会把 OpenOCD / J-Link 子进程一起收掉，不留孤儿占探针）」
+== 5. --doctor 环境预检（只读：不占端口、不起服务）==
+  PASS  预检把 Node / 端口 / OpenOCD / J-Link 逐项列出来
+  PASS  预检**不启服务**（没有那几行启动横幅）
+  PASS  预检不占端口（跑完那口还是空的）
+  PASS  退出码与结论一致（code=0）
+  PASS  目标不存在 → 指出来并以 1 退出（code=1）
+  PASS  报错里带上"该改哪个文件"（不是光说失败）
+
+✅ bridge-lifecycle.test: 21 通过 / 0 失败
+node tools/selftest/flash-image.test.mjs
+== 1. ELF：按节取 + VMA→LMA 换算 ==
+  PASS  段内节用 p_paddr 换算出的 LMA（0x8000d5d0，而不是 VMA 0x01200000）
+  PASS  **不在任何 PT_LOAD 里的节也要烧**（.boot_header → 0x80001000）
+  PASS  .boot_header 的内容原样带过来（01 00 f9 fc = HPM 启动头魔数）
+  PASS  NOBITS（.bss）不会被当成数据烧进去
+  PASS  不产生空段
+== 2. 退化情形 ==
+  PASS  没有节表时退回按 PT_LOAD 取（至少能烧代码）
+  PASS  不是 ELF 就报错（不静默返回空）
+== 3. Intel HEX 与 .bin ==
+  PASS  HEX 记录解析出地址与 16 B 数据
+  PASS  .bin 不给基地址就报错（不猜地址）
+  PASS  .bin 用调用方给的基地址
+== 4. HEX 完整性：校验和 / 长度 / 段重叠（2026-10 代码审查）==
+  PASS  好文件照常解析
+  PASS  数据位翻错 → 报"校验和不对"
+  PASS  行被截断 → 报"长度不对"（不会把校验字节当数据收下）
+  PASS  报错带行号（这里应是第 2 行）
+  PASS  地址重叠的记录 → 报"重叠"而不是悄悄挪地址
+  PASS  相邻不重叠的两段照常合并成 8 B
+== 5. 损坏 ELF 必须在烧录前拒绝 ==
+  PASS  拒绝截断文件头
+  PASS  拒绝过小程序头项
+  PASS  拒绝过小节表项
+  PASS  拒绝截断节表，不忽略最后一节
+  PASS  有正常代码节时也拒绝损坏启动头
+  PASS  没有节表时拒绝截断 PT_LOAD，不接受 slice 截短
+  PASS  拒绝加载段跨 u32 边界
+  PASS  带 byteOffset 的正常 ELF 保持正确
+  PASS  ARM_EXIDX 展开表 保留文件内容
+  PASS  ARM_EXIDX 展开表 截断时拒绝烧录
+  PASS  INIT_ARRAY 初始化数组 保留文件内容
+  PASS  INIT_ARRAY 初始化数组 截断时拒绝烧录
+
+✅ flash-image.test: 28 通过 / 0 失败
+node tools/selftest/hpm-flash.test.mjs
+== 1. flashloader blob 与入口表 ==
+  PASS  blob 1388 B（-nostdlib + 自带 memset，别链 newlib 否则 16 KB）
+  PASS  入口表解析出 7 个入口（7 个：init/erase/program/read/info/eraseChip/deinit）
+  PASS  表项步长 6 B（c.ebreak 是 2 字节），第 2 项偏移 = 6
+  PASS  解析出的跳转目标与构建时的符号地址逐项一致
+  PASS  加载地址 0x00000000（与 SDK 的 work-area 一致）
+  PASS  全 0xFF 的垃圾不进表（不会当成入口）
+  PASS  空 blob 返回空表
+  PASS  c.jal 负偏移符号扩展正确：0x3fd5 → -12（期望 -12）
+  PASS  c.jal 正偏移：0x2011 → 4（期望 4）
+  PASS  blob 机器码结构自检：无"无出口自循环/自递归"
+  PASS  自检能抓出"c.jal 跳回自己"这种死循环（拿旧 bug 的形状反验）
+== 2. JTAG/DMI 编码（照探针固件 riscv_jtag.c 的位序）==
+  PASS  装 IR 的序列形状：2 拍 TMS=1 → 2 拍 TMS=0 → 4 bit → 1 bit → Update → RTI
+  PASS  IR=0x11 的位序：低 4 位先出、第 5 位最后
+  PASS  TAP 复位：6 × (8 拍 TMS=1) + 1 拍 TMS=0
+  PASS  DMI 41 位请求编码/解码往返一致
+  PASS  41 位布局：op(2) | data(32)<<2 | addr(7)<<34
+  PASS  DR 扫描先跑 idle 拍（dtmcs 要求 7 拍），实际 7
+  PASS  41 位 = 40 + 1（最后一位在 Exit1-DR）
+  PASS  只有移位段捕获 TDO（idle/状态迁移段不捕）
+  PASS  dpc 的抽象命令编号 = 0x7b1（规范 §3.14；写错就永远跳不到算法入口）
+  PASS  抽象命令：写 dpc = 0x2307b1（aarsize=2 | transfer | write | regno=0x7b1）
+  PASS  regno 超出 16 位会报错（x 寄存器只有 0x1000..0x101f）
+  PASS  SBA 块访问配置位与固件一致（32 位 + 自增 + 写地址即读 + 读数据即续读）
+== 3. DM/SBA 跑在模拟 DTM 上（TAP 状态机真的按位解序列）==
+  PASS  IDCODE = 0x1000563d（HPM 全系 0x1000563D）
+  PASS  DTMCS = 0x71（idle=7）
+  PASS  DMSTATUS version = 2（调试规范 0.13+ 是 2）
+  PASS  haltreq 之后 dmstatus.allhalted 置位
+  PASS  抽象命令写/读 a0（x10）往返一致
+  PASS  抽象命令写/读 dpc 往返一致
+  PASS  模拟目标初始 dcsr 没置 ebreak*（= 全新板子，不靠上次调试器留下的状态）
+  PASS  prepareRun 置上了 dcsr.ebreakm（dcsr=0x4000b003）
+  PASS  fence.i; fence rw,rw 走 progbuf（postexec）执行，不是写进 SRAM 再跑
+  PASS  模拟器照真机语义：dcsr 没置时 ebreak 变成异常 → 核不停（所以主机侧漏了就会挂）
+  PASS  SBA 块写 → 块读 64 B 逐字节一致
+  PASS  非对齐（+2）读自动补齐头部，取到正确的 8 B
+  PASS  模拟目标真的执行了 SBA（写 363 / 读 19 次）
+  PASS  hold 单字采样读取已完成的当前值，不留下预取事务
+  PASS  SBA 写到未映射地址 → 抛错（位 sberror 生效，不静默）
+== 4. 端到端：加载 flashloader → init → 擦 → 写 → 校验 ==
+    · 已 reset-halt（把 XPI 打回 POR 态，66 ms）—— 不然第一次 erase 会卡死
+    · 准备 flashloader：1388 B（入口 7 个，偏移 init+0x0 erase+0x6 program+0xc read+0x12 info+0x18 eraseChip+0x1e deinit+0x24）
+    · 写完 flashloader：1388 B → SRAM 0x0
+    · XIP 拷贝例程就绪：28 B → SRAM 0x600（verify 走 CPU 读 XIP 窗口，不用 ROM 的 flash_read）
+    · flashloader 就绪：总容量 0.25 MB · 扇区 4096 B
+  PASS  flash_get_info 拿回真容量/扇区：256 KB / 4096 B
+  PASS  模拟目标上的 flashloader 真的被 flash_init 初始化了
+    · 擦除范围对齐到扇区：0x80001000 + 12288 B（原 0x80001000 + 10247 B）
+    · 已擦除 0x80001000 起 12288 B
+  PASS  擦除调用到目标（1 次）
+  PASS  模拟 flash 里逐字节等于固件（10247 B，从 0x80001000 起）
+  PASS  没有出现"往未擦除区域写"（模拟目标会拒绝这种写）
+  PASS  编程分块数 = 1（每块 65536 B，尾部补 0xFF 到 4 字节）
+  PASS  verify 逐字节读过一遍（读了 flash 再比，不是"假成功"）
+  PASS  往"已是 0"的位写 1 → 模拟 flash 记录了"没擦就写"（按位与语义）
+  PASS  校验把"没擦就写"抓出来了：校验失败：0x80002000 读到 0x0，期望 0xff…
+  PASS  擦干净之后写 0x00 成功（擦→写 的顺序是对的）
+  PASS  超出 flash 窗口（0x82000000）的地址在主机侧就被拦住
+  PASS  低于 flash 基址的擦除范围也被拦住
+  PASS  finish(run) 之后目标被放跑（ndmreset 脉冲 + 不置 haltreq）
+== 4b. verify 走 XIP 窗口（2026-10 LA 解码 OpenOCD 波形定因）==
+  PASS  xip-copy 第 1 条反解 = lw t0, 0(a0)（源地址在 a0）
+  PASS  xip-copy 第 2 条反解 = sw t0, 0(a1)（目的地址在 a1）
+  PASS  xip-copy 第 3/4 条 = 源、目的各 +4
+  PASS  xip-copy 第 5 条 = 剩余长度 a2 -= 4
+  PASS  xip-copy 第 6 条 = bne a2, x0, -20（跳回第 1 条；5 条指令 × 4 B = 20）
+  PASS  xip-copy 收尾是 ebreak（上层 waitHalted 靠它看到 halt）
+  PASS  例程落在 0x600：在算法 blob（0x56c 结束）之后、scratchInfo（0x1000）之前
+  PASS  setup 阶段还没用 XIP 拷贝（它只在 verify 里用）
+  PASS  在 0x30000 起校验 64 KB **过了**（真机上这条路以前必卡死）
+  PASS  一次 ROM 的 flash_read 都没发（read 入口调用 0 次），走的是 XIP 拷贝：1 次
+  PASS  XIP 拷贝例程真的在目标上跑了（1 次）
+  PASS  反证成立：走 ROM 的 read 读同一段 → 模拟目标楔死、等 halt 超时（等目标 halt 超时）
+== 4c. 粘滞 DMI BUSY（响应 op=3）→ 清状态并增加延迟 ==
+  PASS  请求阶段遇到粘滞 BUSY，清状态并增加 DMI 延迟后发送
+  PASS  重试之后那条写真的落地了（sbaddress0 = 0x1234567）
+  PASS  读路径遇到 op=3 也会自愈（dmireset 累计 2 次）
+== 5. 板级参数与状态码文案 ==
+  PASS  10 块 HPM 板子的参数（来自 SDK 的 openocd cfg）
+  PASS  header 编码 = words(1) | tag(0xfcf90)<<12 = 0xfcf90001
+  PASS  HPM5300 带两个 option 字（cfg 里给了 0x5 + 0x1000）
+  PASS  HPM6300 的 cfg 没给 option → words=0
+  PASS  范围检查：窗口内放行 / 越过窗口拒绝
+  PASS  全系通用常量：IDCODE / IRLEN=5 / ROM API 表 0x2001FF00（所以一份 blob 通吃）
+  PASS  状态码文案：0→成功 / 2→地址/长度越界（out of range）
+  PASS  芯片下拉里的 10 个 HPM 项与 HPM_BOARDS 的 id 完全一致
+== 6. DAP 封包/解包（照探针固件 DAP.c 的 DAP_JTAG_Sequence）==
+  PASS  请求第 0 字节 = 序列条数（13）
+  PASS  封包布局 = [条数, (info, TDI)×n]，恰好 27 B
+  PASS  DR 扫描里有 2 条序列要捕获 TDO（40 位 + 1 位）
+  PASS  解包里只挑"要捕获"的序列并按序返回（5+1 B）
+  PASS  DAP_JTAG_Sequence 返回非 OK 状态 → 抛错（不静默继续）
+  PASS  output_mode 切换报文的字节与 akaLinkPro 的 hpm6800_probe.py set-mode 一致
+  PASS  output_mode 取值：0=SWD+VCOM / 1=SWD+JTAG
+== 7. 出错路径要"说人话"（真机 bring-up 时靠这些定位）==
+  PASS  没 setup 就擦除 → 明确提示先初始化：「先 setup()」
+  PASS  blob 被截断时入口表也认不满 7 个（setup 会报错而不是硬跑）
+  PASS  返回码 5 = flash 未初始化（XPI 没配起来时的典型值）
+== 8. SBA 批量读（一条 DAP 命令塞多拍：USB 往返从"每字两次"降到"每批一次"）==
+  PASS  2048 B 批量读逐字节一致（位序/地址自增都对）
+  PASS  读 512 个字只用了 82 次 JTAG 命令（逐字要 ≥512 次）
+  PASS  单条命令最大 487 B，没超 CMSIS-DAP 的 512 B/包
+  PASS  有 82 条命令是多拍批量的（批量确实生效，不是悄悄退回逐字）
+  PASS  非对齐（+3）跨批次读也对得上（批次接缝不错位）
+  PASS  跨多个批次的块读顺序正确
+  PASS  异步总线延迟下，批量恢复后的数据逐字节正确
+  PASS  批量冲突后没有重复读取或尾字越界
+  PASS  学到更长的读取延迟，保持批量能力
+  PASS  单字读走慢路径，值正确
+
+✅ hpm-flash.test: 94 通过 / 0 失败
+node tools/selftest/spi-proto.test.mjs
+== 1. 帧编解码（8 B 头 + payload）==
+  PASS  帧长 = 8 + payload
+  PASS  magic 小端是 'S','B'（0x4253）
+  PASS  线上字节序 = 53 42
+  PASS  type/flags/seq/len 落位正确
+  PASS  payload 超过 504 B 直接抛错（不静默截断）
+  PASS  XFER 传输头前 4 字节
+  PASS  tx_len/rx_len/addr 小端
+  PASS  STEP = cmd/nparams/delay_ms/params
+  PASS  STEP 参数 > 255 抛错（nparams 是 1 字节）
+== 2. 打包器：一帧不跨包、绝不填充 ==
+  PASS  小帧被攒批：6 帧 → 1 包
+  PASS  每个包都过固件纪律（无跨包帧、无 ≥8 B 残渣）
+  PASS  解析出的帧数一致（6/6）
+  PASS  帧内容与顺序逐字节一致
+  PASS  一帧占满 512 B 时独占一包（13/512/13）
+  PASS  边界包同样干净
+  PASS  单帧 > 512 B 直接抛错（固件无法解析这种帧）
+  PASS  打包后 12 个包（3 条命令被攒成 1 包 + 10 个整包 + 末片）
+  PASS  整包正好 512 B（一片一个 USB 包，不需要补填充）
+  PASS  batchBytes=512 时退化成"一包一批"（12 批 = 12 包，零行为变化）
+  PASS  短包（命令 3 帧 = 65 B）自成一个尾批 —— 短包绝不能夹在中间
+  PASS  中间批次都是 8 包 / 4096 B（3 批）
+  PASS  末批 = 剩下 2 个整包 + 末片（1428 B / 3 包，末片 404 B 收尾）
+  PASS  批里的包数守恒（没有丢包）
+  PASS  攒批后按 512 B 槽解出来的帧序列，与逐包发一字不差
+  PASS  每个槽都干净（没有跨槽帧、没有 ≥8 B 残渣）
+  PASS  单包 > 512 B 在攒批入口也直接抛错
+  PASS  一次传输被夹在 60 KB 以内（最大 5524 B）
+  PASS  包尾 4 B 残渣：解析出 1 帧、残渣 4 B、无错
+  PASS  包尾 8 B 垃圾：判 bad_magic（真固件这里会 frames_err++）
+  PASS  帧长超出包尾 → bad_len
+== 3. HID 0x35：偏移与解析（照固件实现，不是 proto.h 字段序）==
+  PASS  WebHID 比固件少 1 字节 Report ID：cmd@1、action@2、data@3
+  PASS  ENABLE 请求 = [action, on]
+  PASS  PIN_CFG 请求带 action
+  PASS  计数器 1..7 落位正确
+  PASS  第 9 个字 = 实际 SCLK（固件 res[36]）
+  PASS  第 10 个字 = frames_err（固件 res[40]，**不是** proto.h 的字段序）
+  PASS  状态字位域 + 最近错误码
+  PASS  配置块 32 B
+  PASS  encode → decode 往返一致
+  PASS  max_frame_bytes 默认写成 504（小端 f8 01）
+  PASS  面板档 16 B 往返一致
+  PASS  pad_active_low 位图：bit1 RST / bit2 CS（固件默认 0x06）
+  PASS  SCLK 档位 = 板级默认 + 10/20/40/60/75 MHz（用户拍板）
+== 4. 应答切包（RspStream）与 seq 配对（RspMatcher）==
+  PASS  一个包一次推送 → 切出 1 个
+  PASS  一次 transferIn 带回两个应答 → 切出 2 个
+  PASS  半包先缓存（pending=5）
+  PASS  补齐后一次切出 2 个
+  PASS  垃圾字节记 errors（不静默吞）
+  PASS  seq 从 1 开始分配
+  PASS  wait 后计入在飞
+  PASS  seq 对不上的应答**不**兑现（不是先来先服务）
+  PASS  按 seq 兑现
+  PASS  兑现回来的数据正确
+  PASS  兑现后从在飞里移除
+  PASS  EVT 走事件通道，不去结算任何请求
+  PASS  没人应答 → 超时 reject（不悬挂）
+  PASS  超时后清账
+  PASS  abortAll 立刻拒掉在飞请求（收尾不留残雷）
+== 5. 假探针：HID 0x35 语义 ==
+  PASS  默认配置照固件（sclk=0 / 阈值 100 / cs_policy 0）
+  PASS  默认辅助脚 = PA26/PA02/不用/PA31（14/5/0/13），RST+CS 低有效
+  PASS  非法 mode → 状态字带 RANGE（不静默接受）
+  PASS  非法配置**没有**写进去（回读还是默认）
+  PASS  合法配置真的写进去了（回读对账）
+  PASS  成功写入之后，状态字里仍留着上一次的 RANGE（"err≠0 = 这次失败"是错判据）
+  PASS  未使能时「实际 SCLK」= 0
+  PASS  ENABLE 1 → 状态字 enabled 置位
+  PASS  使能后回读实际 SCLK = 40000000（假探针按整除模型算）
+  PASS  默认面板档 = raw，QSPI 像素 opcode 0x32
+  PASS  未使能时写包被 NAK（真固件这里不 arm OUT 端点）
+== 6. 假探针：帧执行（回环 / 档位展开 / 非阻塞延时）==
+  PASS  XFER 全双工回环：读回 == 发出的 4 B
+  PASS  收发不等长 → RANGE（固件 spi_bridge.c:527）
+  PASS  读数据不带 RSP → 错误经 EVT 上报
+  PASS  没接跳线 → 读回 0x00（回环自检会 FAIL，符合预期）
+  PASS  档 0 raw：cmd + params → ce 5a a5
+  PASS  档 1 spi_dcx：同一 CS 窗口里 DC 0→1 → ce 5a a5
+  PASS  档 2 qspi：命令字在地址中间字节（00 XX 00，与手册一致） → 02 00 f0 00 28
+  PASS  DELAY 帧立刻应答，后面的 PING 被挡住（非阻塞：主循环没停）
+  PASS  时间没到 → 后面的帧还不执行
+  PASS  到点后继续执行（PING 应答出现）
+  PASS  DELAY 的时长被记下来（5000 µs → 5 ms，统一毫秒口径）
+  PASS  dropRsp：应答真的不回（页面侧会走超时分支）
+  PASS  IN 环满 → 应答带 IN_FULL 且 in_drop++
+  PASS  forceStatus 能造出任意错误码（测页面的错误文案）
+== 7. 端到端（无浏览器）：整表下发 + 统计对账 ==
+  PASS  192 条 STEP 打包干净（192 帧 → 6 包）
+  PASS  攒批把 USB 往返压到 6 次（不攒批要 192 次）
+  PASS  所有帧都被执行完（非阻塞延时逐个到点）
+  PASS  只有最后一条的应答回来（其余不带 RSP，不产生 IN 流量）
+  PASS  frames_ok=192（应为 192）· frames_err=0
+  PASS  bytes_tx=1152（每步 6 B：0x02 + 命令字 + 00 00 + 2 B 参数）
+  PASS  CS 窗口数 192（每步一次事务）
+
+✅ spi-proto.test: 90 通过 / 0 失败
+node tools/selftest/spi-panel-code.test.mjs
+== A1. 解析 C 数组（主格式）==
+  PASS  认出 4 条（format=c）
+  PASS  第 1 条：命令 + 2 字节参数
+  PASS  第 2 条：3 字节参数
+  PASS  第 3 条：NULL 参数 + 100 ms
+  PASS  行号指向源文件那一行（6，模板里首行是空行，故为 6）
+  PASS  没有错误也没有告警
+  PASS  统计：4 条 / 5 参数字节 / 100 ms（实际 5 B / 100 ms）
+  PASS  参数换行的条目照样能解析
+  PASS  自报长度 5 ≠ 实际 2 字节 → 按实际字节发 + 告警
+  PASS  命令字越界行被指出来（第 2 行）
+  PASS  #pragma/#include/注释都跳过，行号仍准（5）
+== A2. 与源 C 头文件对账（内置两套表）==
+  PASS  axs15352：条数 30 == 源文件声明的 30
+  PASS  axs15352：解析零错误
+  PASS  axs15352：带参数 28 条 == 28
+  PASS  axs15352：带延时 1 条 == 1
+  PASS  st77916：条数 192 == 源文件声明的 192
+  PASS  st77916：解析零错误
+  PASS  st77916：参数字节 215 == 215
+  PASS  st77916：累计延时 120 ms == 120 ms
+  PASS  AXS15352 首尾命令是 CE…29（与源文件一致）
+  PASS  ST77916 首条是 F0 28
+== A3. 顺带认的两种形态（纯文本行 / JSON）==
+  PASS  纯文本 3 条（format=text）
+  PASS  文本行：首字节当命令，行尾 100ms 当延时
+  PASS  JSON：cmd/data/delay 与 params/delayMs 都认
+  PASS  空文本框 → empty（不报错）
+  PASS  认不出就报一条错，不静默
+== A4. 导出与往返 ==
+  PASS  C 片段每个字节都带 0x（
+    {0xCE, (uint8_t[]){0x5A, 0xA5}, 2, 0},
+    {0x11, NULL, 0, 100},
+）
+  PASS  导出的 C 片段能被自己再解析回来（往返一致）
+  PASS  文本导出带延时（0xCE 5A A5 | 0x11  100ms）
+  PASS  JSON 导出结构正确
+== A5. 表格 → STEP 帧（只有最后一条要应答）==
+  PASS  192 条那种表：只有最后一条带 RSP（避免 IN 流量拖慢）
+  PASS  STEP 载荷 = cmd / nparams / delay_ms
+  PASS  支持"从第 N 条重放"
+== B1. 内置图案 + RGB565（高字节在前 / R-B 交换 / 灰阶）==
+  PASS  图案尺寸与 RGBA 长度
+  PASS  红图案首像素 (255,0,0)
+  PASS  棋盘（16px 块）在小图上是一整块（(0,0) 是暗块）
+  PASS  棋盘 16px：相邻块颜色相反（32×32 上验）
+  PASS  棋盘 1px：(0,0) 暗、(1,0) 亮（逐像素交替）
+  PASS  内置图案 18 种
+  PASS  纯红 → F8 00（大端，实测 f8 00）
+  PASS  纯绿 → 07 E0
+  PASS  纯蓝 → 00 1F
+  PASS  R/B 交换：红按蓝发（屏的 MADCTL 不同时的救命开关）
+  PASS  灰阶 128：满量程分量被压到 128（0x8410）
+  PASS  RGB565 → RGBA 回读（预览用）
+== B2. 摆放 / 对齐 / BMP ==
+  PASS  fit：等比缩放（4×2 放进 4×4 → 4×2 居中，实测 4×2 @y=1）
+  PASS  fill：放大到覆盖目标再居中裁（4×2 → 8×4 @x=-2，实测 8×4 @x=-2）
+  PASS  stretch：直接拉伸到目标
+  PASS  x=3,w=8 按 4 对齐 → 0..11（补 4 列）
+  PASS  align=0 时原样开窗
+  PASS  BMP 头解析：2×2 / 24bpp / 底向上
+  PASS  bottom-up 翻正了：第 0 像素是红、第 1 像素是绿
+  PASS  第二行第一像素是蓝
+  PASS  BI_BITFIELDS 565 掩码解码成红
+  PASS  不是 BMP → 抛错（不静默画黑屏）
+== B3. 切片与开窗帧（帧数 / 字节数 / 不跨包）==
+  PASS  整屏 527 帧（= ceil(259200/492) = 527）
+  PASS  首帧带满 492 B 数据
+  PASS  末帧只剩余数
+  PASS  首片保持 CS，末片放 CS + 带 RSP（只有末帧要应答）
+  PASS  档 2 像素帧头：cmd=0x32 / cmd+addr+4线 / 3 字节地址（实测 32 0e 03 00）
+  PASS  地址 = RAMWR(0x2C) << 8 = 0x002c00（线上 00 2C 00）
+  PASS  档 1（SPI+DC）像素帧：DC=1 走数据，不发命令
+  PASS  开窗 = CASET(0x2A) + RASET(0x2B)
+  PASS  CASET 参数 = x0h x0l x1h x1l（0..239）
+== B3b. 档 1（SPI+DC）的管道化刷屏：RAMWR + CS 一路保持 ==
+  PASS  前两帧是开窗（CASET / RASET）
+  PASS  第 3 帧 = RAMWR 命令（cmd 字段 0、DC=0、tx=0x2C，实测 tcfg=0x20）
+  PASS  RAMWR 帧带 RSP + CS_HOLD（与 panel_show.py 一致）
+  PASS  289 片像素（240×296×2 / 492）
+  PASS  像素片都是 DC=1（数据）
+  PASS  除末片外都带 CS_HOLD（CS 一路不抬，末片才释放）
+  PASS  只有末片带 RSP（每片都带会把吞吐砍半）
+  PASS  slices 计数只数像素片（289，不含开窗与 RAMWR）
+  PASS  假探针零错误（frames_ok=292 / 292 帧）
+  PASS  整屏只开 3 个 CS 窗口：CASET / RASET / 一条被 CS_HOLD 串起来的像素流（实测 3）
+  PASS  线上字节 = 开窗 10（两条 STEP 各 5 B）+ RAMWR 1 + 像素 142080（实测 142091）
+  PASS  档 2 首片：opcode 0x32 + 地址（00 2C 00）+ 4 线数据，CS 保持
+  PASS  档 2 后续片：纯数据相位（不带 cmd/addr），CS 继续保持 —— 面板的写指针才能连着走
+== B4. 整屏刷端到端（无浏览器）：拼帧 → 打包 → 假探针 ==
+  PASS  整屏刷：527 个像素帧 / 259200 字节
+  PASS  打包干净（529 帧 → 528 包）
+  PASS  假探针零错误（frames_ok=529）
+  PASS  帧数对账：529 == 529
+  PASS  线上字节 = 开窗 2×4 B（QSPI：opcode + 00 XX 00 + 4 字节坐标）+ 像素 259200 B（实测 259208）
+  PASS  CS 窗口 = 3（开窗 2 次 + 整帧像素**一个**长窗口，实测 3）
+  PASS  （wire 只记了 tx，像素帧的字节数由 bytes_tx 对账）
+== D. 字节 ↔ 位（解析表里"点字节改 bit"的纯逻辑）==
+  PASS  0x55 → 10101010 逐位对上（10101010）
+  PASS  0x80 → 只有 bit7 = 1（位号从 0 起、低位在前）
+  PASS  位数组 → 字节 往返相等
+  PASS  多出来的位忽略（不外溢）
+  PASS  toggleBit：置起 bit3 / 清掉 bit0
+  PASS  二进制文本 bit7 在左 + 位权
+  PASS  setRowByte 改参数：值变了
+  PASS  原数组没被原地改（换新数组 —— 行对象可能与其他引用共享同一个 data）
+  PASS  setRowByte 也能改命令字节
+  PASS  参数下标越界 = 不动（不抛错、不悄悄加长）
+  PASS  setRowByte 不记"改过"标记（脏不脏由 view 与原值快照比对，改回原值就该变干净）
+  PASS  0x36 有 MADCTL 的位名（bit3 = BGR）
+  PASS  0x3A 有 COLMOD 的位名
+  PASS  没把握的命令返回 null（界面只显示位号与位权，不瞎标）
+  PASS  改过的参数进到 STEP 帧载荷里（cmd=0x36 / n=1 / param=0x08）
+  PASS  导出的 C 用的也是改后的值
+== E. 动画 / 视频：摆放映射 + 一帧的帧序列（整帧刷）==
+  PASS  铺满：目标铺满整窗、源按比例裁掉两侧（源取 389×480）
+  PASS  适应：整幅源都在、上下留黑边（240×180 @ y=58）
+  PASS  原始尺寸：按 1:1 居中裁出 240×296（源偏移 x=200）
+  PASS  拉伸：整幅源压进整窗（无裁剪、无留边）
+  PASS  源比窗口小：铺满 = 放大 + 裁掉多余的一边（源取 32×40 → 目标 240×296）
+  PASS  原始尺寸：不放大，居中放（dx=90）
+  PASS  档 1：289 片像素 + 开窗 2 + RAMWR 1 = 292 帧/帧（142080 B）
+  PASS  帧序：先开窗再 RAMWR（CASET 0..239 → RASET 0..295 → RAMWR 0x2c（DC=0，CS 保持））
+  PASS  一帧只要 2 次应答（RAMWR + 末片）—— 每片都要会把吞吐砍半（实测 2）
+  PASS  末片带 RSP（整帧完成才知道有没有错）
+  PASS  档 1：CS 从 RAMWR 一路保持到末片才抬（管道化，与静图同一条路）
+  PASS  档 2：529 帧（开窗 2 + 像素 527），没有单独的 RAMWR 帧
+  PASS  第 2 帧复用同一组"帧头"对象（缓存生效，每帧少建 3 个对象）
+  PASS  复用时帧数不变
+  PASS  打包干净：292 帧 → 290 包（3 条帧头 1 包 + 每片 1 包，一帧不跨包）
+== E2. 局部刷新：差异包围盒 + 子矩形抠图 + 决策器 ==
+  PASS  两帧逐字节相同 → null（整帧可以一次 USB 都不喊）
+  PASS  单像素变化 → 1×1 包围盒 @(3,2)（实测 1×1 @(3,2) cells=1）
+  PASS  两个分散点 → 包围盒 6×4 但只数到 2 个变化像素（cells=2）
+  PASS  容差 0：B 的最低位不同 → 算变（逐位精确）
+  PASS  容差 1：B 的最低位不同 → 不算变（噪声被吃掉）
+  PASS  容差 1：G 的最低位不同 → 不算变
+  PASS  容差 1：R 的最低位不同 → 不算变
+  PASS  容差 1：差到 R 的第 2 位 → 还是算变
+  PASS  容差掩码：0 → ffff / 1 → f7de / 2 → e79c（实测 ffff f7de e79c）
+  PASS  子矩形 3×3 → 18 字节（= 3*3*2）
+  PASS  子矩形内容逐行紧凑：1 2 1 3 1 4 2 2 2 3 2 4 3 2 3 3 3 4
+  PASS  第 1 帧：整帧建立基准（第一帧（整窗建立基准））
+  PASS  第 2 帧：只发 1 个像素 → 对齐成 4×1 的子窗口（4..7 × 3..3）
+  PASS  子窗口像素 8 字节（对齐补了 3 列）
+  PASS  那个真变化的像素落在子窗口第 2 格（x=5 − 窗口左沿 4 = 1 → 字节偏移 2）：0 0 238 238 0 0 0 0
+  PASS  第 3 帧与第 2 帧相同 → skip（一个字节都不发）
+  PASS  整屏都变 → 回落到整帧（变化区 8×4 占 100%（超过阈值，整帧更划算））
+  PASS  统计：4 帧 = 整帧 2 + 局部 1 + 跳过 1
+  PASS  开关关掉：每帧都是整帧
+  PASS  关着的时候也记基准 —— 一打开就能立刻判"没变"
+  PASS  reset() 后重新建立基准（第一帧（整窗建立基准））
+== E3. 局部刷新：真帧序列（子窗口开窗 + 子窗口像素）==
+  PASS  10×10 的变化 → 局部（只发变化区 200..211 × 100..109（0.1%））
+  PASS  档 2 局部帧：开窗 2 + 像素 1 = 3 帧
+  PASS  局部开窗走 QSPI XFER（CASET 200..211（QSPI 0x2 + 00 2a 00））
+  PASS  CASET 的 24 bit 地址 = 命令字 << 8（线上 00 2a 00 = 0x2a00，实测 0x2a00）
+  PASS  子窗口像素 240 B，只有整帧 259200 B 的 0.09%
+  PASS  整轮发出 259440 B = 一次整帧 259200 + 一次局部 240（不省的话要 2×259200）
+  PASS  局部帧也打包干净（1 包，一帧不跨 512 B 包）
+  PASS  档 1 局部帧：开窗 2 + RAMWR 1 + 像素 1 = 4 帧
+  PASS  局部帧的末片照样带 RSP（不然不知道成没成）
+  PASS  换窗口 → 帧头重新生成（缓存按窗口分键，不会拿上一块的 CASET 去用）
+  PASS  新窗口的 CASET 标签也换了（CASET 40..59（QSPI 0x2 + 00 2a 00））
+== A6. samples/panel-init 的样例表（整段贴进页面就能用）==
+  PASS  样例能被页面同款解析器读懂（format=c · 错误 0）
+  PASS  GC9A01：51 条 / 参数 136 B / 延时 360 ms（实际 51 条 · 136 B · 360 ms）
+  PASS  含 0xEF（解锁）—— dump 生成时最容易丢的就是这类零参数命令
+  PASS  含 0xFE（解锁）—— dump 生成时最容易丢的就是这类零参数命令
+  PASS  含 0x35（关撕裂）—— dump 生成时最容易丢的就是这类零参数命令
+  PASS  含 0x21（开反显）—— dump 生成时最容易丢的就是这类零参数命令
+  PASS  含 0x29（display on）—— dump 生成时最容易丢的就是这类零参数命令
+  PASS  表外补入的 0x01(软复位) / 0x11(sleep out) 在表头、0x29(display on) 在表尾（与驱动 LCD_Init 次序一致）
+  PASS  文件头记下了"源码里 0xFF 声明 4 B 只给 3 B"这类不一致（本表按声明长度补 0，与 SDK 行为一致）
+
+✅ spi-panel-code.test: 156 通过 / 0 失败
+node tools/selftest/spi-read.test.mjs
+== 1. 读寄存器：三种档位的帧形状 ==
+  PASS  档 1：命令帧 + 数据帧（2 条）
+  PASS  命令帧：DC=0、tx=1、字节 = 0x04
+  PASS  命令帧：CS 保持、不要应答
+  PASS  数据帧：DC=1、rx=3、dummy=1、带 RSP
+  PASS  数据帧读完释放 CS
+  PASS  档 2：一条 XFER 搞定（命令 + 地址 + dummy + 读）
+  PASS  档 2：opcode=0x0B(FASTREAD) + 3 字节地址 0x000b00（= 命令字<<8 = 线上 00 0B 00）
+  PASS  地址三字节 = 00 / 命令字 / 00（命令在中间字节）
+  PASS  raw 档(0) 也按 DCS 形状发（命令 DC=0 → 数据 DC=1）—— 页面对 raw 档会先提醒"档位可能不对"
+== 2. 读 GRAM 的计划：切片 / 续读 / CS_HOLD / 地址递增 ==
+  PASS  整帧 142080 B（240×296 RGB565）
+  PASS  切成 285 片（默认每片 500 B）
+  PASS  每片都不超过 503（504 的应答正好 512 B 满包，主机会挂住）
+  PASS  读片上限 = 503（不是固件允许的 504 —— 真机实测踩过）
+  PASS  chunk=504 会被夹到 503（实测最大片 503）
+  PASS  片长加起来正好一帧（不多不少）
+  PASS  首片 = 开窗 2 条 + RAMRD + 读（4 条）
+  PASS  首片先开窗（CASET/RASET）
+  PASS  后续片 = 0x3E 续读命令 + 读
+  PASS  读帧：rx=500（默认片长）、dummy=1
+  PASS  除末片外都保持 CS（读指针靠它连着）
+  PASS  每片只有一个带应答的帧（不浪费往返）
+  PASS  子窗口 100×100 → 20000 B / 40 片
+  PASS  CASET 参数 = 10..109（大端两字节：0,10 …）
+  PASS  QSPI 整屏：519 片
+  PASS  档 2 读回的开窗 = 两条 XFER（02 + 00 2A 00 / 00 2B 00），不走 STEP
+  PASS  开窗 opcode 跟着 qspi.wrOpcode（这里 0x05）走
+  PASS  首片地址 = 0x002e00（RAMRD 2Eh → 线上 00 2E 00）
+  PASS  后续片：纯数据相位（无 cmd/addr），只读 N 字节
+  PASS  QSPI 读也靠 CS 保持串成一整帧（首片起、末片放）
+  PASS  QSPI 后续片只有一条 XFER（纯数据相位续读，不需要重发命令）
+  PASS  合法计划：静态检查通过
+  PASS  空窗口会被拦下来
+== 3. 解码 + BMP 导出 ==
+  PASS  高字节在前：红 = (255,0,0)
+  PASS  绿 = (0,255,0)
+  PASS  蓝 = (0,0,255)
+  PASS  低字节在前：同一份数据解出红
+  PASS  R/B 交换：0x001F 解成红而不是蓝
+  PASS  BMP 头是 'BM'
+  PASS  文件大小 78、像素从 54 开始
+  PASS  DIB：宽高 / 24bpp / BI_RGB
+  PASS  像素区 = stride×h = 24
+  PASS  bottom-up + BGR（首行首像素 = 33,23,13）
+  PASS  行对齐到 4 字节（3 宽 → 9 字节补到 12）
+== 4. 假探针 GRAM 往返：写进去的 = 读回来的 ==
+  PASS  写进 GRAM 142080 B（= 一帧 142080 B）
+  PASS  读回 142080 B（计划 142080 B）
+  PASS  读回来的字节与写进去的**逐字节相同**（假探针 GRAM 往返）
+  PASS  子窗口 40×20 读回来 = 整帧对应区域（窗口语义正确）
+  PASS  没写过也能读：拿到 4 B（图案）
+  PASS  图案解码成 RGBA 正常（16 B / 快照 142080 B）
+== 5. QSPI（档 2）：写进去的 = 读回来的（地址按手册 00 XX 00 编码）==
+  PASS  QSPI 开窗是两条 **XFER**（不再走 STEP）
+  PASS  CASET 地址 = 0x002a00（线上 02 | 00 2A 00 | 坐标）
+  PASS  写进 GRAM 6144 B（= 这张图 6144 B）
+  PASS  QSPI 往返：读回来 6144 B 与写进去的逐字节相同
+  PASS  假探针零错误（frames_err=0）
+
+✅ spi-read.test: 54 通过 / 0 失败
+node tools/selftest/spi-frames-dsl.test.mjs
+== 1. 小工具：去注释 / 分词 / 数字 / 时长 / 十六进制 ==
+  PASS  stripComment：# 到行尾
+  PASS  stripComment：// 到行尾
+  PASS  stripComment：引号里的 # 不算注释
+  PASS  tokenize：引号里的空格不断词
+  PASS  tokenize：多余空白吃掉
+  PASS  tokenize：引号没配对 → 抛错
+  PASS  parseNum：cmd 那颗默认十六进制
+  PASS  parseNum：默认十进制（rx=492 是 492 不是 0x492）
+  PASS  parseNum：0x 前缀一律十六进制
+  PASS  parseNum：非 0x 的十六进制字母在十进制模式下被拒
+  PASS  parseNum：空值被拒
+  PASS  时长 120ms
+  PASS  时长 500us / 500µs
+  PASS  时长 1.5s
+  PASS  时长裸数字 = µs
+  PASS  时长非法被拒
+  PASS  tx：逗号分隔
+  PASS  tx：0x 前缀 + 空格
+  PASS  tx：连写
+  PASS  tx：空 = 零字节
+  PASS  tx：奇数位十六进制被拒
+== 2. 裸字节行 = 一条 cmd 帧 ==
+  PASS  裸字节 → XFER
+  PASS  cmd=0x11 且自动开 cmd 相位
+  PASS  没有数据/地址相位
+  PASS  整段只有一条 → 自动带 RSP（发完要知道成没成）
+  PASS  裸字节按十六进制（29 → 0x29 而不是十进制 29）
+  PASS  裸字节后面可以跟 key=value（0x9F rx=3）
+  PASS  裸字节后面跟不认识的东西 → 报错
+  PASS  行首字节与 cmd= 重复 → 报错
+== 3. XFER 的 key：字段落位与自动开相位 ==
+  PASS  cmd= + rx= → cmd 相位 + 读长度
+  PASS  给 addr+addrl → 自动开地址相位
+  PASS  只给 addr → 地址字节数缺省 3（NOR 的常识）
+  PASS  lines=4 落进 tcfg 低两位
+  PASS  dummy 落位
+  PASS  tx 数据 + 长度一致
+  PASS  flags：cs_hold / dma
+  PASS  tcfg：addrquad / token
+  PASS  dc1 = DC_EN|DC_LEVEL（数据）
+  PASS  dc = 只开 DC_EN（命令）
+  PASS  不发 cmd 的续读帧（cmd_en=0）
+  PASS  rx=1 的短读
+== 4. 其余关键字帧 ==
+  PASS  delay 120ms → DELAY 帧（µs）
+  PASS  gpio DC 1
+  PASS  gpio 线名大小写不敏感
+  PASS  gpio 也吃协议里的数字线号
+  PASS  cs low = 占用（payload 1）
+  PASS  cs high = 释放（payload 0）
+  PASS  reset 10 120
+  PASS  reset 只给一个数 → post 缺省 120ms
+  PASS  ping / auxin
+  PASS  step = cmd/nparams/delay_ms
+  PASS  step 的 tx 就是参数
+== 5. 三条自动规则（RSP 归谁）==
+  PASS  两条读帧都各自带 RSP（rx>0 必带）
+  PASS  没人要应答时不乱加 RSP
+  PASS  整段零 RSP → 末帧补一个（哪怕是 DELAY）
+  PASS  自己写了 rsp → 不再自动补末帧
+  PASS  autoRsp 标记只落在被自动补的那条上
+== 6. 错误必须在解析期带行号拦住 ==
+  PASS  全双工不等长 → 报错
+  PASS  lines 只吃 1/2/4 → 报错
+  PASS  addrl 超范围 → 报错
+  PASS  给了 addr 却 addrl=0 → 报错
+  PASS  dummy 超范围 → 报错
+  PASS  未知 key → 报错
+  PASS  同名 key 重复 → 报错
+  PASS  负数/非法数字 → 报错
+  PASS  奇数位十六进制 → 报错
+  PASS  空帧 → 报错
+  PASS  引号没配对 → 报错
+  PASS  TE 是输入不能写 → 报错
+  PASS  线名不认识 → 报错
+  PASS  gpio 少参数 → 报错
+  PASS  gpio 电平非法 → 报错
+  PASS  cs 值非法 → 报错
+  PASS  delay 少参数 → 报错
+  PASS  delay 多参数 → 报错
+  PASS  reset 少参数 → 报错
+  PASS  reset 多参数 → 报错
+  PASS  gpio 多参数 → 报错
+  PASS  ping 多参数 → 报错
+  PASS  整行认不出 → 报错
+  PASS  step 缺 cmd → 报错
+  PASS  STEP 没有 dc 开关 → 报错
+  PASS  引号里的 tx 也参与等长校验 → 报错
+  PASS  报错行号对准源文件（第 4 行，前面有注释和空行）
+  PASS  错误里带上原行文本
+  PASS  tx 超过 492 B → 报错（不静默截断）
+  PASS  一行错不影响其它行（错误与有效帧分开返回）
+== 7. 整段解析：注释、空行、统计、描述 ==
+  PASS  4 条帧全部解析成功
+  PASS  统计：2 条 XFER / payload 共 62 B
+  PASS  摘要：4 条帧（XFER/DELAY/GPIO）· payload 合计 62 B
+  PASS  全注释/空行 → 零帧零错
+  PASS  空段的摘要
+  PASS  解析结果能干净打包（4 帧 → 1 包）
+== 8. 面板上的示例片段必须是好的（回归）==
+  PASS  内置 5 条示例
+  PASS  示例「NOR：读 ID + SFDP + 状态」解析干净（3 条帧）
+  PASS  示例「NOR：4 线连续读测速（首帧带命令地址，后续帧只读数据）」解析干净（3 条帧）
+  PASS  示例「面板：几条命令 + 延时」解析干净（5 条帧）
+  PASS  示例「传感器：WHO_AM_I + 每 20ms 采三轴（loop + as）」解析干净（2 条帧）
+  PASS  示例「ADC：MCP3008 每 50ms 读 0 通道（命令型）」解析干净（1 条帧）
+  PASS  示例里的 RDID：cmd=0x9F / rx=3
+  PASS  示例里的 SFDP：0x5A + 3 B 地址 + 1 dummy + 8 B
+  PASS  四线连读示例 = 3 条帧
+  PASS  首帧：4 线 + CS_HOLD
+  PASS  续读帧：不发 cmd + CS_HOLD
+  PASS  末帧：CS_OFF 释放
+== 9. C 表行（列序 = 页面命令表）与导出/回灌 ==
+  PASS  C 行：cmd/rx 落位，tx=NULL
+  PASS  C 行：cmd 相位开、地址相位关
+  PASS  C 行：地址 + (uint8_t[]){…} 数据
+  PASS  C 行：4 线
+  PASS  C 行：tx 也能写成字符串（这里是读帧，tx 忽略）
+  PASS  列数不够 → 报错
+  PASS  lines 非法 → 报错
+  PASS  addr_len 超范围 → 报错
+  PASS  rx_len 超范围 → 报错
+  PASS  tx 里有非法十六进制 → 报错
+  PASS  导出的 C 表列序正确：{0x9f, 1, 0, 0x000000, 0, 3, NULL},
+  PASS  导出的 tx 是 (uint8_t[]){…}
+  PASS  导出的 C 表能再解析（3 条）
+  PASS  C 表往返后每帧字节完全一致
+  PASS  DSL 导出能再解析（7 条）
+  PASS  DSL 往返后每帧的 type/payload/flags 完全一致（含 cs_hold / cs_off）
+  PASS  JSON 导出含全部帧（7 条）
+  PASS  JSON 里 delay/gpio 都在
+  PASS  JSON 回灌成 DSL 后条数一致
+  PASS  不是我们的 JSON 形状 → 返回 null（调用方原样载入）
+  PASS  C 表里用注释标出放不下的帧：// delay 10000us    ← 不是 XFER，C 表里放不下
+
+✅ spi-frames-dsl.test: 126 通过 / 0 失败
+node tools/selftest/spi-flash.test.mjs
+== 1. JEDEC ID 解析 ==
+  PASS  厂商/类型
+  PASS  容量码 0x18 → 16 MB（Winbond · 类型 0x40 · 16 MB）
+  PASS  GigaDevice 0x17 → 8 MB
+  PASS  Macronix 0x16 → 4 MB
+  PASS  0x14 → 1 MB
+  PASS  厂商表里没有 → 显示原始值不瞎猜
+  PASS  容量码不认识 → sizeBytes=null
+  PASS  不足 3 字节 → null
+== 2. SFDP 解析（布局照 Linux sfdp.h）==
+  PASS  签名 "SFDP"
+  PASS  头：rev=JESD216B · 1 个参数表头
+  PASS  能取到 1 个参数表头
+  PASS  JEDEC BFPT 的 ID = 0x00
+  PASS  表头名字：JEDEC BFPT（基本参数表）
+  PASS  长度 8 DWORD / 指针 0x30
+  PASS  签名不对 → 明确提示"换 dummy 再试"
+  PASS  不足 8 字节 → null
+  PASS  BFPT 原始 DWORD 可读（DWORD  1 @0x00: 0x50444653）
+== 3. 状态寄存器 ==
+  PASS  SR1 0x03 = BUSY + WEL
+  PASS  SR1 0xFC 的块保护位解出来
+  PASS  SR2 bit1 = QE
+  PASS  QE=0 时明确提示四线可能不出数据
+== 4. 帧序列：读 ID / SFDP / 连续读拆帧 / 按页编程 / 擦除 ==
+  PASS  RDID：一条帧，cmd=0x9F rx=3 带 RSP
+  PASS  SFDP 头：3 B 地址 + dummy
+  PASS  SFDP 表：按指针与长度读
+  PASS  1000 B 拆成 3 帧
+  PASS  首帧：cmd=0xEB + 地址 + 4 线 + dummy
+  PASS  前两帧 CS_HOLD（CS 一直摁着）
+  PASS  续读帧：不发 cmd/地址，只收数据
+  PASS  末帧：CS_OFF 释放，且只收剩下的 16 B
+  PASS  总长度对得上
+  PASS  单帧读也要收尾释放 CS
+  PASS  600 B → 3 页，每页前面都有 WREN
+  PASS  页长 256,256,88（不跨页）
+  PASS  页与页之间插 2 条 DELAY（等 tPP）
+  PASS  pageDelayMs=0 时不插延时
+  PASS  programPages 从页中间起写会切在页尾
+  PASS  从 0x180 跨页起写：128,172（第一笔只写到页尾）
+  PASS  quad 编程用 0x32
+  PASS  扇区擦除 = WREN + 0x20(addr)
+  PASS  整片擦除不带地址
+  PASS  一次编程超过上限 → 抛错（别一次塞爆）
+== 5. 真机路径在假探针上跑通（读 ID / SFDP / 状态）==
+  PASS  假探针缺省就挂了一颗 NOR 模型
+  PASS  RDID 读回：Winbond · 类型 0x40 · 16 MB
+  PASS  SFDP 头读回：JESD216B（major 1）· 1 个参数表头
+  PASS  参数表头：JEDEC BFPT（基本参数表）
+  PASS  BFPT 读回 32 B
+  PASS  解析出 8 个 DWORD
+  PASS  空闲时 SR1 的 BUSY=0
+== 6. 器件模型按 NOR 的规矩答（WEL / BUSY / 1→0 / 跨页 / QE）==
+  PASS  没 WREN 先擦 → 模型明确拒绝（真芯片是静默忽略）
+  PASS  被拒的擦除没有产生 BUSY
+  PASS  WREN + SE 都回了 OK
+  PASS  擦除后 SR1 的 BUSY=1（页面必须轮询）
+  PASS  轮询到 BUSY 清掉，且 WEL 自动归零
+  PASS  按页写入 300 B 读回逐字节一致（收齐 300 B）
+  PASS  不等 tPP 连写两页 → 第二页被忽略（序列里必须插延时）
+  PASS  不擦就写 = 与旧值相与（0x5 & 0x0f = 0x5）
+  PASS  跨页编程 → 模型报"跨页"（真芯片会在页内回绕，更坑）
+  PASS  QE=0 时四线读 → 明确提示（这是真机上最常见的"四线不出数"原因）
+  PASS  置 QE 后四线读正常
+  PASS  用 0xEB 却只给 1 线 → 明确提示
+  PASS  没有首帧的续读 → 提示
+== 7. 连续读真的把地址接下去了（跨帧不断）==
+  PASS  三帧收齐 1000 B（续读帧的地址由器件自己往下数）
+  PASS  连读回来的 1000 B 逐字节一致
+  PASS  器件侧确实是 3 笔（1 首发命令 + 2 笔续读）：读 0x3 @0x2000 492 B / 续读 492 B @0x21ec / 续读 16 B @0x23d8
+== 8. 没把老功能踩坏：全双工仍走回环 ==
+  PASS  全双工帧仍由回环模型答（回环自检不受影响）
+  PASS  这类帧没有被器件模型碰过
+
+✅ spi-flash.test: 66 通过 / 0 失败
+node tools/selftest/stm32-devid.test.mjs
+== 1. DP IDCODE（DPIDR）==
+  PASS  0x2BA01477 = ARM · SW-DP · PARTNO 0xBA01 · 修订 2（实测 designer=0x477 partno=0xba01 rev=2）
+  PASS  文案点明设计者与调试口：0x2BA01477 → 设计者 ARM · SW-DP（DPv1） · 修订 2
+  PASS  0x4BA00477 = JTAG-DP：0x4BA00477 → 设计者 ARM · JTAG-DP / DPv0 · 修订 4
+  PASS  0x6BA02477 = DPv2 的 SW-DP：0x6BA02477 → 设计者 ARM · SW-DP v2（DPv2） · 修订 6
+  PASS  非 ARM 的设计者不会被认成 ARM
+== 2. CPUID → 内核 ==
+  PASS  0x410FC241 = Cortex-M4 r0p1（实测 Cortex-M4 r0p1）
+  PASS  0x412FC231 = Cortex-M3 r2p1（实测 Cortex-M3）
+  PASS  0x411FC271 = Cortex-M7（实测 Cortex-M7）
+  PASS  0x410CC601 = Cortex-M0+（实测 Cortex-M0+）
+  PASS  0x410FD211 = Cortex-M33（实测 Cortex-M33）
+  PASS  表里没有的 PARTNO 不猜：0x410F0001 → 未知内核（PARTNO 0x0） r0p1 · 实现者 0x41 · 架构 0xF
+== 3. STM32 DBGMCU DEV_ID → 型号 ==
+  PASS  DEV_ID 0x410 → STM32F10x 中容量（F103x8/xB 那类）（F1）
+  PASS  DEV_ID 0x414 → STM32F10x 大容量（F103xC/D/E）（F1）
+  PASS  DEV_ID 0x412 → STM32F10x 小容量（F1）
+  PASS  DEV_ID 0x413 → STM32F405/407/415/417（F4）
+  PASS  DEV_ID 0x449 → STM32F745/746/756/765/767（F7）
+  PASS  DEV_ID 0x450 → STM32H742/743/745/747/750/753/755/757（H7）
+  PASS  DEV_ID 0x480 → STM32H7A3/B3（含 H7B0 系列）（H7）
+  PASS  DEV_ID 0x415 → STM32L475/476/486（L4）
+  PASS  DEV_ID 0x460 → STM32G07x/G08x（G0）
+  PASS  表里没有的 DEV_ID 原样报出：DEV_ID 0xABC（表里没有 —— 原样报出） · REV_ID 0x1000
+  PASS  只取低 12 位（高位是 REV_ID 的一部分）
+  PASS  REV_ID 原样带出：0x2003
+  PASS  F1 中容量 1 KB/页、大容量 2 KB/页（擦除粒度判据，与 RM0008 §3.3.1 一致）
+== 4. 候选地址表与容量合理性判据 ==
+  PASS  DBGMCU 候选地址：0xE0042000 / 0xE00E1000 / 0x5C001000（H7 前两处、H7A3/B3 第三处）
+  PASS  容量寄存器表里有 F1（0x1FFFF7E0）与 F4/F7（0x1FFF7A22）
+  PASS  合理容量认得（1 / 512 / 8192 KB）
+  PASS  全 0 / 全 1 / 读不到 → 判为无效（别把垃圾当容量）
+== 5. 同族靠 flash 容量收窄（真机就是这一步认出来的）==
+  PASS  DEV_ID 0x480 + 128 KB ⇒ STM32H7B0（本机实测那颗就是它）
+  PASS  DEV_ID 0x480 + 2 MB ⇒ H7A3
+  PASS  DEV_ID 0x480 + 1 MB ⇒ H7B3
+  PASS  没读到容量就不硬猜（回落到家族名）
+  PASS  0x410 + 128 KB ⇒ STM32F103x8/xB（中容量 128 KB 那档）
+  PASS  表里没写规则的家族不发表意见（返回 null）
+
+✅ stm32-devid.test: 34 通过 / 0 失败
+node tools/selftest/dbg-core.test.mjs
+== 1. 数字与字节串的解析（命令行的地基）==
+  PASS  parseNum 认 0x 前缀
+  PASS  parseNum 认尾缀 h
+  PASS  parseNum 认二进制
+  PASS  parseNum 十进制（不是十六进制！）
+  PASS  parseNum 忽略下划线分隔
+  PASS  parseNum 认不出就回 null（不静默当 0）
+  PASS  parseBytes 空格分隔
+  PASS  parseBytes 逗号 + 0x 前缀
+  PASS  parseBytes 连续写法（偶数长度）
+  PASS  parseBytes 奇数长度连续写法必须报错（不能猜）
+  PASS  parseBytes 超过 0xff 必须报错
+  PASS  hexdump 首行地址与字节
+  PASS  hexdump 右侧 ASCII 列
+  PASS  hexdump 按 16 字节分行且第二行地址正确
+  PASS  readLE 小端
+== 2. 寄存器位域（xPSR / CFBP）==
+  PASS  寄存器名大小写不敏感、r15=PC
+  PASS  SP/PSP 的 REGSEL 正确
+  PASS  不认识的寄存器回 null
+  PASS  xPSR：Z 在 bit30、T 在 bit24
+  PASS  xPSR：IPSR 在 [8:0]（异常号）
+  PASS  xPSR：IT 拆在两段（[26:25] 是高位）→ 0xea
+  PASS  formatXpsr 有人话（含 Handler）
+  PASS  setXpsrFlags 只动指定标志位（T 位等原样保留）
+  PASS  CFBP 打包：PRIMASK→byte0、CONTROL→byte3
+  PASS  CFBP 拆包：byte0=PRIMASK / byte1=BASEPRI / byte2=FAULTMASK / byte3=CONTROL
+  PASS  CFBP 改一个字节不会碰兄弟字节
+  PASS  CONTROL 的人话（nPRIV/SPSEL）
+== 3. FPB 硬件断点的编码 ==
+  PASS  FP_CTRL=0x80 → 8 个比较器、rev1（Cortex-M7 的排法）
+  PASS  REV 字段在 [31:28]（0x1 → rev2）
+  PASS  rev1 只能匹配 0x20000000 以下的地址（H7 的 QSPI 代码就打不了）
+  PASS  rev2 地址不限
+  PASS  rev1 偶数地址 → (addr&~3) | BP_MATCH(0x1<<30) | ENABLE
+  PASS  rev1 上半字地址 → BP_MATCH(0x2<<30)（bit1 不进地址字段）
+  PASS  rev1 解码要把 bit1 从 BP_MATCH 还回来
+  PASS  rev2 只按半字对齐 + ENABLE
+  PASS  编码 → 解码可往返（探针回读对账靠它）
+  PASS  planComparators 按顺序填槽位
+  PASS  超出匹配范围的地址单独报出来（不静默丢）
+  PASS  装不下的断点进 overflow
+== 4. 符号表（拿真 ELF 当靶子）==
+  PASS  解析出 74 个符号
+  PASS  _SEGGER_RTT 的地址/大小正确
+  PASS  按名字找到函数并给出类型
+  PASS  PC 落点：函数名 + 偏移
+  PASS  nameOf 的人话格式
+  PASS  resolve 支持「符号+偏移」
+  PASS  resolve 支持裸十六进制
+  PASS  resolve 支持 &变量
+  PASS  resolve 找不到就回 null（命令层要报错）
+  PASS  sym 搜索命中 7 条
+  PASS  summary 有人话摘要：74 个符号（函数 19 · 数据 9），其中 5 个带类型变量（DWARF），行号表 149 条
+== 5. 会话 + 假目标：真跑一遍调试动作 ==
+  PASS  连上假目标
+  PASS  连上时的状态是"已停止"
+  PASS  读到 FPB 能力：8 个比较器 rev1
+  PASS  读回 23 个寄存器（19 内核含 MSP/PSP/XPSR + 4 个特殊）
+  PASS  复位向量取到了代码区入口
+  PASS  SP 来自向量表
+  PASS  xPSR.T = 1（Thumb）
+  PASS  读回写进去的 R0
+  PASS  改 PC 生效
+  PASS  CFBP 端到端：PRIMASK=1 落在 byte0、CONTROL=2 落在 byte3
+  PASS  两个特殊寄存器各读各的
+  PASS  写内存后回读一致
+  PASS  写 flash 会被拒绝（假目标与真板子一致：本页不做烧录）
+  PASS  断点加进去了
+  PASS  硬件上限 = FPB 报的 8 个比较器
+  PASS  「继续」之后目标在跑
+  PASS  目标在 3 s 内停了下来（命中假目标里的 FPB 比较器）
+  PASS  停在了断点地址上
+  PASS  第二次「继续」也命中（跨过断点后绕回来）
+  PASS  仍停在同一地址（说明真的跨过去又回来了）
+  PASS  跨过断点确实是"跑了一段"而不是立即返回
+  PASS  在断点处单步能走开（临时摘比较器）
+  PASS  单步之后比较器装回去了
+  PASS  C_STEP 能用时走主路径（mode=dhcsr）
+  PASS  C_STEP 不生效时自动改用断点单步（mode=breakpoint）
+  PASS  兜底单步真的让 PC 前进了 8000302 → 8000304
+  PASS  兜底的临时比较器收干净了（只剩用户那一个断点）
+  PASS  日志里说清了"为什么改走断点单步"（不许静默降级）：[dim] 已清掉单步残留的 C_MASKINTS —— 不清的话中断再也进不来（中断里的断点永远不会命中） | [warn] C_STEP 没让目标前进（这次；可能刚复位或重连过） —— 改用「断点单步」，后面每一步都走这条路，不再重复试探
+  PASS  连续单步也稳（连续两次都前进：0x8000306）
+  PASS  记住了"C_STEP 不可用"，第二次单步不再白等 400ms 试探
+  PASS  重连（清掉粘性结论）后立刻回到 C_STEP 主路径（0x8000308）
+  PASS  删断点
+  PASS  断点表空了
+  PASS  复位并停：PC 回到复位向量
+  PASS  复位并停：状态是"已停止"
+  PASS  复位并跑：状态是"运行中"
+  PASS  再暂停回来
+== 6. 命令行（跑在同一个会话上）==
+  PASS  h 打印帮助
+  PASS  不认识的命令要报错（不能静默无反应）
+  PASS  r r0 打印一个寄存器
+  PASS  r PC <值> 写进去了
+  PASS  r <reg> <坏值> 报错而不是静默
+  PASS  mw 写内存并回读对账
+  PASS  md 打印 hexdump
+  PASS  b <符号> 走符号表解析
+  PASS  bl 列出断点与硬件上限
+  PASS  bd 1 按编号删断点
+  PASS  p 打印变量（有 DWARF 就解数值）
+  PASS  p 打出来的值对得上刚写的字节
+  PASS  info 有后端/状态/符号
+  PASS  sym 搜符号
+  PASS  x &变量 先解释符号再 dump
+  PASS  md 缺参数时报用法
+  PASS  md 长度上限有保护
+== 7. 没连接时的命令（不能崩，要给人话）==
+  PASS  未连接时 c 提示先连接
+  PASS  未连接时 h 仍然可用
+== 8. 行号表（DWARF .debug_line）：停下来显示源码行的地基 ==
+  PASS  载入 ELF 时顺带解析出了行号表
+  PASS  行号记录 149 条
+  PASS  3 个编译单元（每段一个行号程序）
+  PASS  CU 版本是 DWARF 4
+  PASS  源文件表里有 src/main.c
+  PASS  cleanPath 归一化（盘符/`..`/`.`）
+  PASS  isAbsPath 认盘符与 Unix 根
+  PASS  relTo 算相对路径
+  PASS  SysTick_Handler 的首地址 → src/main.c:24
+  PASS  main+0 → src/main.c:28
+  PASS  locText 给"文件:行"的人话：main.c:24
+  PASS  最小记录地址在代码段里（0x8000040）—— 占位序列被剔掉了
+  PASS  地址 0 / RAM 地址查不到行号（回 null 而不是乱指一行）
+  PASS  行→地址→行 全部自洽（149 条，0 条不一致）
+  PASS  SymTab.lines 要么有表要么是 null（两种都不能崩）
+  PASS  DWARF 5 的行号表也能解析（riscv_dwarf5.elf）
+  PASS  0x80000000 查得到行号（有符号位那个坑的回归测试）
+== 8.1 源码文件仓（选择目录后的匹配与读取）==
+  PASS  索引 FileList（webkitdirectory 兜底路径）：源码目录「proj」：2 个文件
+  PASS  按后缀匹配 ELF 里的绝对路径（编译机路径 ≠ 本机路径）
+  PASS  多级后缀也能匹配
+  PASS  匹配不上就回 null（界面显示"没找到源文件"，不乱猜）
+  PASS  读源码文本（走缓存）
+  PASS  第二次读走缓存（同一份内容）
+  PASS  读不到时给人话（告诉用户去选目录）
+== 9. 监视窗口（表达式解析 / 取值 / 增删）==
+  PASS  w 变量名 → 解析到地址
+  PASS  w 符号+偏移 → 按 u32 看那个地址
+  PASS  w 裸地址 → 按 u32 读
+  PASS  w 认不出来 → 给错误（不静默）
+  PASS  没载入 ELF 时 w 说明原因
+  PASS  u32 取值：十进制 + 十六进制
+  PASS  没有类型信息时也要给出人看得懂的十六进制
+  PASS  加一项监视
+  PASS  同名不重复加（返回 dup）
+  PASS  一共 3 项
+  PASS  wd 按编号删
+  PASS  wd 按名字删
+  PASS  toJSON 不把值存进 localStorage
+  PASS  fromJSON 重新解析（换 ELF 后地址会跟着变）
+  PASS  wd all 全清
+== 10. Tab 补全（命令名 / 符号 / 寄存器）==
+  PASS  commonPrefix 取最长公共前缀
+  PASS  空行 Tab → 列出全部命令名
+  PASS  唯一候选补全并补一个空格："help "
+  PASS  b <前缀> → 补符号名："b main"
+  PASS  p _SEG → 补出 _SEGGER_RTT*（有多个就补公共前缀）："p _SEGGER_RTT"
+  PASS  r 后面补寄存器名："r primask"
+  PASS  没有候选时原样不动（绝不猜一个最近的）
+  PASS  多个候选 → 只补公共前缀（候选交给界面列出来）
+== 11. 新命令：w / wl / wd / sl / src + Ctrl+C 取消 ==
+  PASS  w <变量> 加进监视窗口
+  PASS  wl 列出监视项与值
+  PASS  wd 1 删掉监视项
+  PASS  w 缺参数报用法
+  PASS  sl 打印当前源码位置
+  PASS  sl 顺手把源码视图跳过去
+  PASS  src 不带参数列出源文件
+  PASS  src <文件:行> 跳转
+  PASS  src 找不到文件时报错（不静默）
+  PASS  Ctrl+C（signal=true）时命令抛 Cancelled，不再往下跑
+  PASS  signal=false 时命令照常执行
+  PASS  没有界面时 w 说明"需要界面支持"
+== 12. SWD 时钟：默认 10 MHz + PPB 坏读自动退回 1 MHz ==
+  PASS  默认时钟是 10 MHz（10000 kHz）
+  PASS  PPB 读数正常 → 保持 10 MHz
+  PASS  PPB 读回 0 → 自动退回 1 MHz
+  PASS  探针那边的 SWJ_Clock 也真的改了
+  PASS  日志里说清"为什么退回"（不许静默降级）
+  PASS  已经 ≤1 MHz 时跳过检查
+== 13. SWD 串行化（后台轮询不许和用户动作交错）==
+  PASS  独占动作进行中 → 后台轮询跳过这一拍（不排队、不交错）
+  PASS  空闲时后台轮询正常执行
+  PASS  两个独占动作排队：A 全程跑完才轮到 B
+  PASS  队列跑空后锁已释放
+== 14. 断点目标解析：文件:行 / 函数:行 / 相对行（breakSpec）==
+  PASS  fixture ELF 有行号表（行号表：3 段 · 149 条记录 · 34 个源文件（DWARF 4）)
+  PASS  取到一条 is_stmt 记录：main.c:24@0x8000040
+  PASS  b <文件名:行> 反查到地址（后缀匹配）
+  PASS  b <完整路径:行> 也能解析
+  PASS  b <函数:行> 用该函数所在文件解析
+  PASS  函数形式的出处写明"函数 → 文件:行"：SysTick_Handler → main.c:24
+  PASS  b +2 相对当前行往后
+  PASS  b +2 但目标在跑（没有 PC）→ 明确报错，不猜
+  PASS  不存在的文件 → 报错
+  PASS  不存在的行号 → 报错
+  PASS  普通符号名照旧走 resolve（不回归）
+  PASS  十六进制地址照旧
+== 14b. 行号表的"序列"边界（nextStmtAddr 不许跨进隔壁函数）==
+  PASS  F103 靶子 ELF：139 条记录的"下一行"都在同一条序列里
+  PASS  F103 靶子 ELF：跨函数的"下一行"都是直接衔接（fall-through），没有跳跃
+  PASS  F103 靶子上覆盖到 139 条记录（样本够大）
+  PASS  H743 scope ELF：184 条记录的"下一行"都在同一条序列里
+  PASS  H743 scope ELF：跨函数的"下一行"都是直接衔接（fall-through），没有跳跃
+  PASS  H743 scope 靶子上覆盖到 184 条记录
+== 15. Thumb：指令长度与 BL/BLX 目标 ==
+  PASS  NOP（0xBF00）是 16 位
+  PASS  `b .`（0xE7FE）是 16 位 —— 0xE000~0xE7FF 这一档最容易判错
+  PASS  0xF000/0xF800（32 位分支前缀）是 32 位
+  PASS  BL 目标解码（+0xFC）
+  PASS  H 位（bit12）=0 → BLX
+  PASS  不是分支指令 → null（不瞎算）
+  PASS  负偏移（往回跳）也算对
+  PASS  BLX <reg> 是调用、BX 不是
+  PASS  encode→decode 往返一致（0x8000100 → 0x8000200）
+  PASS  encode→decode 往返一致（0x8000200 → 0x8000100）
+  PASS  encode→decode 往返一致（0x8000040 → 0x8012340）
+== 16. 结构体/数组树（监视窗口的树）==
+  PASS  u32 成员解出数值：3735928559
+  PASS  u32 成员给出十六进制：0xdeadbeef
+  PASS  嵌套结构体给出容器行
+  PASS  嵌套成员按偏移解出（x=7, y=9）
+  PASS  嵌套成员的缩进层级正确
+  PASS  位域按 bitOffset/bitSize 解出：5  (0x5)
+  PASS  位域行有标记（界面用黄字）
+  PASS  数组给出 [n]
+  PASS  数组元素解出 f32：1.50000
+  PASS  越界的元素如实说"读不到"（绝不猜 0）：（越界 / 读不到）
+  PASS  maxRows 限流并给出"只显示前 N 行"
+  PASS  数组超上限时给出"还有 N 项"
+  PASS  折叠摘要给出成员=值：{a=3735928559, x=7, y=9, flag : 3=5  (0x5)}
+  PASS  readBits 按位偏移取值
+  PASS  readBits 低位取值
+  PASS  u8 数组可打印时给出字符串行
+== 17. 源码级单步（假目标真跑：跳过 / 进入 / 跳出 / 运行到）==
+  PASS  假目标从代码区入口开始
+  PASS  nextStmtAddr 给出下一行地址
+  PASS  单步跳过落在下一行（0x8000102）
+  PASS  返回的人话带源码行：单步跳过 → SEGGER_RTT.c:493（0x8000102）
+  PASS  临时比较器收干净了（用户断点 0 个）
+  PASS  记下了这一步是"跳过"（lastStepMode=over）
+  PASS  源码单步命令的 PC 回显跟随本次停止地址
+  PASS  临时断点落在用户断点上时不动它（剩 1 个）
+  PASS  断点上的出处备注还在：user.bp
+  PASS  比较器占满时给人话错误：单步跳过：需要在 0x800010c 放一个临时比较器，但硬件断点已用完（8/8）—— 先删掉一个用户断点再试
+  PASS  报错后用户断点一个没少
+  PASS  单步进入落在被调函数入口（0x8000300）
+  PASS  假目标按真硬件把返回地址放进了 LR（0x08000204|1）
+  PASS  单步跳出回到调用点的下一条指令（0x8000204）
+  PASS  单步进入/跳出之后比较器都收干净了
+  PASS  LR=0xFFFFFFF9（EXC_RETURN）时拒绝"跳出"并说明原因
+  PASS  运行到指定地址（0x8000400）
+  PASS  目标已经在那里时直接说"已停在这一行"
+  PASS  没有行号信息时 stepOver 明确报错
+== 17b. 「单步跳出」在非叶子函数里（LR 被本函数内部的调用覆盖）==
+  PASS  走到"刚从一个内部调用返回"的位置（PC=0x8000246）
+  PASS  此刻 LR 已被内部调用覆盖（LR=0x8000247，不是真正的返回地址 0x8000050）
+  PASS  页面能识别出"LR 落在本函数里 = 被覆盖"（这正是旧实现原地不动的原因）
+  PASS  「跳出」正确回到调用者（0x8000050，帧已弹掉：SP 0x2000fff8 → 0x20010000）
+  PASS  人话里说明了"LR 被覆盖，所以是一步步走回来的"：单步跳出 → fn@0x8000050（0x8000050，LR 不是本帧的返回地址（被内部调用覆盖或已陈旧），走了 2 条指令回到调用者）
+  PASS  这条慢路径也不留临时比较器（0 个）
+  PASS  n 在函数最后一行执行收尾并返回调用者
+  PASS  n 的 PC 回显使用本次停止位置，不使用旧寄存器缓存
+  PASS  函数末尾 n 不遗留临时比较器
+  PASS  行号空洞仍明确报错，不擅自跳出
+== 18. 命令行：b <文件:行> / p <结构体> / bl 显示出处 ==
+  PASS  b main.c:30 下断点：断点 #1 @ 0x08000056  main+0x6  main.c:30　[main.c:30]
+  PASS  输出里带出处：断点 #1 @ 0x08000056  main+0x6  main.c:30　[main.c:30]
+  PASS  bl 显示源码出处：#1  0x08000056  main.c:30             比较器 0
+  PASS  bd 也能按 文件:行 删：删掉断点 @ 0x08000056
+  PASS  p <结构体> 打成缩进的树（含成员名）
+  PASS  结构体打印是多行（43 行）
+  PASS  b 认不出来时报错（不静默）：解析不了「nope.c:1」：（行号表里没有叫「nope.c」的源文件，它也不是函数名；用 src 看有哪些文件）
+  PASS  help 里列出了新的单步/运行到命令
+  PASS  help 里给出了 文件:行 的例子
+== 19. 位域解码：嵌套结构体里的位域必须按"所在结构体"起算 ==
+  PASS  on（bit0）在嵌套结构体里也解得对：1  (0x1)
+  PASS  level（bit1..3 = 0b111）解得 7：7  (0x7)
+  PASS  mode（bit4..5 = 0b11）解得 3：3  (0x3)
+  PASS  parity（bit6 = 1）解得 1：1  (0x1)
+  PASS  rev（bit7..15 = 0x001）解得 1：1  (0x1)
+  PASS  spare（bit16..31 = 0x00FF）解得 255：255  (0xff)
+  PASS  sbits.bias（有符号位域）解得 +5：5  (0x5)
+  PASS  有符号位域做符号扩展（0b111011 → -5）：-5  (0x3b)
+  PASS  signExtend 三位/单位宽都正确
+  PASS  readBits 位序仍是"最低位在前"（小端 MCU）
+  PASS  decodeBitfield 直接解有符号位域
+  PASS  偏移读不出来时 decodeBitfield 返回 null（不猜）
+  PASS  根对象自己的位域（lo = 0xE）不受影响：14  (0xe)
+  PASS  根对象的最高半字节（hi = 0xC）：12  (0xc)
+== 20. 复合路径：p/w 支持 a.b[2].c（按 DWARF 成员偏移算地址）==
+  PASS  parsePath 拆出 成员/下标 交替的段：[{"name":"g_model"},{"name":"nodes"},{"index":1},{"name":"cell"},{"name":"scale"}]
+  PASS  单段名字不算路径（走原来的精确查）
+  PASS  不认的东西一律返回 null（+偏移/箭头/非数字下标）
+  PASS  顶层变量仍走精确查：{"a":603979840}
+  PASS  路径算出地址 = 基址+16(数组)+16(第 1 项)+8(scale) = 0x24000068，类型 f64
+  PASS  数组元素本身也能取到（类型 = cell_t）：0x24000080
+  PASS  下标越界如实报原因（不返回一个错地址）：下标 [9] 越界（数组只有 4 项）
+  PASS  成员不存在如实报原因：没有成员「nosuch」（model_t 里有：nodes · flags）
+  PASS  标量后面再走成员要报错：uint8_t 不是结构体/联合，没有成员「deeper」
+  PASS  位域成员带出 bit{inUnit,size,signed}（bitOffset 2 在存储单元内仍是 2）：{"inUnit":2,"size":6,"scalar":"i32","signed":true}
+  PASS  监视窗口认复合路径：{"k":"var","s":"f64","a":603979880}
+  PASS  监视复合路径指向结构体时是可展开的树：struct / cell_t
+  PASS  监视位域成员带 bit 信息（取值时按位切）：int32_t 位域
+  PASS  位域监视项按位取值（bytes[0]=0b00111011 从 bit2 取 6 位 = 0b001110 = 14，而不是整个 0x3B）
+  PASS  路径走不通时如实报错、不画一棵看着正常的树：「g_model.nope」：没有成员「nope」（model_t 里有：nodes · flags）
+  PASS  命令行 p 走不通的路径也如实报错：「g_model.nope」：没有成员「nope」（model_t 里有：nodes · flags）
+== 21. 行号写错时说人话（文件只有 1~N 行）==
+  PASS  lineRange 给出文件的行号范围：{"min":24,"max":40,"count":12,"path":"E:/web-serial-rtt-tools/tools/target-firmware/stm32f103_rtt_speed/src/main.c"}
+  PASS  b main.c:99999 报"文件只有 1~N 行"：解析不了「main.c:99999」：（main.c 里只有第 24~40 行有代码，没有第 99999 行）
+  PASS  比最小行还小的行号也给范围提示：解析不了「main.c:1」：（main.c 里只有第 24~40 行有代码，没有第 1 行）
+  PASS  范围内的行照常解析：0x8000056
+  PASS  文件不存在时仍报"没有这个源文件"
+== 22. nextAddrsOf：分支/返回指令的"落点"（断点单步的地基）==
+  PASS  NOP → 下一条（pc+2）：{"addrs":[134217986],"why":"其它 16 位指令（顺序执行）","certain":true}
+  PASS  32 位非分支指令 → pc+4（长度判对）：{"addrs":[134217988],"why":"其它 32 位指令（顺序执行）","certain":true}
+  PASS  bx lr → LR（抹 Thumb 位）：{"addrs":[134218240],"why":"bx lr（返回）","certain":true}
+  PASS  bx r3 → R3：{"addrs":[134218496],"why":"bx r3","certain":true}
+  PASS  blx r3 → R3（间接调用）：{"addrs":[134218752],"why":"blx r3（间接调用）","certain":true}
+  PASS  读不到寄存器时如实标"不确定"（不假装知道、更不能当成寄存器=0）：{"addrs":[134217986],"why":"bx r3（读不到寄存器）","certain":false}
+  PASS  pop {r7,pc} → [sp+4]：{"addrs":[572662306],"why":"pop {…, pc}（返回）","certain":true}
+  PASS  pop {pc} → [sp+0]：{"addrs":[858993458],"why":"pop {…, pc}（返回）","certain":true}
+  PASS  pop.w {r7,pc}（32 位）→ [sp+4]：{"addrs":[1145324612],"why":"pop.w {…, pc}（返回）","certain":true}
+  PASS  ldr pc,[sp,#4] → [sp+4]：{"addrs":[1431655764],"why":"ldr pc, [sp, #imm]（返回）","certain":true}
+  PASS  mov pc, lr（编码 0x46F7）→ LR：{"addrs":[134219008],"why":"mov pc, …","certain":true}
+  PASS  mov pc, r7（0x46BF）→ R7：{"addrs":[134219264],"why":"mov pc, …","certain":true}
+  PASS  普通 mov r0,r1（0x4608）不改变控制流 → pc+2：{"addrs":[134217986],"why":"mov（高寄存器）","certain":true}
+  PASS  b +8（16 位）→ 目标：{"addrs":[134217996],"why":"b 无条件跳转","certain":true}
+  PASS  b .（自己跳自己）→ 目标 == 自己：{"addrs":[134217984],"why":"b 无条件跳转","certain":true}
+  PASS  bcc → **两个候选都返回**（跳 / 不跳，不跳是 pc+2）：{"addrs":[134217992,134217986],"why":"b0 条件分支（两个落点都放比较器）","certain":true}
+  PASS  cbz → 两个候选（pc+2 与 pc+6）：{"addrs":[134217990,134217986],"why":"cbz/cbnz（两个落点都放比较器）","certain":true}
+  PASS  bl → 被调函数入口：{"addrs":[134218496],"why":"bl 调用（进入被调函数）","certain":true}
+  PASS  bl 的落点不是 pc+4（旧兜底就是这么错的）
+== 23. ≥0x80000000 的地址：断点表比对不能踩"有符号掩码"的坑（HPM6800EVK 真机定因）==
+  PASS  _bpAt 认 0x80005ae8（有符号掩码会永远匹配不上）
+  PASS  _bpAt 忽略最低位（半字对齐）
+  PASS  _bpAt 不把相邻地址算成命中
+  PASS  _bpAt 认第二个高地址断点（多断点的地基）
+  PASS  _withBpCleared 在跑之前真的把那个地址摘掉了（单步/继续都要靠它）
+  PASS  跑完把断点原样装回来
+  PASS  bpAdd 存的是**无符号**地址（不然后面每次比对都要出岔子）
+  PASS  同一地址重复下断点会被认出来（不占第二个比较器）
+  PASS  bpDel 能删掉高地址断点（有符号掩码会删不掉）
+  PASS  删不存在的断点回 false（命令层据此说"没有这个断点"）
+  PASS  RISC-V：两个高地址触发器都能对上
+  PASS  断点备注按无符号地址存（bpList 才显示得出来）
+  PASS  bpList 里高地址显示正常（不是负数、备注也在）
+  PASS  RISC-V：删掉第二个断点后表里只剩第一个
+
+== 汇总：326 通过 / 0 失败 ==
+node tools/selftest/dbg-riscv-reset.test.mjs
+dbg-riscv-reset: 复位并跑 = 先放开复位并停住 → 再写触发器 → 再放 haltreq（顺序钉死）PASS
+dbg-riscv-reset: SBA 传输层拒绝 XIP 窗口（零 DMI 命令）PASS
+dbg-riscv-reset: cont() 容忍"状态与硬件不一致"（自愈之后接着敲 c）PASS
+node tools/selftest/dbg-riscv-memory.test.mjs
+RISC-V memory: adjacent ELF segments, missing/hole/write/nonallocated/truncated bytes rejected, full XIP fence, no implicit reset, bounded range cooldown PASS
+RISC-V state: unknown status fails closed, register failures preserve snapshot, failed trigger re-arm blocks resume, failed pause does not system-reset PASS
+RISC-V reset: helper return is not proof of halt; running hart blocks re-arm/resume PASS
+RISC-V external RAM: gated/transitional DDR never accessed; readiness restores reads/writes without cooldown PASS
+Debugger watch: deferred and failed reads discard old struct member bytes PASS
+node tools/selftest/riscv-sba-async.test.mjs
+PASS DMI response codes are independent of request opcodes
+PASS single word at RAM end never prefetches an unmapped word
+PASS unaligned multi-batch reads access exactly the aligned span
+PASS burst tail BUSY/FAILED cannot be accepted as clean SBCS
+PASS errors raised on bus completion are reported
+PASS permanent busy times out without writing SBCS
+PASS writes wait for actual bus completion
+PASS delayed reads recover by completed address without rereading
+PASS real bus error is cleared and reported without retry/reset
+PASS permanent bus hang is bounded and causes no unsafe recovery writes
+PASS sticky DMI BUSY learns delay; FAILED is cleared and surfaced
+PASS learned idle >64 clocks is preserved and packets remain within 512 bytes
+PASS concurrent memory operations serialize address/configuration state
+PASS timed-out wire is quarantined, including queued and late operations
+PASS DMI FAILED at burst tail reports failure and next valid read works
+PASS bus delays across first-read, inter-word and tail boundaries never duplicate accesses
+PASS write BUSY with lost DMI result resumes only uncommitted words
+PASS write bus error is reported once and subsequent valid write succeeds
+PASS slow and burst writes complete exactly once across bus delays
+PASS JTAG forwards the shared deadline and USB stops between OUT and IN
+PASS bus timeout with real wire latency preserves the DMI control channel
+RISC-V async SBA: 21 passed / 0 failed
+node tools/selftest/dbg-riscv-resume.test.mjs
+RISC-V 继续：dmstatus 现场核一遍（在跑 ⇒ 不下发抽象命令、只纠正状态、resumereq 幂等），停着照常，读不到保持失败且不发抽象命令 PASS
+node tools/selftest/dbg-src-suggest.test.mjs
+dbg-src-suggest: 首选目录（沿最大分支钻）/ 跨机器簇标记 / 大小写去重 / 真 ELF / 陈旧地址判据 covers() / 按需索引（不遍历目录）/ FileList 筛选 PASS
+SourceStore: stale ELF open/walk/text cancelled, FileList retires directory and reindexes across ELF changes PASS
+node tools/selftest/i2c-proto.test.mjs
+== 1. 报文偏移（与 proto.h / i2c_bridge_test.py 对账）==
+  PASS  HID 命令码 = 0x36
+  PASS  data[0] = action(XFER=5)
+  PASS  data[1] = flags（保留，必须 0）
+  PASS  data[2] = dev
+  PASS  data[3] = addr_len
+  PASS  data[4] = wr_len
+  PASS  data[5] = rd_len
+  PASS  data[6..9] = addr 4 B（子地址按原序，后面补 0）
+  PASS  data[10..] = wr_data
+  PASS  总长 = 1 + 9 + wr_len
+  PASS  子地址两个字节按原序发出（不是小端翻转）
+  PASS  ENABLE 的 req[4] = 1（开）
+  PASS  ENABLE 的 req[4] = 0（关）
+  PASS  SCAN = action 7
+  PASS  RESULT = action 6
+  PASS  PINTEST = action 11
+  PASS  DBG = action 10
+  PASS  BITPROBE 的 req[4] = 7 位地址
+  PASS  配置块 16 B
+  PASS  scl_hz 小端 400000 = 0x00061A80
+  PASS  偏移 4 = pullup
+  PASS  偏移 5 = retries
+  PASS  偏移 6 = flags（必须 0）
+  PASS  parseCfg 读回 sclHz
+  PASS  res[1] = 0x36（命令回显 —— AkaLinkHid._handleInput 按它匹配）
+  PASS  res[2] = action 回显
+  PASS  状态字 = res[3..6] 小端
+  PASS  bit0 ENABLED
+  PASS  bit1 PENDING
+  PASS  bit2 BUS_OK
+  PASS  bit3 SDA 电平
+  PASS  bit4 SCL 电平
+  PASS  bit8..15 = 最近一次完成事务的错误码
+  PASS  bit16..23 = 完成计数
+  PASS  bit24..31 = 本命令结果码
+  PASS  RESULT：res[7] = 错误码
+  PASS  RESULT：res[8] = 长度
+  PASS  RESULT：res[9..] = 数据
+== 2. 计数器 / 扫描位图 / PINTEST / 分片计划 ==
+  PASS  frames_ok
+  PASS  frames_err
+  PASS  bytes_tx
+  PASS  bytes_rx
+  PASS  nack_addr
+  PASS  nack_data
+  PASS  bus_recover
+  PASS  actual_scl_hz
+  PASS  last_ticks → µs（24 MHz tick）
+  PASS  位图 → 地址列表（bit0 = 0x08）
+  PASS  全 0 位图 = 没有器件
+  PASS  PINTEST 空闲 SDA
+  PASS  PINTEST 空闲 SCL
+  PASS  PINTEST 事务中拉低过 SCL
+  PASS  问题位图取 bit8..15（bit0/1 是"空闲电平=1"这两个正常信号）
+  PASS  bit16=1 且问题位图=0 ⇒ 桥侧正常
+  PASS  问题位图非 0 ⇒ 桥侧异常
+  PASS  问题文案说清了是什么
+  PASS  0x50 认成 EEPROM
+  PASS  0x68 认成 MPU6050
+  PASS  0x48 认成 ADS1115
+  PASS  第一笔是设地址指针
+  PASS  设地址指针那笔不读
+  PASS  256 B → 1 笔设指针 + 5 笔 54/54/54/54/40
+  PASS  第一片 54 B
+  PASS  末片 40 B
+  PASS  续读片不带子地址（靠器件内部指针自增）
+  PASS  reset 模式：每片都带子地址
+  PASS  reset 模式的第二片子地址 = 0x10 + 54 = 0x46
+  PASS  探测的线序描述
+  PASS  写子地址再读要有 repeated START
+  PASS  纯读没有 repeated START
+  PASS  只写没有 repeated START
+== 3. 组包上限：越界必须在主机侧就拦住 ==
+  PASS  写 52 B 被拒（上限 51）
+  PASS  读 55 B 被拒（上限 54）
+  PASS  子地址 5 B 被拒（上限 4）
+  PASS  地址 bit7 置位被拒（7 位地址）
+  PASS  actXfer({dev:0x7f,…}) 不抛（7 位地址上界）
+  PASS  E_BUSY 的文案告诉用户"等一下重发"
+  PASS  E_NO_ADDR 的文案指向器件侧
+== 4. 假器件：EEPROM 的页写与 tWR ==
+  PASS  页写成功
+  PASS  写完之后立刻读被 NACK（tWR 还没过）
+  PASS  tWR 中读仍被 NACK
+  PASS  tWR 过后读回原值
+  PASS  跨页写在页内回绕（后两个字节盖回页首 —— 这就是"必须页对齐"的原因）
+  PASS  读自增 ①
+  PASS  地址指针在片间自增（不带子地址也接着读）
+  PASS  写保护 → 数据相位 NACK
+== 5. 假器件：MPU6050 / ADS1115 的换算要对得上手册 ==
+  PASS  WHO_AM_I = 0x68
+  PASS  温度按手册逆运算存（解出来 ≈36.5 ℃，不是 73 ℃）
+  PASS  加速度 z ≈ 1 g（重力压在 z 上）
+  PASS  PWR_MGMT_1 上电默认 0x40（SLEEP=1，真器件如此）
+  PASS  ADS1115 配置寄存器上电默认 0x8583
+  PASS  未启动转换时结果是 0
+  PASS  配置字写进去了（bit15 OS 是"读回状态"，会变）
+  PASS  MUX = 100（AIN0 对 GND）
+  PASS  PGA = 001（±4.096 V）
+  PASS  AIN0 按 125 µV/LSB 解出来 ≈1.000 V（正弦在 300 s 过零）
+  PASS  转换完成后 OS 读回 1（＝空闲）
+  PASS  转换没到点：读到的还是上一次的结果（上电后是 0）
+  PASS  ……过了 1/DR 才出新的转换结果
+  PASS  连续模式：比数据率还快的第二次读还是同一个值（受 DR 节流）
+== 5b. 假件 Si5351 的寄存器地址（按数据手册 / AN619）==
+  PASS  0x03 输出使能：复位值 0x00 = 四路都开着
+  PASS  0x10 = CLK0 控制（AN619 复位值 0x00）
+  PASS  往 0x03 写 0x0f 回读还是 0x0f（它只管开关，= 关掉 CLK0..CLK3）
+  PASS  CLK0 控制写在 0x10 上（不是 0x03）
+  PASS  0xB1 PLL 软复位是自清位：写完回读就是 0（寄存器文件够大，没绕回 0x31）
+== 6. 假探针：登记 + 轮询 RESULT 的语义 ==
+  PASS  刚上电未使能
+  PASS  STATUS 恒成功
+  PASS  未使能时 XFER 回 E_DISABLED（与上游 a4d5205 的修法一致）
+  PASS  ENABLE 1 之后已使能
+  PASS  XFER 被受理
+  PASS  受理后 PENDING=1（事务在主循环里做）
+  PASS  并发 XFER 回 E_BUSY（不是排队执行）
+  PASS  第一轮 RESULT 还在做（pendingExtra=1）
+  PASS  第二轮做完了
+  PASS  完成计数 +1
+  PASS  错误码 0
+  PASS  读回 4 B
+  PASS  wr_len=52 越界 → E_RANGE
+  PASS  flags 非 0 → E_RANGE
+  PASS  RESET 清计数器
+  PASS  bus_recover 计 1 次
+  PASS  RESET 保留配置（400 kHz 还在）
+== 7. 会话层端到端（假探针）：扫描 / EEPROM 写读 / 计数器 ==
+  PASS  connect(mock) 成功
+  PASS  会话已连接
+  PASS  连上时桥还没使能
+  PASS  setEnabled(true) 之后已使能
+  PASS  默认档 100 kHz
+  PASS  扫描到四个假器件（按地址升序）
+  PASS  页写成功
+  PASS  tWR 过后回读成功
+  PASS  回读逐字节对得上
+  PASS  每笔事务都有耗时记录
+  PASS  不存在的地址 → E_NO_ADDR
+  PASS  配置生效并回读
+  PASS  pullup 回读
+  PASS  PINTEST 判"桥这一侧正常"
+  PASS  并发三笔被串行化，全部拿到 0x68
+  PASS  frames_ok 记下 6 笔成功事务
+  PASS  nack_addr 记下那次不存在地址
+  PASS  frames_err 记下 1 笔失败
+  PASS  disconnect 之后已断开
+== 8. 失联记账：连续超时要置 lost 并停轮询 ==
+  PASS  连续 3 次超时 → lost
+  PASS  日志里明确提示拔插 USB
+  PASS  失联后事务直接拒绝并说明原因
+== 9. 执行器：稳态不刷日志（否则日志环十几秒就被冲干净）==
+  PASS  循环脚本解析零错误
+  PASS  20 ms 周期跑 0.7 s 采了 36 次
+  PASS  每次采样都是 0x68（读数正确）
+  PASS  🚨 成功日志只有前几拍（2 条），没有按采样次数刷屏
+  PASS  日志条数（3）远少于采样次数（36）
+  PASS  器件不存在 → 记下 36 笔失败
+  PASS  错误日志被限量（7 条，远少于 36 笔失败）
+  PASS  每笔失败事务的耗时 19.8 ms（不许接近 2 s 的 resultTimeout）
+== 10. readLong：长读自动分片（对上层就是"读 N 个字节"）==
+  PASS  短读成功
+  PASS  短读只有 1 笔（不分片）
+  PASS  短读内容对
+  PASS  256 B 长读成功
+  PASS  拼回来 256 B
+  PASS  自动分成 5 笔（54×4 + 40）
+  PASS  默认 reset 模式
+  PASS  256 B 逐字节与写入的图案一致（分片拼接没串位）
+  PASS  🚨 中间 5 笔**不往日志里写**，只出一行结果（"让外部看不到"就靠这条）
+  PASS  ……那一行说清了总长与笔数
+  PASS  ptr 模式 120 B 长读成功
+  PASS  ……读回 120 B
+  PASS  ……mode 标成 ptr
+  PASS  ptr 模式：1 笔设指针 + 3 片 = 4 笔
+  PASS  第一笔带子地址（设地址指针）
+  PASS  ……而且不读数据
+  PASS  后续每一片都**不带**子地址（靠器件内部指针自增）
+  PASS  续片 54 B
+  PASS  末片 12 B
+  PASS  ptr 模式拼回来的内容也对
+  PASS  第 3 片失败 → 整个长读报那个错误码
+  PASS  🚨 失败时**不返回半截数据**（读到一半的值没有意义）
+  PASS  报告断在第 3 片
+  PASS  ……并且说清"第几片/共几片"
+  PASS  失败也只出一行日志
+  PASS  ……那一行说清了已经读回多少（方便判断器件是不是半路掉线）
+
+== 结果：178 项通过 / 0 项失败 ==
+node tools/selftest/i2c-dsl.test.mjs
+== 1. 小工具：注释 / 分词 / 数字 / 时长 / 子地址铺字节 ==
+  PASS  stripComment：# 到行尾
+  PASS  stripComment：// 到行尾
+  PASS  stripComment：引号里的 # 不算注释
+  PASS  tokenize：引号里的空格不断词
+  PASS  tokenize：引号没配对 → 抛错
+  PASS  parseNum：器件地址默认十六进制（50 = 0x50）
+  PASS  parseNum：0x 前缀一律十六进制
+  PASS  parseNum：长度默认十进制
+  PASS  parseNum：十进制模式下非 0x 的十六进制字母被拒
+  PASS  parseNum：空值被拒
+  PASS  时长 10ms
+  PASS  时长 500us
+  PASS  时长 500µs（带 µ）
+  PASS  时长 1.5s
+  PASS  时长裸数字 = µs
+  PASS  时长非法被拒
+  PASS  hex 字节：逗号分隔
+  PASS  hex 字节：0x 前缀 + 空格
+  PASS  hex 字节：连写
+  PASS  hex 字节：奇数位被拒
+  PASS  numToBytes 大端铺字节
+== 2. 基本命令：scan / ping / rd / wr / delay ==
+  PASS  scan
+  PASS  ping 是一条 XFER
+  PASS  ping：器件地址
+  PASS  ping：wr=rd=0（只问 ACK）
+  PASS  ping：标签
+  PASS  rd：器件
+  PASS  rd：子地址 1 B
+  PASS  rd：读长
+  PASS  rd：不写数据
+  PASS  rd：标签
+  PASS  rd 的 `-` = 不带子地址（纯读）
+  PASS  纯读的标签
+  PASS  子地址 0x0010 → 线上发 00 10（按写出来的位数铺字节）
+  PASS  子地址「00,10」按字节串读也对
+  PASS  子地址拆成两个 token 时，报错要说清"要写成一个整体"
+  PASS  wr：写数据
+  PASS  wr：不读
+  PASS  wr：标签
+  PASS  wr 不给数据 = 只发子地址
+  PASS  ……而且子地址还在
+  PASS  ……标签写清了它在干什么
+  PASS  wr 的 `-` = 不带子地址的纯写
+  PASS  纯写的数据
+  PASS  delay
+  PASS  delay：毫秒
+  PASS  wrr 等价于 rd（读起来顺一点）
+== 3. xfer 字段名写法 ==
+  PASS  xfer：dev=
+  PASS  xfer：addr=
+  PASS  xfer：rd=
+  PASS  xfer：addr 多字节
+  PASS  xfer：wr 多字节
+  PASS  xfer：dev 默认十六进制
+  PASS  xfer：只给 addrl=2 → 子地址两个 0 字节
+  PASS  xfer：不认识的字段报错
+  PASS  xfer：flags 非 0 报错
+  PASS  xfer：addr_len 与 addr 对不上报错
+== 4. C 表行 ==
+  PASS  C 表：dev
+  PASS  C 表：addr_len=1 addr=0x0000 → 发 00
+  PASS  C 表：rd_len
+  PASS  C 表：NULL = 没有写数据
+  PASS  C 表：addr 0x0010 + addr_len 1 → 只发最低字节 10
+  PASS  C 表：(uint8_t[]){…} 数据
+  PASS  C 表：addr_len=2 → 发 00 10
+  PASS  C 表：裸 {…} 也吃
+  PASS  C 表：字符串字面量 → 每字符一字节
+  PASS  C 表：addr_len=0 → 不带子地址
+  PASS  C 表 + 行尾修饰：读长
+  PASS  C 表 + 行尾修饰：every 50ms
+  PASS  C 表 + 行尾修饰：as 解码
+  PASS  C 表：wr_len=4 却写 NULL → 报错
+  PASS  C 表：数据长度与 wr_len 对不上 → 报错
+  PASS  C 表：wr_len 超上限 → 报错
+  PASS  C 表：rd_len 超上限 → 报错
+  PASS  C 表：dev 超 7 位 → 报错
+  PASS  C 表：列数不足 → 报错
+  PASS  C 表：少右花括号 → 报错
+== 5. 定时（while(1)）：loop / every / 任务边界 ==
+  PASS  这段没有语法错
+  PASS  共 5 条命令
+  PASS  一次性 1 条
+  PASS  定时 4 条
+  PASS  一次性段 1 条
+  PASS  两个定时任务（loop 块 + 单行 every）
+  PASS  loop 块周期 100 ms
+  PASS  🚨 loop 块里的 3 条是**一个不可拆的整段**（写配置→等→读结果）
+  PASS  ……而且顺序原样保留
+  PASS  单行 every 自成任务，周期 500 ms
+  PASS  ……只有 1 条
+  PASS  loop 带次数 → 跑 20 轮自停
+  PASS  every 带次数
+  PASS  换周期会切出第二个任务
+  PASS  第一段 2 条
+  PASS  第一段 100 ms
+  PASS  第二段 500 ms
+  PASS  `once` 之后回到一次性
+  PASS  行尾 every 覆盖周期的那一行自成任务
+  PASS  ……周期是它自己的 1000 ms
+  PASS  少了 end → 报错
+  PASS  多了 end → 报错
+  PASS  loop 的周期非法 → 报错
+  PASS  把扫描塞进循环会给个告警
+== 6. as 解码表达式 ==
+  PASS  解析三轴
+  PASS  ax = 0x4000/16384 = 1 g
+  PASS  ay = 0xC000/16384 = -1 g（有符号）
+  PASS  az = 0xFFFF → -1/16384
+  PASS  温度：raw/340+36.53（严格从左到右）
+  PASS  电压：raw*125µV
+  PASS  位段：>>12&7 = 4（从左到右，注意没有优先级）
+  PASS  u16le 小端
+  PASS  f32be
+  PASS  i8 有符号
+  PASS  as hex = 只显示原始字节
+  PASS  空 as = 只显示原始字节
+  PASS  未知函数被拒
+  PASS  除以 0 被拒
+  PASS  少 = 被拒
+  PASS  变量名非法被拒
+  PASS  变量名重复被拒
+  PASS  读不到的偏移会给告警
+  PASS  fmtValue：整数原样
+  PASS  fmtValue：小数不留尾零
+  PASS  fmtValue：小值给足有效位
+  PASS  fmtValue：大值收两位
+== 7. 错误必须带行号拦住 ==
+  PASS  一次逻辑读超上限：报在第 2 行
+  PASS  ……并说清上限是多少（4096）
+  PASS  器件地址超 7 位被拒
+  PASS  读命令缺长度被拒
+  PASS  读长 0 被拒（要探测就写 ping）
+  PASS  写 5 B 是合法的（上限 51）
+  PASS  写 52 B 被拒
+  PASS  ……并说清"写不自动分片"（EEPROM 跨页会绕回页首）
+  PASS  读命令多余参数被拒
+  PASS  未知关键字被拒
+  PASS  裸字节缺 dev 被拒并给出正确写法
+  PASS  as 少 = 被拒
+  PASS  多余的位置参数给告警（不静默吞掉）
+== 8. 导出与往返 ==
+  PASS  C 表导出：读那一行
+  PASS  C 表导出：写那一行
+  PASS  C 表导出：延时
+  PASS  C 表导出：扫描
+  PASS  C 表导出：带上 as 与周期
+  PASS  导出的 C 表能原样解析回来
+  PASS  ……条数一致
+  PASS  ……每条字段都一致
+  PASS  JSON 往返：条数
+  PASS  JSON 往返：字段一致
+  PASS  不是本站形状的 JSON 返回 null（上层按普通文本处理）
+  PASS  文本导出一行一条
+== 9. 命令表 ⇄ 脚本（表格与脚本区走同一套解析）==
+  PASS  周期空格 → 空
+  PASS  周期裸数字按 ms
+  PASS  周期 100ms
+  PASS  周期 100ms×50
+  PASS  周期 100msx50（小写 x 也认）
+  PASS  周期 500us
+  PASS  once = 一次性
+  PASS  表格生成的脚本没有语法错：[]
+  PASS  空器件那一行被跳过（5 条）
+  PASS  表格 → 脚本：读长
+  PASS  表格 → 脚本：写数据
+  PASS  表格 → 脚本：探测
+  PASS  表格 → 脚本：延时
+  PASS  表格 → 脚本：周期
+  PASS  表格 → 脚本：次数
+  PASS  表格 → 脚本：as 解码
+  PASS  脚本 → 表格：行数
+  PASS  ……第一行是读
+  PASS  ……第二行是写
+  PASS  ……第三行是探测
+  PASS  ……第四行是延时
+  PASS  ……延时行的时长放在「数据」格
+  PASS  ……周期带次数
+  PASS  ……as 带上
+  PASS  表格 → 脚本 → 表格 稳定不漂
+== 10. 示例脚本必须零错误（示例写错比功能写错更丢人）==
+  PASS  示例「快速上手（扫描 + 试读）」解析零错误
+  PASS  示例「快速上手（扫描 + 试读）」解析零告警
+  PASS  示例「快速上手（扫描 + 试读）」有 4 条命令（一次性 4 / 定时任务 0）
+  PASS  示例「AT24C02 · 读（安全，不动内容）」解析零错误
+  PASS  示例「AT24C02 · 读（安全，不动内容）」解析零告警
+  PASS  示例「AT24C02 · 读（安全，不动内容）」有 4 条命令（一次性 3 / 定时任务 1）
+  PASS  示例「AT24C02 · 页写 + 回读对账（⚠️ 会改动内容）」解析零错误
+  PASS  示例「AT24C02 · 页写 + 回读对账（⚠️ 会改动内容）」解析零告警
+  PASS  示例「AT24C02 · 页写 + 回读对账（⚠️ 会改动内容）」有 9 条命令（一次性 6 / 定时任务 1）
+  PASS  示例「MPU6050 · 初始化 + while(1) 读姿态」解析零错误
+  PASS  示例「MPU6050 · 初始化 + while(1) 读姿态」解析零告警
+  PASS  示例「MPU6050 · 初始化 + while(1) 读姿态」有 9 条命令（一次性 8 / 定时任务 1）
+  PASS  示例「ADS1115 · 四通道 + while(1) 读电压」解析零错误
+  PASS  示例「ADS1115 · 四通道 + while(1) 读电压」解析零告警
+  PASS  示例「ADS1115 · 四通道 + while(1) 读电压」有 17 条命令（一次性 5 / 定时任务 1）
+  PASS  示例「⚠ Si5351 · 配成三路输出（50 / 12.5 / 1 MHz）」解析零错误
+  PASS  示例「⚠ Si5351 · 配成三路输出（50 / 12.5 / 1 MHz）」解析零告警
+  PASS  示例「⚠ Si5351 · 配成三路输出（50 / 12.5 / 1 MHz）」有 23 条命令（一次性 22 / 定时任务 1）
+  PASS  默认示例是「快速上手」
+  PASS  示例 id 不重复
+  PASS  收录了示例 at24c02-read
+  PASS  收录了示例 at24c02-write
+  PASS  收录了示例 mpu6050
+  PASS  收录了示例 ads1115
+  PASS  收录了示例 si5351
+  PASS  MPU6050 的 while(1)：一个任务一条命令
+  PASS  ……一次读 14 B（加速度 6 + 温度 2 + 陀螺 6）
+  PASS  ……周期 50 ms
+  PASS  ……解出 7 个命名变量
+  PASS  ADS1115 的 while(1)：四通道 × (写配置+等+读) = 12 条
+  PASS  🚨 每通道的「写配置 → 等 10ms → 读结果」是一个不可拆的整段
+  PASS  ……周期 200 ms
+  PASS  写 EEPROM 的示例标题里带警告标记
+  PASS  ……并提示先跑只读那份留底
+  PASS  ADS1115 给出了"单端 ±2.048V"的正确配置字 0xC583
+  PASS  ……不再把 0x8383 说成"同上但 PGA=010(±2.048V)"
+  PASS  ……0x8383 的真实含义写对了（MUX=000 差分 · ±4.096V）
+  PASS  Si5351 写明 0x03 是输出使能（低有效，写 1 = 关掉那一路）
+  PASS  ……CLK0 控制在 0x10
+  PASS  ……不再把 CLK0 控制写成 0x03
+  PASS  ……参数块 8 B 不再漏掉 P1[17:16] 那一位
+  PASS  Si5351 三路参数块字节齐全（50 / 12.5 / 1 MHz）
+  PASS  ……MS2 那 8 B 带上了 P1[17:16]（P1 = 0x012A00，÷600）
+  PASS  ……三路控制字一次写完（0x10 ← 0F 0F 0F）
+  PASS  ……带上 OEB 掩码那一笔（0x09 = 0xFF，输出交给 0x03 管）
+  PASS  ……PLL 软复位写 0xA0（不是流程图的 0xAC）
+  PASS  ……并说明为什么不照抄 0xAC（实测会留下 Reserved 位）
+  PASS  Si5351 示例标题带 ⚠、注明字节已真机验证
+  PASS  ……写明空白件上电没频率、配置在 RAM 掉电即失
+  PASS  Si5351 的状态监视循环带次数（跑 20 轮自停）
+== 11. 长读自动分片（实现细节，不该让人自己拆）==
+  PASS  读长 256 直接收下（不再要求 ≤54）
+  PASS  长读默认 chunk=reset（每片重发子地址 —— EEPROM/寄存器型全都对）
+  PASS  标签里写明了会自动分片
+  PASS  短读也带 chunk 字段（恒 reset，下游不用特判）
+  PASS  行尾 ptr → 连续读
+  PASS  chain 是 ptr 的别名
+  PASS  chunk=ptr 也认
+  PASS  chunk=reset 显式写也认
+  PASS  xfer 字段名写法也支持 chunk=
+  PASS  chunk 只认 ptr / reset
+  PASS  ……ptr 不吃掉读长
+  PASS  ……也不吃掉子地址
+  PASS  ……和 as 共存
+  PASS  一次逻辑读超过 4096 B 被拒
+  PASS  恰好 4096 可以
+  PASS  刚过 54 也走自动分片（两笔）
+  PASS  ……标签直接说"2 笔"
+  PASS  写超过 51 B 明确拒绝并说明原因
+  PASS  reset 模式 256 B → 5 行；ptr 模式 120 B → 1 笔设指针 + 3 片 = 4 行，合计 9
+  PASS  ……每一行的 rd_len 都在线上范围内
+  PASS  ……并留了注释说明为什么被展开
+  PASS  ……并指向无损的 JSON 导出
+  PASS  展开后的 C 表能原样解析回来（零错误）
+  PASS  展开后的条数 = 分片数 + ptr 那条的设指针笔 + …
+  PASS  第一片的读长一致
+  PASS  第一片的子地址一致
+  PASS  末片读长一致（40 B）
+  PASS  末片子地址一致（0x00+216=0xD8）
+  PASS  JSON 往返：chunk 保住
+  PASS  JSON 往返：ptr 保住
+  PASS  JSON 往返：读长保住
+  PASS  读长格：256
+  PASS  读长格：默认每片重发子地址
+  PASS  读长格：256 ptr
+  PASS  读长格：256ptr 连写也认
+  PASS  读长格：空 → null（交给上层给默认值）
+  PASS  读长格：非数字 → null
+  PASS  表格 → 脚本：长读原样写成一条
+  PASS  表格 → 脚本：ptr 也带出去
+  PASS  脚本 → 表格：长读回到「读长」格
+  PASS  脚本 → 表格：ptr 长读带上标记
+  PASS  短读不带多余标记
+
+== 结果：265 项通过 / 0 项失败 ==
+node tools/selftest/i2c-registers.test.mjs
+== A. planWrite：长写分片（每片自带子地址）==
+  PASS  128 B / 51 → 3 片
+  PASS  bytes 记账 = 128
+  PASS  每片长度 51/51/26
+  PASS  第二、三片的子地址被 bump 到 0x33 / 0x66
+  PASS  第二片首字节 = 数据里的第 51 个
+  PASS  没有一片超过协议上限 51
+  PASS  chunkMax=8 → 16 B 分 2 片（页写档位）
+  PASS  按页分片的子地址 0x00 / 0x08
+  PASS  稀疏改动 → 3 片（连续段各成一片）
+  PASS  每片记着起始偏移
+  PASS  第一片 = 偏移 0..2 的值
+  PASS  第二片的子地址 = 0x10 + 6
+  PASS  offsets=[] → 一片都不发
+  PASS  空数据 → 一片都不发
+  PASS  越界/非法下标被丢掉，只算合法的那两个
+  PASS  chunkMax 给大了会被夹回协议上限 51（4 B 一片）
+  PASS  2 字节地址：首片 0x0100
+  PASS  2 字节地址 + 偏移 60 → 0x013C（跨字节进位对）
+== B. registers.js：输入解析 / diff / ASCII / bit ==
+  PASS  parseDev('0x50')
+  PASS  parseDev('50') 也认（不带 0x）
+  PASS  首尾空格无所谓
+  PASS  parseDev 拒 0x07（低于扫描范围）
+  PASS  parseDev 拒 0x78（高于 7 位可用范围）
+  PASS  parseDev 拒空
+  PASS  parseDev 拒非十六进制
+  PASS  1 B 地址：0x00
+  PASS  起始留空 = 0x00（读整个器件）
+  PASS  2 B 地址：大端 0x0100 → 01 00
+  PASS  地址宽度 0 → 不带子地址（纯读）
+  PASS  1 B 地址格塞 0x1234 → 报错（提示改成 2 B）
+  PASS  2 B 地址格塞 0x12345 → 报错
+  PASS  长度留空 = 128
+  PASS  parseLen('128')
+  PASS  parseLen('0x10') = 16（也吃十六进制）
+  PASS  parseLen 拒 0
+  PASS  parseLen 拒 > 4096
+  PASS  parseLen 拒小数
+  PASS  diff 找到 2 处改动
+  PASS  diff 的偏移是 1 / 3
+  PASS  diff 记着 原值→新值
+  PASS  没改 → 没有偏移（写回会被拦下）
+  PASS  ASCII 列：可打印原样，其余一个点（0x00 与 0x1f 各一个点）
+  PASS  ASCII 支持 from/len 切片
+  PASS  1 B 地址：偏移 0 → 0x00
+  PASS  1 B 地址：偏移 42 → 0x2A（大写十六进制）
+  PASS  2 B 地址：0x0100 + 60 → 0x013C
+  PASS  2 B 地址跨字节进位也对
+  PASS  地址宽度 0（纯读）→ 只标偏移
+  PASS  bitsOf(0x81)：bit0 与 bit7 为 1
+  PASS  setBit 置位
+  PASS  setBit 清位
+  PASS  toggleBit 翻转
+  PASS  popcount = 8 + 0 + 2
+  PASS  翻转再翻回来 = 原值
+  PASS  摘要：没读过时说清计划
+  PASS  摘要：报改动个数
+== C. 端到端（假探针）：读 128 B → 改位 → 只写改动 → 回读对账 ==
+  PASS  connect(mock) 成功
+  PASS  种数据成功（128 B 分片写）
+  PASS  读 128 B 成功
+  PASS  读回 128 B
+  PASS  128 B 分了 3 笔（54/54/20）
+  PASS  读回的数据与种下去的一致
+  PASS  面板 diff 出的改动下标 = 0 / 5 / 127
+  PASS  「只写改动」成功
+  PASS  只发了 3 个字节
+  PASS  3 个分散字节 → 3 笔事务
+  PASS  回读与改后的缓冲逐字节一致（没改的字节也没被动过）
+  PASS  中间没改的字节保持原样
+  PASS  整块写回 128 B → 3 片
+  PASS  整块写回后回读依旧一致
+  PASS  2 字节子地址也能写（假 EEPROM 只取低字节，但不该报错）
+== D. EEPROM 页写回卷 + tWR（这面板为什么要给「写分片 / 片间等待」）==
+  PASS  按页写 + 等 tWR：两片都成功
+  PASS  按页写回读一致（这就是面板「写分片 8 B + 片间等待 6 ms」的用法）
+  PASS  一片 16 B 跨页：桥侧看着"写成功"（器件 ACK 了）
+  PASS  但回读**与写入不一致** —— 页写回卷真的会把数据写花
+  PASS  不等 tWR 连发：第 2 片失败并被如实报出来
+== E. 页对齐（只设 chunkMax 挡不住"起始地址不是页倍数"）==
+  PASS  从 0x05 起按页 8 分片：没有一片跨页
+  PASS  从 0x05 起 16 B 分 3 片
+  PASS  分片起点跟着页边界走（0x05..07 / 08..0F / 10..14）
+  PASS  只改 +6..+9 且跨页：拆成 +6..+7 与 +8..+9
+  PASS  2 字节地址 0x0105、页 32：没有一片跨页
+  PASS  第一片收窄到 27 B（0x105 在页内偏移 5）
+  PASS  pageSize=0（寄存器型器件）：行为与以前一致，不切
+  PASS  场景 A：从 0x05 写 16 B 提交成功
+  PASS  场景 A：回读逐字节一致（审查里这里是花的）
+  PASS  场景 B：只改 +6..+9（跨页）回读逐字节一致
+  PASS  反证：不给页大小时器件照样回 OK（"写成功"是假的）
+  PASS  反证：不给页大小时数据确实是花的
+
+OK  88 通过 / 0 失败
+node tools/selftest/spi-regs.test.mjs
+== A. 档位表与帧构造（regs.js）==
+  PASS  BMP280 档：地址并入 opcode
+  PASS  BMP280 档：读**不要** dummy（网传"要 1 字节"是错的）
+  PASS  BMP280 档：**写不自增**（手册 Figure 10 标题写明 not auto-incremented）
+  PASS  读 0xD0（ID 寄存器）→ opcode 0xD0 = 0x80|0x50
+  PASS  写 0xF4 → opcode 0x74 = 0xF4 & 0x7F
+  PASS  128 个寄存器（1 B/寄存器）→ 一条命令连读
+  PASS  这条帧读 128 B
+  PASS  ……且不带 dummy
+  PASS  ……地址不占独立字节（在 opcode 里）
+  PASS  ADXL345 档：地址只占 opcode 低 6 位（bit7=读、bit6=多字节）
+  PASS  ADXL345 档：也不要 dummy（它对的是 Mode 3，别忘改左栏模式）
+  PASS  单寄存器读 0x32 → 0xB2 = 0x80|0x32
+  PASS  读 1 个寄存器：不带 MB
+  PASS  读 6 个寄存器（三轴）：**自动置 MB** → 0xF2 = 0xC0|0x32
+  PASS  ……一次读 6 B
+  PASS  MCP23S17 档：地址是独立字节
+  PASS  ……地址相位 1 字节
+  PASS  ……读 opcode = 0x41
+  PASS  ……地址字段 = 寄存器号
+  PASS  读 2 个寄存器 = 2 B
+  PASS  不自增 → 3 个寄存器 3 帧
+  PASS  ……每帧的命令字节按寄存器号递增
+  PASS  8 个 16 位寄存器 = 16 B
+  PASS  600 B 超过单帧 480 B 上限 → 分 2 帧
+  PASS  ……每帧都不超过单帧读上限
+  PASS  ……第二帧按新的起始寄存器重发命令
+  PASS  MCP3008 是命令型（没有寄存器空间）
+  PASS  读通道 3 = 一条命令
+  PASS  命令字节：0x01 + (0x80|3<<4) + 0x00
+  PASS  ……回 3 B
+  PASS  ……tx 长度 3（收发等长，全双工要求）
+  PASS  ……命令型不带 cmd 相位（整条命令都在 tx 里）
+  PASS  写不自增 → 4 处改动 = 4 帧（0/1 不再合并）
+  PASS  ……每帧命令按各自寄存器号（写 = reg&0x7F）
+  PASS  ……每帧只带 1 个字节
+  PASS  没有改动 → 一帧都不发
+  PASS  整块写 600 B 会按单帧 tx 上限切开
+  PASS  写自增的器件：相邻改动照旧合并（2 帧）
+  PASS  ……第一帧带 2 个字节
+  PASS  16 位寄存器 + 写不自增 → 改动被补齐成整寄存器
+  PASS  ……这一帧带该寄存器的两个字节
+  PASS  档位表里没有 ADS1256（它的命令是两字节打包，本面板表达不了）
+  PASS  ICM-20602 这种没取到手册的，把握程度如实标成"驱动旁证"
+== B. 端到端（假寄存器器件）：读 → 改 → 只写改动 → 回读 ==
+  PASS  假器件回了一个应答（128 寄存器 = 一条命令）
+  PASS  ……状态 OK
+  PASS  读回 128 B
+  PASS  读回内容与器件里的图案逐字节一致
+  PASS  dummy 给对了 → 器件没有报"错位"
+  PASS  dummy 少给 1 字节 → 读回的数据与器件不一致（错位）
+  PASS  ……假器件如实报出"dummy 不符"
+  PASS  两帧写都有 OK 应答
+  PASS  改动写进了器件（reg[2]）
+  PASS  改动写进了器件（reg[9]）
+  PASS  没改的字节没被动过（reg[3]）
+  PASS  回读 16 B 与写后的缓冲逐字节一致
+  PASS  先确认这一帧确实带了 2 个字节
+  PASS  写不自增的器件会明确说明"这一帧只最后一个生效"
+  PASS  ……相邻寄存器没被写（两个字节都落在 0x20）
+  PASS  ……0x20 里留下的是最后一个字节
+  PASS  不自增的器件连读 4 B 全是同一个寄存器（真机症状）
+  PASS  ADC 回 3 B
+  PASS  as 表达式解析通过（单取字节函数 + 常量掩码）
+  PASS  解出的码值在 10 位范围内（589）
+  PASS  ……通道 0
+  PASS  命令里的通道被解析出来（通道 3）
+  PASS  不同通道 / 不同时刻采样值不同（假的也是活的）
+  PASS  命令缺起始位 → 假器件报出来
+== C. 定时采集（runner.js）：loop + as 解码 + 计数与停止 ==
+  PASS  假探针数据面就绪
+  PASS  DSL 解析零错误
+  PASS  1 条定时帧
+  PASS  1 条一次性帧
+  PASS  解码变量名单
+  PASS  采集跑起来了
+  PASS  20 ms 周期在 320 ms 里跑了 16 拍（≥5）
+  PASS  ……每拍都广播了变量值
+  PASS  解出了 ax / az
+  PASS  一次性部分先跑了一遍（WHO_AM_I）
+  PASS  ax 的值在变（假器件的采样是活的）
+  PASS  停止之后不再采样
+  PASS  runner 状态已停
+  PASS  跑满 3 轮后自己停了
+  PASS  ……正好 3 拍
+== D. DSL 的定时采集语法 ==
+  PASS  every 写法零错误
+  PASS  ……every 之前的那条是一次性
+  PASS  ……every 之后的是定时
+  PASS  ……周期 30 ms
+  PASS  ……轮数 2
+  PASS  一次性那条没有周期
+  PASS  行尾 as + every 一起写也认
+  PASS  ……行尾 every 覆盖块级周期
+  PASS  ……行尾轮数
+  PASS  ……as 解析成 1 个变量
+  PASS  loop 没闭合 → 报错说清
+  PASS  loop 嵌套 → 明确拒绝
+  PASS  as 写坏 → 解析期就带行号报错
+  PASS  cmd= 支持位运算表达式（0x80|0x3B = 0xBB）
+  PASS  ……括号与移位也对（0x40|(2<<1) = 0x44）
+
+OK  97 通过 / 0 失败
+node tools/selftest/scenery-samples.test.mjs
+== A. manifest 与目录结构 ==
+  PASS  manifest.json 在
+  PASS  axs15352 有 4 类 × 2 张 = 8 条记录
+  PASS  st77916 有 4 类 × 2 张 = 8 条记录
+  PASS  四类齐全且每类 2 张（两屏各一份）
+  PASS  素材 key 唯一：8 个
+  PASS  每条都记了 license
+  PASS  每条都记了原始文件名（可回溯来源）
+  PASS  许可都是 CC0 / 公有领域 / CC BY / CC BY-SA
+== B. 页面解码器吃得下（parseBMP 真解一遍）+ 文件头 ==
+  PASS  axs15352: 8 个文件都是 24bpp BI_RGB 且几何正确
+  PASS  axs15352: parseBMP 解出的尺寸/像素数全对
+  PASS  axs15352: 抽查像素有颜色变化（不是纯色坏图）
+  PASS  st77916: 8 个文件都是 24bpp BI_RGB 且几何正确
+  PASS  st77916: parseBMP 解出的尺寸/像素数全对
+  PASS  st77916: 抽查像素有颜色变化（不是纯色坏图）
+== C. sha256 与 manifest 对账（防偷改）==
+  PASS  16 个文件 sha256 全对
+
+OK  15 通过 / 0 失败

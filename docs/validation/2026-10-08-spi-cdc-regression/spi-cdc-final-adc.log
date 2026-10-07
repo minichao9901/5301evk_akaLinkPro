@@ -1,0 +1,455 @@
+   复用当前来源已授权的单台探针：akaLinkPro CMSIS-DAP
+ADC 已连接：通道 6 · 2000000 Sa/s · 3.3 V · DMA 4096 words
+
+有限矩阵 1/2: 12-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 12-bit codes stay in range [159, 510]
+
+有限矩阵 1/2: 8-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 1/2: sampled 8-bit codes stay in range [11, 35]
+
+有限矩阵 1/2: 10-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 1/2: sampled 10-bit codes stay in range [24, 180]
+
+有限矩阵 1/2: 10-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 1/2: sampled 10-bit codes stay in range [86, 127]
+
+有限矩阵 1/2: 12-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 1/2: sampled 12-bit codes stay in range [337, 510]
+
+有限矩阵 1/2: 10-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 1/2: sampled 10-bit codes stay in range [90, 250]
+
+有限矩阵 1/2: 16-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 16-bit codes stay in range [3177, 8103]
+
+有限矩阵 1/2: 10-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 10-bit codes stay in range [26, 127]
+
+有限矩阵 1/2: 12-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 1/2: sampled 12-bit codes stay in range [252, 998]
+
+有限矩阵 1/2: 16-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 16-bit codes stay in range [1757, 11210]
+
+有限矩阵 1/2: 16-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 16-bit codes stay in range [2984, 8126]
+
+有限矩阵 1/2: 10-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 10-bit codes stay in range [47, 129]
+
+有限矩阵 1/2: 16-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 1/2: sampled 16-bit codes stay in range [3060, 8127]
+
+有限矩阵 1/2: 16-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 1/2: sampled 16-bit codes stay in range [3401, 15788]
+
+有限矩阵 1/2: 8-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 1/2: sampled 8-bit codes stay in range [15, 63]
+
+有限矩阵 1/2: 12-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 12-bit codes stay in range [224, 512]
+
+有限矩阵 1/2: 8-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 8-bit codes stay in range [7, 35]
+
+有限矩阵 1/2: 8-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 8-bit codes stay in range [17, 35]
+
+有限矩阵 1/2: 12-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 12-bit codes stay in range [115, 510]
+
+有限矩阵 1/2: 8-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 1/2: sampled 8-bit codes stay in range [7, 43]
+
+有限矩阵 1/2: 16-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 1/2: sampled 16-bit codes stay in range [1590, 10793]
+
+有限矩阵 1/2: 10-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 10-bit codes stay in range [50, 127]
+
+有限矩阵 1/2: 8-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 1/2: sampled 8-bit codes stay in range [7, 35]
+
+有限矩阵 1/2: 12-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 1/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 1/2: exact finite count 2048/2048
+  PASS  有限矩阵 1/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 1/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 1/2: sampled 12-bit codes stay in range [196, 680]
+
+有限矩阵 2/2: 10-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 2/2: sampled 10-bit codes stay in range [26, 248]
+
+有限矩阵 2/2: 12-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 12-bit codes stay in range [192, 510]
+
+有限矩阵 2/2: 8-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 8-bit codes stay in range [11, 35]
+
+有限矩阵 2/2: 8-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 2/2: sampled 8-bit codes stay in range [25, 35]
+
+有限矩阵 2/2: 16-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 2/2: sampled 16-bit codes stay in range [1696, 8146]
+
+有限矩阵 2/2: 10-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 10-bit codes stay in range [47, 129]
+
+有限矩阵 2/2: 12-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 2/2: sampled 12-bit codes stay in range [172, 981]
+
+有限矩阵 2/2: 8-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 2/2: sampled 8-bit codes stay in range [13, 43]
+
+有限矩阵 2/2: 16-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 16-bit codes stay in range [3113, 11200]
+
+有限矩阵 2/2: 12-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 12-bit codes stay in range [192, 510]
+
+有限矩阵 2/2: 10-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 2/2: sampled 10-bit codes stay in range [47, 141]
+
+有限矩阵 2/2: 10-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 2/2: sampled 10-bit codes stay in range [26, 170]
+
+有限矩阵 2/2: 16-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 2/2: sampled 16-bit codes stay in range [3327, 15785]
+
+有限矩阵 2/2: 8-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 8-bit codes stay in range [17, 35]
+
+有限矩阵 2/2: 8-bit @ 1000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (1024)
+  PASS  有限矩阵 2/2: sampled 8-bit codes stay in range [17, 63]
+
+有限矩阵 2/2: 12-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 2/2: sampled 12-bit codes stay in range [219, 667]
+
+有限矩阵 2/2: 12-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 12-bit codes stay in range [303, 559]
+
+有限矩阵 2/2: 16-bit @ 1000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 1000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 16-bit codes stay in range [1812, 8167]
+
+有限矩阵 2/2: 10-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 10-bit codes stay in range [26, 127]
+
+有限矩阵 2/2: 16-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 16-bit codes stay in range [3230, 8140]
+
+有限矩阵 2/2: 16-bit @ 10000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 10000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (104)
+  PASS  有限矩阵 2/2: sampled 16-bit codes stay in range [1751, 10716]
+
+有限矩阵 2/2: 10-bit @ 2000000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 2000000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 10-bit codes stay in range [77, 127]
+
+有限矩阵 2/2: 8-bit @ 500000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 500000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (3)
+  PASS  有限矩阵 2/2: sampled 8-bit codes stay in range [19, 35]
+
+有限矩阵 2/2: 12-bit @ 100000 Sa/s, 2048 samples
+  PASS  有限矩阵 2/2: finite capture completes without ADC/USB fault
+  PASS  有限矩阵 2/2: exact finite count 2048/2048
+  PASS  有限矩阵 2/2: actual rate 100000 Sa/s within 1% of request
+  PASS  有限矩阵 2/2: multiple sequenced USB data blocks (12)
+  PASS  有限矩阵 2/2: sampled 12-bit codes stay in range [110, 512]
+
+DMA 环回: 16-bit @ 100000 Sa/s, 8192 samples
+  PASS  DMA 环回: finite capture completes without ADC/USB fault
+  PASS  DMA 环回: exact finite count 8192/8192
+  PASS  DMA 环回: actual rate 100000 Sa/s within 1% of request
+  PASS  DMA 环回: multiple sequenced USB data blocks (42)
+  PASS  DMA 环回: sampled 16-bit codes stay in range [1707, 8187]
+持续轮次 1/1
+
+持续 DMA: 8-bit @ 500000 Sa/s, 1500 ms
+  PASS  持续 8-bit @ 500000: sustained（无溢出）
+  PASS  持续 8-bit @ 500000: ADS2 时基 500000 Sa/s
+  PASS  持续 8-bit @ 500000: 688 块 / 728853 点
+  PASS  持续 8-bit @ 500000: 抽样码值未超位宽 [19, 35]
+  PASS  持续 8-bit @ 500000: 完整尾块 728853/728853/728853（主机/发送/采集）
+  PASS  持续 8-bit @ 500000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 8-bit @ 1000000 Sa/s, 1500 ms
+  PASS  持续 8-bit @ 1000000: sustained（无溢出）
+  PASS  持续 8-bit @ 1000000: ADS2 时基 1000000 Sa/s
+  PASS  持续 8-bit @ 1000000: 723 块 / 1465707 点
+  PASS  持续 8-bit @ 1000000: 抽样码值未超位宽 [7, 35]
+  PASS  持续 8-bit @ 1000000: 完整尾块 1465707/1465707/1465707（主机/发送/采集）
+  PASS  持续 8-bit @ 1000000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 8-bit @ 2000000 Sa/s, 1500 ms
+  PASS  持续 8-bit @ 2000000: sustained（无溢出）
+  PASS  持续 8-bit @ 2000000: ADS2 时基 2000000 Sa/s
+  PASS  持续 8-bit @ 2000000: 1512 块 / 3067413 点
+  PASS  持续 8-bit @ 2000000: 抽样码值未超位宽 [11, 35]
+  PASS  持续 8-bit @ 2000000: 完整尾块 3067413/3067413/3067413（主机/发送/采集）
+  PASS  持续 8-bit @ 2000000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 10-bit @ 500000 Sa/s, 1500 ms
+  PASS  持续 10-bit @ 500000: sustained（无溢出）
+  PASS  持续 10-bit @ 500000: ADS2 时基 500000 Sa/s
+  PASS  持续 10-bit @ 500000: 713 块 / 754852 点
+  PASS  持续 10-bit @ 500000: 抽样码值未超位宽 [47, 141]
+  PASS  持续 10-bit @ 500000: 完整尾块 754852/754852/754852（主机/发送/采集）
+  PASS  持续 10-bit @ 500000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 10-bit @ 1000000 Sa/s, 1500 ms
+  PASS  持续 10-bit @ 1000000: sustained（无溢出）
+  PASS  持续 10-bit @ 1000000: ADS2 时基 1000000 Sa/s
+  PASS  持续 10-bit @ 1000000: 741 块 / 1501707 点
+  PASS  持续 10-bit @ 1000000: 抽样码值未超位宽 [26, 141]
+  PASS  持续 10-bit @ 1000000: 完整尾块 1501707/1501707/1501707（主机/发送/采集）
+  PASS  持续 10-bit @ 1000000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 10-bit @ 2000000 Sa/s, 1500 ms
+  PASS  持续 10-bit @ 2000000: sustained（无溢出）
+  PASS  持续 10-bit @ 2000000: ADS2 时基 2000000 Sa/s
+  PASS  持续 10-bit @ 2000000: 1472 块 / 2987413 点
+  PASS  持续 10-bit @ 2000000: 抽样码值未超位宽 [49, 129]
+  PASS  持续 10-bit @ 2000000: 完整尾块 2987413/2987413/2987413（主机/发送/采集）
+  PASS  持续 10-bit @ 2000000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 12-bit @ 500000 Sa/s, 1500 ms
+  PASS  持续 12-bit @ 500000: sustained（无溢出）
+  PASS  持续 12-bit @ 500000: ADS2 时基 500000 Sa/s
+  PASS  持续 12-bit @ 500000: 711 块 / 752864 点
+  PASS  持续 12-bit @ 500000: 抽样码值未超位宽 [185, 565]
+  PASS  持续 12-bit @ 500000: 完整尾块 752864/752864/752864（主机/发送/采集）
+  PASS  持续 12-bit @ 500000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 12-bit @ 1000000 Sa/s, 1500 ms
+  PASS  持续 12-bit @ 1000000: sustained（无溢出）
+  PASS  持续 12-bit @ 1000000: ADS2 时基 1000000 Sa/s
+  PASS  持续 12-bit @ 1000000: 725 块 / 1469709 点
+  PASS  持续 12-bit @ 1000000: 抽样码值未超位宽 [380, 563]
+  PASS  持续 12-bit @ 1000000: 完整尾块 1469709/1469709/1469709（主机/发送/采集）
+  PASS  持续 12-bit @ 1000000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 12-bit @ 2000000 Sa/s, 1500 ms
+  PASS  持续 12-bit @ 2000000: sustained（无溢出）
+  PASS  持续 12-bit @ 2000000: ADS2 时基 2000000 Sa/s
+  PASS  持续 12-bit @ 2000000: 1457 块 / 2955589 点
+  PASS  持续 12-bit @ 2000000: 抽样码值未超位宽 [170, 563]
+  PASS  持续 12-bit @ 2000000: 完整尾块 2955589/2955589/2955589（主机/发送/采集）
+  PASS  持续 12-bit @ 2000000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 16-bit @ 500000 Sa/s, 1500 ms
+  PASS  持续 16-bit @ 500000: sustained（无溢出）
+  PASS  持续 16-bit @ 500000: ADS2 时基 500000 Sa/s
+  PASS  持续 16-bit @ 500000: 718 块 / 760854 点
+  PASS  持续 16-bit @ 500000: 抽样码值未超位宽 [2692, 8982]
+  PASS  持续 16-bit @ 500000: 完整尾块 760854/760854/760854（主机/发送/采集）
+  PASS  持续 16-bit @ 500000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 16-bit @ 1000000 Sa/s, 1500 ms
+  PASS  持续 16-bit @ 1000000: sustained（无溢出）
+  PASS  持续 16-bit @ 1000000: ADS2 时基 1000000 Sa/s
+  PASS  持续 16-bit @ 1000000: 723 块 / 1465708 点
+  PASS  持续 16-bit @ 1000000: 抽样码值未超位宽 [3280, 9004]
+  PASS  持续 16-bit @ 1000000: 完整尾块 1465708/1465708/1465708（主机/发送/采集）
+  PASS  持续 16-bit @ 1000000: END 和共享资源退场
+持续轮次 1/1
+
+持续 DMA: 16-bit @ 2000000 Sa/s, 1500 ms
+  PASS  持续 16-bit @ 2000000: sustained（无溢出）
+  PASS  持续 16-bit @ 2000000: ADS2 时基 2000000 Sa/s
+  PASS  持续 16-bit @ 2000000: 1441 块 / 2923405 点
+  PASS  持续 16-bit @ 2000000: 抽样码值未超位宽 [3046, 11276]
+  PASS  持续 16-bit @ 2000000: 完整尾块 2923405/2923405/2923405（主机/发送/采集）
+  PASS  持续 16-bit @ 2000000: END 和共享资源退场
+
+ADC hardware matrix: 317 passed / 0 failed; report tmp/spi-cdc-final-adc.json

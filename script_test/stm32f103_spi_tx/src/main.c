@@ -20,6 +20,9 @@
 volatile uint32_t g_run = 0, g_div = 1, g_pattern = 0;
 volatile uint32_t g_mode = 0, g_lsb = 0;
 volatile uint32_t g_core_hz, g_spi_hz, g_sequence, g_refill_late, g_blocks;
+/* Integrity word for simultaneous JScope/SPI CDC regression. Low bits count
+ * completed DMA halves; the high word stays fixed for sampling validation. */
+volatile struct { uint32_t u_hi; } g_pack = { 0x10000000U };
 static uint8_t data[4096] __attribute__((aligned(4)));
 static const uint8_t hello[] = "hello world!\r\n";
 static void clock_init(void)
@@ -65,6 +68,7 @@ int main(void)
             stop(); active = g_run; div = g_div & 7U; pattern = g_pattern; mode = g_mode & 3U; lsb = g_lsb & 1U;
             if (!active) { continue; }
             g_sequence = g_refill_late = g_blocks = 0;
+            g_pack.u_hi = 0x10000000U;
             if (pattern) { fill(0); fill(sizeof(data)/2); }
             else for (uint32_t i = 0; i < sizeof(data); i++) { data[i] = hello[i % (sizeof(hello)-1)]; }
             /* For hello mode make the ring an exact multiple of the string. */
@@ -83,6 +87,7 @@ int main(void)
             if (flags == (6U<<8)) { g_refill_late++; }
             if (flags & (4U<<8)) { DMA_IFCR = 4U<<8; fill(0); g_blocks++; }
             if (flags & (2U<<8)) { DMA_IFCR = 2U<<8; fill(sizeof(data)/2); g_blocks++; }
+            g_pack.u_hi = 0x10000000U | (g_blocks & 0xffffU);
         }
     }
 }

@@ -1,0 +1,185 @@
+目标: http://127.0.0.1:8899/index.html?demo=serial&t=1791406708897
+== 1. 标签页与初始状态 ==
+  PASS  标签栏里有 spi（桥页）
+  PASS  标签栏里有 panel（屏页）
+  PASS  末尾五个标签是 屏 → SPI→USB → I2C → ADC/DAC → 工程生成（panel → spicdc → i2c → analog → gen）
+  PASS  页面无 JS 错误
+  PASS  初始：未连接（HID 与数据面都空）
+  PASS  屏页看到的是**同一个**会话（初始也未连接）
+  PASS  日志区有启动提示
+== 1b. 右列分 tab（照 #dbg 那套：一次只显示一个）==
+  PASS  六个 tab：命令表/寄存器/脚本/实时值/Flash/回环（cmd,reg,dsl,live,flash,loop）
+  PASS  每个 tab 都有对应的内容块（顺序一致）
+  PASS  🚨 同时**只有一个**内容块可见
+  PASS  切到「dsl」：只有它显示
+  PASS  ……tab 按钮也只有一个高亮
+  PASS  ……选择落进 localStorage（刷新/切页回来还在）
+  PASS  切到「flash」：只有它显示
+  PASS  ……tab 按钮也只有一个高亮
+  PASS  ……选择落进 localStorage（刷新/切页回来还在）
+  PASS  切到「loop」：只有它显示
+  PASS  ……tab 按钮也只有一个高亮
+  PASS  ……选择落进 localStorage（刷新/切页回来还在）
+  PASS  切到「cmd」：只有它显示
+  PASS  ……tab 按钮也只有一个高亮
+  PASS  ……选择落进 localStorage（刷新/切页回来还在）
+  PASS  切到「dsl」：只有它显示
+  PASS  ……tab 按钮也只有一个高亮
+  PASS  ……选择落进 localStorage（刷新/切页回来还在）
+  PASS  切 tab 不重建命令表（初始 3 行始终在）
+  PASS  切 tab 不污染回环结果表（还没跑过）
+  PASS  运行状态在卡片内的公共工具栏，切 tab 仍可见
+  PASS  「中止」按钮在卡片内的公共工具栏
+  PASS  空闲时胶囊写着状态：「空闲」
+  PASS  没在跑回环时「中止」是灰的
+== 2. 切到 SPI/QSPI 桥页 + 开假探针 ==
+  PASS  点击标签后 #tab-spi 变成 active
+  PASS  勾上「用假探针」→ HID 与数据面都就绪
+  PASS  侧栏写明是假探针：「假探针（无需硬件） | 假探针（无需硬件）· 档位 0 · 板级默认」
+  PASS  状态行 = 假探针
+== 3. 配置：读取 → 改写 → 回读对账 ==
+  PASS  默认 SCLK = 板级默认（select=0）
+  PASS  默认辅助脚 DC=PA26 / RST=PA02（14/5）
+  PASS  那一节已改名「引脚设置」：引脚设置
+  PASS  CS 辅助（下拉 + 低有效勾）已移除
+  PASS  BL 默认 PA31（13）
+  PASS  pad 下拉里有 PA26~PA29（14~17，2026-09-30 释放的那批）
+  PASS  「引脚分配图」能打开
+  PASS  J3[19] 固定标成 I2C SCL（19◆PA29I2C 桥 SCL固定20·GND）
+  PASS  J3[21] 固定标成 I2C SDA（21◆PA28I2C 桥 SDA固定22·NC）
+  PASS  这两根带「固定」徽标与 I2C 配色（徽标 2 / 配色 2）
+  PASS  图例里有「◆ I2C 桥固定脚」
+  PASS  脚注给了 I2C 的接线位置（J3[19]/J3[21]）
+  PASS  探针里是"不用"时面板预填推荐脚位（探针 0/0/0 → 面板 14/5/13）
+  PASS  日志里说明了"预填还没写进探针"
+  PASS  写配置后回读到 40 MHz（实际 40000000）
+  PASS  日志明确写着「回读对账一致」（不靠状态字的 err 判断）
+== 5. 使能与状态 ==
+  PASS  ENABLE → 假探针进入使能状态
+  PASS  状态回读的实际 SCLK = 40 MHz（40000000）
+  PASS  页面把实际 SCLK 显示出来了：「40 MHz」
+  PASS  状态字人话里含「已使能」：「已使能」
+== 6. 通用命令表（一行一条，最多 10 条）+ 文本面板 ==
+  PASS  右区就是那四块（现在是四个 tab 的内容）：sp-cmd-card / sp-dsl-card / sp-flash-card / sp-loop-card
+  PASS  右列是 tab 面板（不再是单列堆叠 .busstack，也不是两列 .spcols）
+  PASS  命令表初始 3 行（实际 3）
+  PASS  表头是参数项：# | cmd | 线数 | addr_len | addr | dummy | rx_len | tx 数据（十六进制） | 结果
+  PASS  每行的字段：cmd,lines,addrLen,addr,dummy,rx,tx,res
+  PASS  旧 XFER 表单里的 DC / token / 辅助 CS / 强制轮询等勾选项都撤了
+  PASS  添加命令行保留已填内容、原节点与发送顺序
+  PASS  3 行发出 3 条帧，空行不发（frames_ok 0→3）
+  PASS  第 1 行读回 JEDEC ID 显示在「结果」列：OK · ef 40 18
+  PASS  第 2 行（读 8 B）也 OK：OK · ff ff ff ff…
+  PASS  第 4 行（写 2 B，没有读）也能看到结果：OK
+  PASS  没填的行结果列保持空白
+  PASS  日志里有整段总结
+  PASS  结果列带上 ok/bad 类（失败会标红）
+== 6b. 文本面板：C 表行 / 语法错带行号 / 导出回灌 ==
+  PASS  C 表行 + delay + gpio + reset 共 5 条帧都发了（frames_ok 3→8）
+  PASS  delay 2000（µs）= 2 ms、reset 5 20 = 25 ms 都落到探针上（2,25）
+  PASS  gpio 帧也落地了
+  PASS  整段结束后 CS 是释放的
+  PASS  摘要：发完 1/1 包 · 5 条帧（2 条带应答）· 0 ms
+  PASS  错误表里正好 1 行、行号 4：4{0x9F, 1, 0, 0, 0}C 表行要 6~7 列（cmd, lines, addr_len, addr, dummy, rx_len[, tx]），收到 5 列
+  PASS  C 表行列数不够 → 说清了几列
+  PASS  有语法错时**一条都不发**（frames_ok 没动：8）
+  PASS  日志里有明确报错、错误表也显示了
+  PASS  导出的 C 表行与表格列序一致：{0x6b, 4, 3, 0x000000, 1, 492, NULL},
+  PASS  三条导出都能回灌（C true / JSON true / 文本 true，JSON 3 条）
+  PASS  文本回灌后每帧与原来一致
+  PASS  读文件把内容填进了文本框
+  PASS  载入后自动解析：解析通过：2 条帧 · payload 40 B · 1 个 USB 包
+  PASS  日志里写明读了哪个文件
+== 7. 回环自检（假探针自带回环）==
+  PASS  8 个长度 × 2 条路径 = 16 行结果（实际 16）
+  PASS  回环自检全部通过：16/16 PASS
+  PASS  日志里有总结行
+  PASS  起跑瞬间胶囊就显示进度：「▶ 回环自检 0/8」
+  PASS  ……「中止」按钮变成可点
+  PASS  🚨 切到别的 tab 不打断回环自检（同步块里读仍是 busy，且确实切过去了）
+  PASS  ……胶囊在别的 tab 上照样是进度：「▶ 回环自检 0/8」
+  PASS  跑完 8/8 PASS（实际 8/8 PASS / 8 行）
+  PASS  结束后胶囊转成结果、中止按钮变灰：「回环 8/8 PASS」
+  PASS  「清空结果」把回环结果表清空了
+  PASS  ……摘要回到「未跑」（实际「未跑」）
+== 8. 错误路径：必须看得见，不能静默 ==
+  PASS  没接跳线 → FAIL 且行标红（0/1 PASS / class=bad）
+  PASS  DISABLE 生效
+  PASS  失能后发帧被如实报错（transport.errors=1）
+  PASS  丢应答 → 页面报「应答超时」（不静默挂住）
+  PASS  DSL 摘要也点出没等到应答：「发完 1/1 包 · 1 条帧（1 条带应答）· 1504 ms · 1 条没等到应答」
+== 9. 统计对账（页面显示 = 探针计数）==
+  PASS  协议层错误会被记账：RANGE(4) → frames_err 0→1
+  PASS  frames_ok 对账一致（页面 34 = 探针 34）
+  PASS  frames_err 对账一致（1）
+  PASS  bytes_tx 对账一致（3259 B）
+  PASS  计数器渲染到 DOM（ok=34 · tx=3.2 KB）
+  PASS  frames_err **只**由协议层错误产生：回环失配是应用层判定、失能 NAK 在传输层、丢应答不改帧执行结果 —— 三类都不该混进这个计数
+== 10. NOR flash 卡（假探针里挂着一颗 W25Q128 模型）==
+  PASS  动作按钮是**内容宽**、没被 flex:1 拉伸（读一段 61px / 读测速 61px，之前是 591px）
+  PASS  擦除按钮同理（48px）
+  PASS  四个参数排**一行**而不是 2×2（实测 1 行）
+  PASS  🚨「读数据 / 写数据」两窗**精确等高**（90 vs 90px）
+  PASS  两窗都够大（90px / 卡片 411px；900 高的窗口下是 176px —— 原来写数据 90 而读数据 183）
+  PASS  PY00/PY01 已灰掉（固件 v1 不支持）：1,2,3,4,9,10,12
+  PASS  PB10~PB13 已灰掉（SPI2 的 CS/SCLK/MISO/MOSI）：1,2,3,4,9,10,12
+  PASS  PA30 已灰掉（USB0_PWR 被板上 Q1 短到地）
+  PASS  PA31 是自由脚，不该灰
+  PASS  提示文字里写明了为什么灰
+  PASS  提示文字里写明了为什么灰
+  PASS  默认 = READ 0x03 + dummy 0（实际 mode=3 dummy=0）
+  PASS  切读模式自动带出 dummy：[["11","1"],["3","0"],["59","1"],["107","1"],["235","1"]]
+  PASS  读 ID 显示厂商与容量：Winbond · 类型 0x40 · 16 MB
+  PASS  日志里也有
+  PASS  标题写明是原始数据：SFDP 原始 256 B（dummy=1）—— 解读按 JESD216 表 2 查：
+  PASS  hexdump 前 4 字节就是 "SFDP" 签名（原始字节）
+  PASS  不再出现任何解读内容（版本名 / 参数表 / BFPT / DWORD 都没有）
+  PASS  dummy 标定结果写回面板（模型用 8 拍，1 就对）
+  PASS  读状态显示 SR1 且判为空闲
+  PASS  SR2 指出 QE=0（四线读不出来的头号原因，这里必须提示）
+  PASS  擦除态读出全 FF（hexdump 带偏移）：0000  ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+  PASS  日志里有长度与速率
+  PASS  读测速给出速率：16 KB 用时 3.0 ms → 5.46 MB/s（实际 SCLK 40 MHz 理论上限 5.00 MB/s，实测占 109%）
+  PASS  给出了"占理论值百分比"（不然不知道差在哪）
+  PASS  没勾「我确认要擦写」时三个破坏性按钮全禁用
+  PASS  勾上之后才可用
+  PASS  写 256 B 后回读一致（写数据开头 00 01 02 03 04 05 06 07）
+  PASS  日志里有写+校验的总结行
+  PASS  扇区擦除走完（擦除完成  扇区擦除 0x20 · 4 KB）
+  PASS  擦完再读 → 全 FF（写入的内容确实没了）
+  PASS  四线读在 QE=0 时器件侧给出明确原因（页面按全 00 显示，与真机一致）
+== 10b. 「寄存器」面板：读一段 → 逐位改 → 只写改动 ==
+  PASS  假器件已切到「寄存器器件」
+  PASS  切到「寄存器」tab 且只显示它
+  PASS  128 个寄存器画成 16×8（实际 8 行 / 128 格）
+  PASS  首末字节与假器件图案对账（05 … 82）
+  PASS  表头 = 地址 + 列号 0..F + ASCII
+  PASS  dummy 给对（BMP280 档 = 0，手册核过）→ 器件侧没有报错
+  PASS  摘要写明读回长度与帧数
+  PASS  点表里的字节 → 弹出 8 个 bit 的开关板
+  PASS  点 bit0 把 0x05 翻成 0x04（只改缓冲）
+  PASS  格子立刻变 04 并套上黄框
+  PASS  开关板上"与原值不同的位"标了 1 个
+  PASS  有改动时「只写改动」可点
+  PASS  「只写改动」真的写进了假器件（regs[0] = 0x04）
+  PASS  相邻没改的字节没动（regs[1] 仍是 0x08）
+  PASS  写回成功后"器件现值"更新、黄框清掉
+  PASS  没有改动了 → 「只写改动」自动灰掉
+  PASS  dummy 多给 1 字节 → 器件侧明确报"数据错位"
+  PASS  ……表里读到的第一个字节也确实错了（不是 0x05）
+== 10c. 定时采集：loop + as 解码 + 实时值 ==
+  PASS  假器件切到 ADC，采集在跑
+  PASS  25 ms 周期在 700 ms 里跑了 29 拍（≥8）
+  PASS  运行胶囊显示拍数（切到任何 tab 都看得见）
+  PASS  实时值表里有 1 个变量 v
+  PASS  v 采样了 30 次
+  PASS  ……并画了迷你曲线
+  PASS  「停止」可点
+  PASS  采样值在变（675 → 260）
+  PASS  点「停止」后不再采样
+  PASS  胶囊回到「未运行 / 已结束」
+== 11. 收尾：放掉探针（别的页签要用）==
+  PASS  teardown 后 HID 与数据面都放掉了
+  PASS  整场跑完页面无未捕获错误
+
+✅ spi-bus-page.test: 168 通过 / 0 失败

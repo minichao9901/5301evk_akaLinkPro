@@ -1,0 +1,24 @@
+xPack Open On-Chip Debugger 0.12.0+dev-01850-geb6f2745b-dirty (2025-02-07-10:08)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "swd". To override use 'transport select <transport>'.
+adapter speed: 1000 kHz
+Info : Using CMSIS-DAPv2 interface with VID:PID=0x0d28:0x0204, serial=B4444F2110DDDAFE44800BBB0AE800E0
+Info : CMSIS-DAP: SWD supported
+Info : CMSIS-DAP: Atomic commands supported
+Info : CMSIS-DAP: Test domain timer supported
+Info : CMSIS-DAP: UART via USB COM port supported
+Info : CMSIS-DAP: FW Version = 2.1.2
+Info : CMSIS-DAP: Interface Initialised (SWD)
+Info : SWCLK/TCK = 1 SWDIO/TMS = 1 TDI = 1 TDO = 1 nTRST = 1 nRESET = 1
+Info : CMSIS-DAP: Interface ready
+Info : clock speed 1000 kHz
+Info : SWD DPIDR 0x1ba01477
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] gdb port disabled
+[stm32f1x.cpu] halted due to breakpoint, current mode: Thread
+xPSR: 0x01000000 pc: 0x080003c4 msp: 0x20010000
+shutdown command invoked

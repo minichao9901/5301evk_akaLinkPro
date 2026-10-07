@@ -1,0 +1,360 @@
+{
+ "startedAt": "2026-10-07T20:12:03.398Z",
+ "app": "http://127.0.0.1:8899/tmp/spi-baseline-web/index.html?t=1791403922508#flash",
+ "board": "f103ze",
+ "com": "COM5",
+ "chip": "stm32f103",
+ "clock": "60000000",
+ "cycles": [
+  {
+   "cycle": 1,
+   "flashSpam": {
+    "label": "狂发 #1",
+    "fw": "fw.elf",
+    "size": 139168,
+    "ms": 777,
+    "ok": true,
+    "summary": "耗时小结：探针 71ms · 加载算法 222ms · 读DEV_ID 1ms · 擦除 65ms · 写入 111ms · 校验 29ms · 复位 109ms · 合计 0.61s"
+   },
+   "rtt": {
+    "bytesPerSec": 596589,
+    "pollHz": 33.3,
+    "seconds": 6,
+    "pageRate": "587.8 KB/s",
+    "cb": "0x2000000c",
+    "up": "2",
+    "lost": 0,
+    "err": "高速 207.2 KB/s：渲染已停（收数/记录不受影响）· 点此恢复显示"
+   },
+   "fwd": {
+    "rate": 3030661.167354081,
+    "rateMB": 2.89,
+    "probeRateMB": 2.65,
+    "mhz": 60,
+    "cb": "0x2000000c",
+    "pageRate": "2968.0 KB/s",
+    "seconds": 8,
+    "record": {
+     "seconds": 10.2,
+     "rxBytes": 30968832,
+     "fileBytes": 30854143,
+     "writes": 135,
+     "backlog": 188416,
+     "path": "tmp/rtt-forward-2026-10-07T20-12-24.bin",
+     "head": "d! hello world! hello world! hello world! hello world! hello",
+     "words": 314
+    }
+   },
+   "flashScope": {
+    "label": "scope #1",
+    "fw": "fw.elf",
+    "size": 160964,
+    "ms": 1094,
+    "ok": true,
+    "summary": "耗时小结：探针 52ms · 加载算法 232ms · 读DEV_ID 1ms · 擦除 131ms · 写入 322ms · 校验 89ms · 复位 104ms · 合计 0.93s"
+   },
+   "elf": {
+    "cached": false,
+    "n": 19
+   },
+   "picks": {
+    "one": [
+     0
+    ],
+    "three": [
+     0,
+     1,
+     2
+    ],
+    "oneName": "g_lfsr",
+    "threeNames": [
+     "g_lfsr",
+     "g_far_cnt",
+     "g_far_sq100"
+    ]
+   },
+   "s1_fast": {
+    "label": "1 变量 @2µs",
+    "periodUs": 2,
+    "wantHz": 500000,
+    "vars": [
+     "g_lfsr@0x20000000"
+    ],
+    "spans": 1,
+    "frameBytes": 4,
+    "estUs": 4.47,
+    "estHz": 223914,
+    "samples": 1486884,
+    "rateHz": 495622,
+    "packets": 12192,
+    "lostProbe": 13120,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3448
+   },
+   "s1_50k": {
+    "label": "1 变量 @20µs",
+    "periodUs": 20,
+    "wantHz": 50000,
+    "vars": [
+     "g_lfsr@0x20000000"
+    ],
+    "spans": 1,
+    "frameBytes": 4,
+    "estUs": 4.47,
+    "estHz": 223914,
+    "samples": 150040,
+    "rateHz": 49999,
+    "packets": 1232,
+    "lostProbe": 3,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3472
+   },
+   "s3_fast": {
+    "label": "3 变量 @2µs",
+    "periodUs": 2,
+    "wantHz": 500000,
+    "vars": [
+     "g_lfsr@0x20000000",
+     "g_far_cnt@0x20000008",
+     "g_far_sq100@0x2000000c"
+    ],
+    "spans": 1,
+    "frameBytes": 10,
+    "estUs": 7.81,
+    "estHz": 127975,
+    "samples": 330309,
+    "rateHz": 110101,
+    "packets": 6848,
+    "lostProbe": 1165957,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3477
+   },
+   "s3_50k": {
+    "label": "3 变量 @20µs",
+    "periodUs": 20,
+    "wantHz": 50000,
+    "vars": [
+     "g_lfsr@0x20000000",
+     "g_far_cnt@0x20000008",
+     "g_far_sq100@0x2000000c"
+    ],
+    "spans": 1,
+    "frameBytes": 10,
+    "estUs": 7.81,
+    "estHz": 127975,
+    "samples": 150038,
+    "rateHz": 49999,
+    "packets": 3120,
+    "lostProbe": 3,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3486
+   }
+  },
+  {
+   "cycle": 2,
+   "flashSpam": {
+    "label": "狂发 #2",
+    "fw": "fw.elf",
+    "size": 139168,
+    "ms": 780,
+    "ok": true,
+    "summary": "耗时小结：探针 48ms · 加载算法 226ms · 读DEV_ID 1ms · 擦除 61ms · 写入 109ms · 校验 28ms · 复位 112ms · 合计 0.59s"
+   },
+   "rtt": {
+    "bytesPerSec": 589267,
+    "pollHz": 32.8,
+    "seconds": 6,
+    "pageRate": "555.3 KB/s",
+    "cb": "0x2000000c",
+    "up": "2",
+    "lost": 0,
+    "err": "高速 543.5 KB/s：渲染已停（收数/记录不受影响）· 点此恢复显示"
+   },
+   "fwd": {
+    "rate": 3038337.3301392845,
+    "rateMB": 2.9,
+    "probeRateMB": 2.64,
+    "mhz": 60,
+    "cb": "0x2000000c",
+    "pageRate": "2968.0 KB/s",
+    "seconds": 8,
+    "record": {
+     "seconds": 10.2,
+     "rxBytes": 30982144,
+     "fileBytes": 30953472,
+     "writes": 136,
+     "backlog": 8192,
+     "path": "tmp/rtt-forward-2026-10-07T20-13-18.bin",
+     "head": " world! hello world! hello world! hello world! hello world! ",
+     "words": 314
+    }
+   },
+   "flashScope": {
+    "label": "scope #2",
+    "fw": "fw.elf",
+    "size": 160964,
+    "ms": 1094,
+    "ok": true,
+    "summary": "耗时小结：探针 51ms · 加载算法 218ms · 读DEV_ID 1ms · 擦除 126ms · 写入 300ms · 校验 89ms · 复位 113ms · 合计 0.90s"
+   },
+   "elf": {
+    "cached": true,
+    "n": 19
+   },
+   "picks": {
+    "one": [
+     0
+    ],
+    "three": [
+     0,
+     1,
+     2
+    ],
+    "oneName": "g_lfsr",
+    "threeNames": [
+     "g_lfsr",
+     "g_far_cnt",
+     "g_far_sq100"
+    ]
+   },
+   "s1_fast": {
+    "label": "1 变量 @2µs",
+    "periodUs": 2,
+    "wantHz": 500000,
+    "vars": [
+     "g_lfsr@0x20000000"
+    ],
+    "spans": 1,
+    "frameBytes": 4,
+    "estUs": 4.47,
+    "estHz": 223914,
+    "samples": 1486884,
+    "rateHz": 495605,
+    "packets": 12192,
+    "lostProbe": 13134,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3450
+   },
+   "s1_50k": {
+    "label": "1 变量 @20µs",
+    "periodUs": 20,
+    "wantHz": 50000,
+    "vars": [
+     "g_lfsr@0x20000000"
+    ],
+    "spans": 1,
+    "frameBytes": 4,
+    "estUs": 4.47,
+    "estHz": 223914,
+    "samples": 150040,
+    "rateHz": 49999,
+    "packets": 1232,
+    "lostProbe": 4,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3500
+   },
+   "s3_fast": {
+    "label": "3 变量 @2µs",
+    "periodUs": 2,
+    "wantHz": 500000,
+    "vars": [
+     "g_lfsr@0x20000000",
+     "g_far_cnt@0x20000008",
+     "g_far_sq100@0x2000000c"
+    ],
+    "spans": 1,
+    "frameBytes": 10,
+    "estUs": 7.81,
+    "estHz": 127975,
+    "samples": 330897,
+    "rateHz": 110286,
+    "packets": 6864,
+    "lostProbe": 1165401,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3519
+   },
+   "s3_50k": {
+    "label": "3 变量 @20µs",
+    "periodUs": 20,
+    "wantHz": 50000,
+    "vars": [
+     "g_lfsr@0x20000000",
+     "g_far_cnt@0x20000008",
+     "g_far_sq100@0x2000000c"
+    ],
+    "spans": 1,
+    "frameBytes": 10,
+    "estUs": 7.81,
+    "estHz": 127975,
+    "samples": 150038,
+    "rateHz": 49999,
+    "packets": 3120,
+    "lostProbe": 3,
+    "lostUsb": 0,
+    "lostGap": 0,
+    "state": "正在停止…",
+    "autoStopped": true,
+    "wallMs": 3505
+   }
+  }
+ ],
+ "alt": [
+  {
+   "i": 1,
+   "spamMs": 776,
+   "scopeMs": 1081,
+   "spamSum": "耗时小结：探针 68ms · 加载算法 219ms · 读DEV_ID 1ms · 擦除 62ms · 写入 111ms · 校验 29ms · 复位 104ms · 合计 0.59s",
+   "scopeSum": "耗时小结：探针 61ms · 加载算法 255ms · 读DEV_ID 1ms · 擦除 127ms · 写入 297ms · 校验 88ms · 复位 104ms · 合计 0.93s"
+  },
+  {
+   "i": 2,
+   "spamMs": 802,
+   "scopeMs": 1103,
+   "spamSum": "耗时小结：探针 49ms · 加载算法 228ms · 读DEV_ID 1ms · 擦除 62ms · 写入 108ms · 校验 28ms · 复位 138ms · 合计 0.61s",
+   "scopeSum": "耗时小结：探针 50ms · 加载算法 217ms · 读DEV_ID 1ms · 擦除 130ms · 写入 302ms · 校验 90ms · 复位 112ms · 合计 0.90s"
+  },
+  {
+   "i": 3,
+   "spamMs": 787,
+   "scopeMs": 1096,
+   "spamSum": "耗时小结：探针 59ms · 加载算法 249ms · 读DEV_ID 1ms · 擦除 63ms · 写入 109ms · 校验 28ms · 复位 105ms · 合计 0.61s",
+   "scopeSum": "耗时小结：探针 51ms · 加载算法 229ms · 读DEV_ID 1ms · 擦除 147ms · 写入 295ms · 校验 89ms · 复位 104ms · 合计 0.92s"
+  },
+  {
+   "i": 4,
+   "spamMs": 773,
+   "scopeMs": 1096,
+   "spamSum": "耗时小结：探针 48ms · 加载算法 227ms · 读DEV_ID 1ms · 擦除 65ms · 写入 108ms · 校验 30ms · 复位 104ms · 合计 0.58s",
+   "scopeSum": "耗时小结：探针 83ms · 加载算法 221ms · 读DEV_ID 1ms · 擦除 128ms · 写入 301ms · 校验 88ms · 复位 106ms · 合计 0.93s"
+  },
+  {
+   "i": 5,
+   "spamMs": 787,
+   "scopeMs": 1092,
+   "spamSum": "耗时小结：探针 58ms · 加载算法 256ms · 读DEV_ID 1ms · 擦除 62ms · 写入 111ms · 校验 29ms · 复位 104ms · 合计 0.62s",
+   "scopeSum": "耗时小结：探针 51ms · 加载算法 225ms · 读DEV_ID 1ms · 擦除 129ms · 写入 305ms · 校验 88ms · 复位 140ms · 合计 0.94s"
+  }
+ ],
+ "errors": []
+}
