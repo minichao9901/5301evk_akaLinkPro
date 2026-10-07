@@ -46,7 +46,7 @@ int main(void){
  assert(!spi_bridge_adc_claim(&capture,&transmit));spi_bridge_adc_release();
 '''
 # Every rejected claim preserves native bookkeeping and the whole gate/state.
-flags = ['s_enabled', 's_pkt_active', 's_adc_owner', 's_out_inflight', 's_in_inflight',
+flags = ['s_enabled', 's_pkt_active', 's_adc_owner', 's_slave_owner', 's_out_inflight', 's_in_inflight',
          's_out_used', 's_in_used', 's_hw_req', 's_reset_req', 's_usb_reset_req',
          's_abort_req', 's_drain_reads', 's_cs_asserted']
 for flag in flags:
@@ -55,6 +55,12 @@ for flag in flags:
  assert(!memcmp(&before,&s_st,sizeof(s_st)));assert(!memcmp(&gate,&spi_bridge_gate,sizeof(gate)));}}{flag}=0;
 '''
 source += '''
+ uint8_t *slave_rx=0;uint32_t slave_size=0;
+ assert(spi_bridge_slave_claim(&slave_rx,&slave_size));
+ assert(slave_rx==&s_out_buf[0][0] && slave_size==sizeof(s_out_buf));
+ assert(!spi_bridge_adc_claim(&capture,&transmit));assert(!spi_bridge_slave_claim(&slave_rx,&slave_size));
+ spi_bridge_slave_release();
+ assert(spi_bridge_adc_claim(&capture,&transmit));assert(!spi_bridge_slave_claim(&slave_rx,&slave_size));spi_bridge_adc_release();
  /* Both native transfers still own their buffers after the bridge is disabled.
   * Only real completions release them; generations never change on a claim. */
  s_out_inflight=s_in_inflight=1;s_in_used=1;

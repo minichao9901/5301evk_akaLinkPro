@@ -67,6 +67,9 @@ test-host: test-jtag-host
 	$(PYTHON) script_test/rtt_stop_host_test.py
 	$(PYTHON) script_test/spi_drain_host_test.py
 	$(PYTHON) script_test/spi_adc_owner_host_test.py
+	$(PYTHON) script_test/spi_cdc_host_test.py
+	$(PYTHON) script_test/spi_cdc_service_host_test.py
+	$(PYTHON) script_test/cdc_source_host_test.py
 	$(PYTHON) script_test/target_switch_host_test.py
 	$(PYTHON) script_test/test_scope_hss_test.py
 

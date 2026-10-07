@@ -7,6 +7,7 @@
 #include "riscv_svc.h"
 #include "scope_sampler.h"
 #include "spi_bridge.h"
+#include "spi_cdc.h"
 #include "i2c_bridge.h"
 #include "bus_periodic.h"
 #include "analog_bridge.h"
@@ -648,6 +649,9 @@ void api_param_proc_hid(uint8_t *req_hid, uint8_t *res_hid)
         spi_bridge_hid(req_hid, res_hid);
         break;
     }
+    case SPI_CDC_CMD:
+        spi_cdc_hid(req_hid, res_hid);
+        break;
     case CMD_I2C:
     {
         /* USB→I2C 转发桥（动作见 src/i2c_bridge/i2c_bridge_proto.h）。

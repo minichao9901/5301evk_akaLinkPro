@@ -68,6 +68,10 @@ uint8_t spi_bridge_adc_claim(uint32_t **capture, uint8_t **transmit) {
 }
 void spi_bridge_adc_release(void) {}
 uint8_t spi_bridge_adc_flags(void) { return 2U; }
+uint8_t spi_bridge_slave_claim(uint8_t **receive, uint32_t *size) {
+    (void)receive; (void)size; return 0U;
+}
+void spi_bridge_slave_release(void) {}
 
 void spi_bridge_hid(uint8_t *req_hid, uint8_t *res_hid)
 {
@@ -273,6 +277,7 @@ static sb_state_t s_st;
 #define s_format (s_st.format)
 #define s_fmt_addr_len (s_st.fmt_addr_len)
 #define s_adc_owner (spi_bridge_gate.flag[5])
+#define s_slave_owner (spi_bridge_gate.flag[6])
 
 /* Shared buffers cannot change owners while native USB DMA or deferred bridge
  * work still references them. bit0 requests OUT retirement with a host ZLP;
@@ -283,7 +288,7 @@ uint8_t spi_bridge_adc_flags(void)
     return (uint8_t)((s_out_inflight ? 1U : 0U) |
         ((s_enabled || s_in_inflight || s_in_used || s_out_used || s_pkt_active ||
           s_hw_req || s_reset_req || s_usb_reset_req || s_abort_req ||
-          s_drain_reads || s_adc_owner || s_cs_asserted) ? 2U : 0U));
+          s_drain_reads || s_adc_owner || s_slave_owner || s_cs_asserted) ? 2U : 0U));
 }
 
 uint8_t spi_bridge_adc_claim(uint32_t **capture, uint8_t **transmit)
@@ -296,6 +301,16 @@ uint8_t spi_bridge_adc_claim(uint32_t **capture, uint8_t **transmit)
     return 1U;
 }
 void spi_bridge_adc_release(void) { s_adc_owner = 0U; }
+uint8_t spi_bridge_slave_claim(uint8_t **receive, uint32_t *size)
+{
+    /* Caller holds the IRQ lock; native IN/OUT must have retired first. */
+    if (spi_bridge_adc_flags() != 0U) { return 0U; }
+    s_slave_owner = 1U;
+    *receive = &s_out_buf[0][0];
+    *size = sizeof(s_out_buf);
+    return 1U;
+}
+void spi_bridge_slave_release(void) { s_slave_owner = 0U; }
 
 /* ============================== 小工具 ============================== */
 
@@ -1770,6 +1785,7 @@ static void sb_drain_pending_reads(void)
 
 void spi_bridge_poll(void)
 {
+    if (s_slave_owner) { return; }
     if (s_adc_owner) { adc_stream_poll(); return; }
     if (s_usb_reset_req != 0U)
     {
@@ -2334,7 +2350,7 @@ void spi_bridge_hid(uint8_t *req_hid, uint8_t *res_hid)
     res_hid[2] = SB_HID_CMD;
     res_hid[3] = action;
 
-    if (s_adc_owner && action != SB_ACT_STATUS && action != SB_ACT_GET_CFG &&
+    if ((s_adc_owner || s_slave_owner) && action != SB_ACT_STATUS && action != SB_ACT_GET_CFG &&
         action != SB_ACT_GET_PROFILE && action != SB_ACT_DBG) {
         wr_u32(res_hid + 4, sb_status_word() | ((uint32_t)SB_E_BUSY << SB_ST_SHIFT_ERR));
         res_hid[1] = 8U; return;

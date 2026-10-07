@@ -1,0 +1,75 @@
+{
+  "master_rejected": [
+    0,
+    8,
+    0,
+    0
+  ],
+  "closed": {
+    "magic": 826495059,
+    "flags": 3,
+    "rc": 0,
+    "config": 0,
+    "buffer": 16384,
+    "received": 1187725,
+    "forwarded": 32768,
+    "dropped": 1146765,
+    "fifo_overflows": 0,
+    "pending": 8192,
+    "cdc_queued": 32768,
+    "generation": 23,
+    "dma_errors": 0
+  },
+  "resumed": {
+    "magic": 826495059,
+    "flags": 3,
+    "rc": 0,
+    "config": 0,
+    "buffer": 16384,
+    "received": 2330794,
+    "forwarded": 1183052,
+    "dropped": 1147740,
+    "fifo_overflows": 0,
+    "pending": 2,
+    "cdc_queued": 134,
+    "generation": 23,
+    "dma_errors": 0
+  },
+  "clean_host": {
+    "bytes": 4981331,
+    "frames": 77833,
+    "gaps": 0,
+    "bad": 0,
+    "reversed": 0
+  },
+  "clean_status": {
+    "magic": 826495059,
+    "flags": 3,
+    "rc": 0,
+    "config": 0,
+    "buffer": 16384,
+    "received": 4578592,
+    "forwarded": 4578590,
+    "dropped": 0,
+    "fifo_overflows": 0,
+    "pending": 2,
+    "cdc_queued": 135,
+    "generation": 24,
+    "dma_errors": 0
+  },
+  "end": {
+    "magic": 826495059,
+    "flags": 1,
+    "rc": 0,
+    "config": 0,
+    "buffer": 16384,
+    "received": 4981331,
+    "forwarded": 4981331,
+    "dropped": 0,
+    "fifo_overflows": 0,
+    "pending": 0,
+    "cdc_queued": 0,
+    "generation": 24,
+    "dma_errors": 0
+  }
+}

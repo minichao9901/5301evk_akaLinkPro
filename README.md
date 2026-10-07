@@ -9,7 +9,7 @@
 | --- | --- | --- |
 | ① | **调试与传输**（对标 J-Link PRO 的下载 / 调试通路） | 60 MHz 档写 **3384** / 读 **2928** KB/s（OpenOCD 纯传输口径）；探针侧 RTT→CDC **2954 KB/s = 主机轮询上限的 2.6 倍**；RISC-V 目标 SRAM 读写 **约 1510 KB/s = OpenOCD 主机驱动的 9 倍** |
 | ② | **变量示波（J-Scope / HSS）** | 单变量 u32 端到端 **330 kHz**（探针本体 637 kHz）、双变量 **114 kHz**、8 通道 **82 kHz**。同样口径下 **J-Link PRO 的 J-Scope 单变量是 100 kHz** —— 这里是它的 **3.3 倍**；而且**目标固件一行都不用改** |
-| ③ | **零安装上位机**（WebUSB / WebHID） | **11 个标签页**：DAPLink 调试器 · gdb 风格命令行调试 · 串口助手 · Xshell 式终端 · RTT Viewer · RTT→串口超高速转发 · J-Scope 变量示波 · 零安装 Flash 烧录 · USB→SPI/QSPI 调试助手 · SPI/QSPI 点屏助手 · USB→I2C 调试助手 · 典型工程 Makefile 模板生成 |
+| ③ | **零安装上位机**（WebUSB / WebHID） | **13 个标签页**：DAPLink 源码调试器（gdb 风格命令行）· 串口助手 · Xshell 式终端 · RTT Viewer · RTT→串口超高速转发 · J-Scope 变量示波 · 零安装 Flash 烧录 · USB→SPI/QSPI 调试助手 · SPI/QSPI 点屏助手 · SPI→USB 从机转发 · USB→I2C 调试助手 · USB→ADC/DAC · 典型工程 Makefile 模板生成 |
 
 **③ 就在这里，不用装任何东西**：👉 <https://minichao9901.github.io/web-serial-rtt-tools/>
 （桌面版 Chrome / Edge，插上探针授权一次即可；源码在
@@ -103,8 +103,9 @@ akaLinkPro 是一个基于 HPM5301 的高性能 CMSIS-DAP 调试器。同一套�
 | **RTT Viewer** | SEGGER RTT 多通道查看 + 下行输入 + 复位目标，**目标类型 SWD/ARM 或 RISC-V/JTAG 可选**（HPM 系列走 JTAG+DMI+SBA），四种后端 |
 | **RTT 转发** | 本探针的**探针侧** RTT→CDC：探针自己轮询目标控制块、把数据塞进自己的 CDC 口，**主机只读一个 COM 口** —— 网页上它就长成"一个超高速串口" |
 | **J-Scope 波形** | 变量示波器：探针自己按固定周期读目标 RAM（HSS），多通道波形 + 触发 + CSV 导出 + 原始包回放 |
-| **SPI/QSPI 桥** | USB→SPI/QSPI 调试助手：命令表 / 脚本 / **外接 NOR flash 测试**（读 ID、SFDP、读测速、擦写校验）/ 回环自检 |
+| **USB→SPI/QSPI** | USB→SPI/QSPI 调试助手：命令表 / 脚本 / **外接 NOR flash 测试**（读 ID、SFDP、读测速、擦写校验）/ 回环自检 |
 | **SPI/QSPI 屏** | 点屏助手：刷屏（内置图案 / 拖入图片 / 动图 / 视频，**局部刷新**只发与上一帧不同的包围盒）、厂规面板初始化表解析与重放（每个字节可改、可点开看 8 个 bit）、读回 GRAM 还原成图 |
+| **SPI→USB** | 外部 SPI 主机 → 探针从机循环 DMA → 现有 CDC 串口；复用 SPI 引脚、16 KiB 环与 CDC 会话，F103ZE 18 MHz 实收约 **2.250 MB/s**、字节/序号零错误。见 [功能与协议](docs/spi-cdc.md)、[验收数据](docs/validation/2026-10-08-spi-cdc.md) |
 | **USB→I2C** | USB 转 I2C 主机：总线扫描 / 命令表 / 脚本（`loop 100ms … end` 就是 `while(1)` 定时读写）/ 实时值解码（把字节变成 g / ℃ / V + 迷你曲线），长读自动分片 |
 | **工程生成** | 拖进 Keil `.uvprojx`，生成 `Makefile.jlink` / `jlink_gdb.script` / `Makefile.pyocd` / `Makefile.openocd`（含 `rtt_logger.py`）/ `test_sram.bin`，参数可填可勾、产物实时预览 |
 
@@ -1413,7 +1414,7 @@ python i2c_bridge_test.py rd 0x50 0x00 54      # 直接读 54 B
 | [`docs/hpm6800evk-jtag.md`](docs/hpm6800evk-jtag.md) | **HPM6800EVK（HPM6880，RISC-V）用本探针调 JTAG 的完整记录**：接线坑、启动头真相、DMI/SBA 引擎与专用汇编、三个 DTM 时序坑、RTT 交付率与跨后端极性 bug、TCK 频率上限 |
 | [`docs/HPM5301EVKLite_port.md`](docs/HPM5301EVKLite_port.md) | EVKLite 移植说明：引脚映射、构建、烧录、自调试、验证清单 |
 | [`docs/HANDOVER-evklite-20260927.md`](docs/HANDOVER-evklite-20260927.md) | 移植过程交接记录（含 CDC 回环故障的根因与修复） |
-| [`firmware/application_5301/Custom HID Protocol.md`](firmware/application_5301/Custom%20HID%20Protocol.md) | HID 配置协议（0x31 RTT / 0x32 SCOPE / 0x33 RISCV / 0x34 BRIDGE / 0x35 SPI / 0x36 I2C） |
+| [`firmware/application_5301/Custom HID Protocol.md`](firmware/application_5301/Custom%20HID%20Protocol.md) | HID 配置协议（0x31 RTT / 0x32 SCOPE / 0x33 RISCV / 0x34 BRIDGE / 0x35 SPI / 0x36 I2C / 0x39 SPI→USB） |
 | [`docs/web-handoff-riscv-scope.md`](docs/web-handoff-riscv-scope.md) | **给网页侧的最小改动说明**：波形页采 RISC-V 需要的三个新位、哪些 SWD 专属控件该藏、按后端分档的采样率提示 |
 | [`docs/代码审查报告.md`](docs/代码审查报告.md) | 两轮代码审查全文 + 逐条处置结论（修复/上板验证/判定不修的理由） |
 | [`docs/web-handoff-spi-bridge.md`](docs/web-handoff-spi-bridge.md) | **USB→SPI/QSPI 桥的主机侧实现说明**：HID 0x35 全部动作、bulk 帧格式与流程、面板初始化表怎么搬、排坑清单、实测性能 |

@@ -58,6 +58,9 @@ uint8_t spi_bridge_is_enabled(void);
 uint8_t spi_bridge_adc_claim(uint32_t **capture, uint8_t **transmit);
 void spi_bridge_adc_release(void);
 uint8_t spi_bridge_adc_flags(void); /* bit0: OUT armed; bit1: other work/owner busy */
+/* SPI slave uses the master's OUT ring as its circular DMA destination. */
+uint8_t spi_bridge_slave_claim(uint8_t **receive, uint32_t *size);
+void spi_bridge_slave_release(void);
 
 /* 这根 pad 是否正被本桥当辅助脚占用（供 I2C 桥做反方向的引脚仲裁）。
  * pad 用 IOC_PAD_xx；返回 1 = 占用，别抢。 */

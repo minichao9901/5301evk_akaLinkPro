@@ -37,9 +37,11 @@ extern "C"
      * and resume position tracking from the current DMA write pointer. */
     void uartx_rx_resync(void);
 
-    /* Who feeds the CDC ringbuffer: 0 = the VCOM UART bridge (default),
-     * 1 = the probe-side RTT bridge. Only one producer may write g_uartrx. */
-    void uartx_set_cdc_source(uint8_t from_rtt);
+    enum { CDC_SOURCE_UART = 0, CDC_SOURCE_RTT = 1, CDC_SOURCE_SPI = 2 };
+    /* One producer feeds the shared CDC ring. Changing sources preserves any
+     * in-flight USB buffer; never reset its read/write indices on handoff. */
+    void uartx_set_cdc_source(uint8_t source);
+    uint8_t uartx_get_cdc_source(void);
 
 #ifdef __cplusplus
 }

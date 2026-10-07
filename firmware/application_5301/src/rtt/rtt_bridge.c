@@ -539,6 +539,7 @@ static void rtt_link_recover(void)
 
 int rtt_bridge_start(uint32_t addr, uint32_t size, uint8_t channel)
 {
+    if (uartx_get_cdc_source() == CDC_SOURCE_SPI) return -15;
     if (adc_stream_enabled()) return -14; /* shared ADC must retire before core streaming */
     rtt_bridge_stop();
 

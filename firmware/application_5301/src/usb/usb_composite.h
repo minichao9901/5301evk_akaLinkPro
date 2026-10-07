@@ -108,6 +108,8 @@ void chry_dap_usb2uart_handle(void);
 extern volatile uint8_t usb2uart_bridge_enabled;
 void    chry_dap_usb2uart_set_enabled(uint8_t enable);
 uint8_t chry_dap_usb2uart_is_enabled(void);
+/* Apply the last CDC line coding in main after a producer hands back UART. */
+void chry_dap_usb2uart_request_config(void);
 
 /* implment by user */
 extern void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding);

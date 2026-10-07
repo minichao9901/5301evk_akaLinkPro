@@ -1,0 +1,570 @@
+[
+  {
+    "divider": 2,
+    "mode": 0,
+    "order": "msb",
+    "seconds": 2.0002413999973214,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2252061,
+      "frames": 35188,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 0,
+      "buffer": 16384,
+      "received": 590247,
+      "forwarded": 590246,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 72,
+      "generation": 15,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 0,
+      "buffer": 16384,
+      "received": 2844883,
+      "forwarded": 2844882,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 59,
+      "generation": 15,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.125894604522742,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 0,
+      "buffer": 16384,
+      "received": 3165655,
+      "forwarded": 3165655,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 15,
+      "dma_errors": 0
+    }
+  },
+  {
+    "divider": 2,
+    "mode": 0,
+    "order": "lsb",
+    "seconds": 2.000356600001396,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2252881,
+      "frames": 35201,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 256,
+      "buffer": 16384,
+      "received": 590857,
+      "forwarded": 590857,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 61,
+      "generation": 16,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 256,
+      "buffer": 16384,
+      "received": 2845494,
+      "forwarded": 2845493,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 60,
+      "generation": 16,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.126239691462226,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 256,
+      "buffer": 16384,
+      "received": 3149386,
+      "forwarded": 3149386,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 16,
+      "dma_errors": 0
+    }
+  },
+  {
+    "divider": 2,
+    "mode": 1,
+    "order": "msb",
+    "seconds": 2.0001703000016278,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2250788,
+      "frames": 35169,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 1,
+      "buffer": 16384,
+      "received": 588532,
+      "forwarded": 588531,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 61,
+      "generation": 17,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 1,
+      "buffer": 16384,
+      "received": 2843168,
+      "forwarded": 2843168,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 309,
+      "generation": 17,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.125298180858984,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 1,
+      "buffer": 16384,
+      "received": 3146025,
+      "forwarded": 3146025,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 17,
+      "dma_errors": 0
+    }
+  },
+  {
+    "divider": 2,
+    "mode": 1,
+    "order": "lsb",
+    "seconds": 2.000431500004197,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2253029,
+      "frames": 35204,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 257,
+      "buffer": 16384,
+      "received": 591382,
+      "forwarded": 591381,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 77,
+      "generation": 18,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 257,
+      "buffer": 16384,
+      "received": 2846018,
+      "forwarded": 2846017,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 67,
+      "generation": 18,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.1262715069200184,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 257,
+      "buffer": 16384,
+      "received": 3190553,
+      "forwarded": 3190553,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 18,
+      "dma_errors": 0
+    }
+  },
+  {
+    "divider": 2,
+    "mode": 2,
+    "order": "msb",
+    "seconds": 2.0005738000036217,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2252935,
+      "frames": 35202,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 2,
+      "buffer": 16384,
+      "received": 592086,
+      "forwarded": 592085,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 65,
+      "generation": 19,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 2,
+      "buffer": 16384,
+      "received": 2846722,
+      "forwarded": 2846721,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 65,
+      "generation": 19,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.1261444091669708,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 2,
+      "buffer": 16384,
+      "received": 3162080,
+      "forwarded": 3162080,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 19,
+      "dma_errors": 0
+    }
+  },
+  {
+    "divider": 2,
+    "mode": 2,
+    "order": "lsb",
+    "seconds": 2.000089900000603,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2254468,
+      "frames": 35226,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 258,
+      "buffer": 16384,
+      "received": 593445,
+      "forwarded": 593444,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 60,
+      "generation": 20,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 258,
+      "buffer": 16384,
+      "received": 2848081,
+      "forwarded": 2848081,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 58,
+      "generation": 20,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.127183333108837,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 258,
+      "buffer": 16384,
+      "received": 3167452,
+      "forwarded": 3167452,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 20,
+      "dma_errors": 0
+    }
+  },
+  {
+    "divider": 2,
+    "mode": 3,
+    "order": "msb",
+    "seconds": 2.000507499993546,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2251837,
+      "frames": 35185,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 3,
+      "buffer": 16384,
+      "received": 589729,
+      "forwarded": 589729,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 60,
+      "generation": 21,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 3,
+      "buffer": 16384,
+      "received": 2844366,
+      "forwarded": 2844365,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 55,
+      "generation": 21,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.1256328706627017,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 3,
+      "buffer": 16384,
+      "received": 3166962,
+      "forwarded": 3166962,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 21,
+      "dma_errors": 0
+    }
+  },
+  {
+    "divider": 2,
+    "mode": 3,
+    "order": "lsb",
+    "seconds": 2.0005458000014187,
+    "target": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "host": {
+      "bytes": 2251352,
+      "frames": 35177,
+      "gaps": 0,
+      "bad": 0,
+      "reversed": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 259,
+      "buffer": 16384,
+      "received": 589722,
+      "forwarded": 589722,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 77,
+      "generation": 22,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 259,
+      "buffer": 16384,
+      "received": 2844359,
+      "forwarded": 2844358,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 1,
+      "cdc_queued": 64,
+      "generation": 22,
+      "dma_errors": 0
+    },
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "reader_error": null,
+    "MBps": 1.1253688868299858,
+    "target_after": {
+      "g_core_hz": 72000000,
+      "g_spi_hz": 9000000,
+      "g_refill_late": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 259,
+      "buffer": 16384,
+      "received": 3157964,
+      "forwarded": 3157964,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 22,
+      "dma_errors": 0
+    }
+  }
+]

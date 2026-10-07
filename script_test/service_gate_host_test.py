@@ -7,7 +7,8 @@ modules={'api/api_param':['s_save_pending'],
  'riscv/riscv_svc':['s_pending'],
  'rtt/rtt_bridge':['s_running','s_start_pending','s_stop_pending','s_raw_pending','s_bench_pending'],
  'scope/scope_sampler':['s_running','s_start_req','s_usb_reset_req','s_bench_req'],
- 'spi_bridge/spi_bridge':['s_enabled','s_reset_req','s_usb_reset_req','s_abort_req','s_drain_reads','s_adc_owner']}
+ 'spi_bridge/spi_bridge':['s_enabled','s_reset_req','s_usb_reset_req','s_abort_req','s_drain_reads','s_adc_owner','s_slave_owner'],
+ 'spi_cdc/spi_cdc':['s_running','s_start_req','s_stop_req','s_reset_req','s_fault','s_configuring']}
 unit='#include <assert.h>\n'
 for path in modules:
  name=Path(path).name

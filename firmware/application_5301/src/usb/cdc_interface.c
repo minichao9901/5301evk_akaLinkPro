@@ -106,25 +106,25 @@ static volatile uint32_t rb_write_pos = 0;
  * (only possible on boards where UART2 shares the JTAG pins). */
 static volatile uint8_t s_uart2_com_mode = 0;
 
-/* 1 = the probe-side RTT bridge owns the CDC ringbuffer; the UART must then
- * stay out of it (single producer rule for chry_ringbuffer). */
+/* CDC_SOURCE_UART / RTT / SPI; a non-UART producer excludes UART DMA flushes
+ * from the shared CDC ring (single producer rule for chry_ringbuffer). */
 static volatile uint8_t s_cdc_src_rtt = 0;
+static uint32_t uartx_rx_written(void);
 
-void uartx_set_cdc_source(uint8_t from_rtt)
+uint8_t uartx_get_cdc_source(void) { return s_cdc_src_rtt; }
+
+void uartx_set_cdc_source(uint8_t source)
 {
-    s_cdc_src_rtt = from_rtt ? 1U : 0U;
-    if (s_cdc_src_rtt)
-    {
-        chry_ringbuffer_reset(&g_uartrx);
+    uint32_t level = disable_global_irq(CSR_MSTATUS_MIE_MASK);
+    uint8_t previous = s_cdc_src_rtt;
+    s_cdc_src_rtt = source;
+    /* DMA continues while another producer owns CDC. Skip its UART backlog,
+     * but retain the ring storage currently referenced by a USB IN transfer. */
+    if (source == CDC_SOURCE_UART) {
+        rb_write_pos = uartx_rx_written();
+        if (previous != CDC_SOURCE_UART) { chry_dap_usb2uart_request_config(); }
     }
-    else
-    {
-        /* 交还给串口时同样要"追平并丢弃"：桥运行期间 RX DMA 一直在无限循环里搬，
-         * rb_write_pos 却停在原处 —— 不追平的话，停桥后的第一次 flush 会把期间攒下的
-         * 陈旧字节（长时间桥接后可能超过一整圈）一次性灌给主机。
-         * 与 chry_dap_usb2uart_set_enabled(1) 的恢复路径同一个动作。 */
-        uartx_rx_resync();
-    }
+    restore_global_irq(level);
 }
 ATTR_PLACE_AT_NONCACHEABLE_BSS_WITH_ALIGNMENT(4)
 uint8_t uart_rx_buf[UART_RX_DMA_BUFFER_SIZE];
@@ -505,7 +505,8 @@ static void uartx_rx_dma_restart(void)
 
     dma_mgr_disable_channel(rx);
     rb_write_pos = 0;
-    chry_ringbuffer_reset(&g_uartrx);
+    /* The UART DMA buffer is separate from CDC. Preserve queued CDC bytes
+     * and the indices referenced by an existing USB IN transfer. */
     uartx_rx_dma_start();
 
     restore_global_irq(level);

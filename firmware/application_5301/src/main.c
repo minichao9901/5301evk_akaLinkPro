@@ -19,6 +19,7 @@
 #include "riscv_svc.h"
 #include "scope_sampler.h"
 #include "spi_bridge.h"
+#include "spi_cdc.h"
 #include "i2c_bridge.h"
 #include "led_state.h"
 
@@ -134,6 +135,10 @@ int main(void)
         if (riscv_svc_needs_service())
         {
             riscv_svc_poll();
+        }
+        if (spi_cdc_needs_service())
+        {
+            spi_cdc_poll();
         }
         /* USB→SPI/QSPI 转发桥（HID 0x35 控制面 + bulk 0x0B/0x8B 数据面）。
          * 空闲时仅检查服务标志；使能后每轮按预算处理若干帧。 */

@@ -8,6 +8,7 @@
 #include "cdc_interface.h"
 #include "scope_sampler.h"
 #include "spi_bridge.h"
+#include "spi_cdc.h"
 #include "i2c_bridge.h"
 #include "bus_periodic.h"
 #include "adc_stream.h"
@@ -534,6 +535,7 @@ static uint16_t USB_RespSize[DAP_PACKET_COUNT];                                 
 volatile struct cdc_line_coding g_cdc_lincoding;
 volatile uint8_t config_uart = 0;
 volatile uint8_t config_uart_transfer = 0;
+static volatile uint8_t cdc_configured = 0U; /* reset ISR / main-loop setup */
 
 USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t uartrx_ringbuffer[CONFIG_UARTRX_RINGBUF_SIZE];
 USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t usbrx_ringbuffer[CONFIG_USBRX_RINGBUF_SIZE];
@@ -555,12 +557,14 @@ void usbd_event_handler(uint8_t busid, uint8_t event)
     switch (event)
     {
     case USBD_EVENT_RESET:
+        spi_cdc_usb_reset();
         /* 先记代数：主循环据此判断"我手上这条命令是不是已经被复位作废了" */
         USB_ResetGen++;
         usbrx_idle_flag = 0;
         usbtx_idle_flag = 0;
         uarttx_idle_flag = 0;
         config_uart_transfer = 0;
+        cdc_configured = 0U;
         /* DAP 的队列索引/计数必须一起复位：下面的 CONFIGURED 固定从 USB_Request[0]
          * 重新武装，索引不复位的话，dap_out_callback 会拿旧 IndexI 去判 TransferAbort
          * （读的是旧缓冲），而数据其实落在 [0] —— 命令流错乱，一直到下一次复位。
@@ -1045,6 +1049,12 @@ uint8_t chry_dap_usb2uart_is_enabled(void)
     return usb2uart_bridge_enabled;
 }
 
+void chry_dap_usb2uart_request_config(void)
+{
+    /* USB reset/fresh boot must wait for the host's first line coding. */
+    if (cdc_configured) { config_uart = 1U; }
+}
+
 #if 1
 void chry_dap_usb2uart_handle(void)
 {
@@ -1060,9 +1070,12 @@ void chry_dap_usb2uart_handle(void)
         /* disable irq here */
         config_uart = 0;
         /* config uart here */
-        chry_dap_usb2uart_uart_config_callback((struct cdc_line_coding *)&g_cdc_lincoding);
-        usbtx_idle_flag = 1;
-        uarttx_idle_flag = 1;
+        if (uartx_get_cdc_source() == CDC_SOURCE_UART) {
+            chry_dap_usb2uart_uart_config_callback((struct cdc_line_coding *)&g_cdc_lincoding);
+        }
+        /* A repeated SET_LINE_CODING must not arm CDC IN twice or reset an
+         * active stream. UART baud is irrelevant to RTT/SPI producers. */
+        if (!cdc_configured) { usbtx_idle_flag = 1; uarttx_idle_flag = 1; cdc_configured = 1U; }
         config_uart_transfer = 1;
         // chry_ringbuffer_reset_read(&g_uartrx);
         /* enable irq here */

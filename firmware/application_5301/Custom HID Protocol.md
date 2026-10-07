@@ -679,6 +679,12 @@ Byte[0x03-0x3F] = Command data（可选）
 - Bootloader 启动时校验 APP 头（签名 + 长度 + CRC32），失败则停留在 DFU 模式。
 - 指令 `0x12`–`0x17` 即从上述固定地址读取返回。
 
+## SPI→USB 从机转发（0x39）
+
+复用现有 SPI2 引脚、SPI 主机 16 KiB OUT 缓冲与 CDC ACM 串口。动作 0 STATUS、1 START、2 STOP；START 后附 mode（0…3）与 LSB（0/1）。启停由主循环处理，响应表示入队，须轮询 STATUS 的 pending/rc/running 确认完成。
+
+响应返回 SPC1 能力标记及 13 个小端 u32 状态字，完整布局、互斥规则、回绕计数和接线见 [SPI→USB 协议](../../docs/spi-cdc.md#hid-0x39)。不支持板型返回 -1；CDC 被 SPI 占用时 RTT START 返回 -15。
+
 ## WebUI 配置界面
 
 点击连接按钮尝试连接 HID 设备

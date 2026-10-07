@@ -57,6 +57,7 @@ script_test/_*.log
 
 # scope 靶子固件的构建产物（可重新 build.ps1 生成）
 script_test/stm32f103_scope/build/
+script_test/stm32f103_spi_tx/build/
 # 逻辑分析仪抓包与临时件
 captures/
 tmp/
