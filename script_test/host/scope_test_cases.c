@@ -124,6 +124,30 @@ int main(void)
     assert(status_words[2] == 24000000 && status_words[3] == 100000);
     assert(status_words[4] == 80000 && status_words[5] == 70000 && status_words[6] == 90000);
     assert(status_words[7] == 65536 && status_words[10] == 96);
+    /* JTAG held reads retain the posted values across bounded bursts and
+     * packet flushes. Slower periods/multi-span plans must stay scalar. */
+    reset_test(); test_read_cost = 70;
+    assert(scope_sampler_configure_ticks(96, SCOPE_FLAG_RISCV | SCOPE_FLAG_DISCARD | SCOPE_FLAG_FAST_BATCH, 1, &one) == 0);
+    assert(scope_start_now() == 0); test_clock = s_next_tick; scope_sampler_poll();
+    assert(s_backend == SCOPE_BE_RISCV && s_produced == 16 && s_dropped == 0);
+    for (unsigned i = 0; i < 7; i++) { test_clock = s_next_tick; scope_sampler_poll(); }
+    assert(s_produced == 124 && s_fill_n == 0);
+    batch_buf = 0;
+    while (s_pkt[batch_buf][3] != SCOPE_KIND_DATA) { batch_buf++; assert(batch_buf < SCOPE_TX_BUFS); }
+    for (unsigned i = 1; i < 124; i++)
+        assert(get32(s_pkt[batch_buf]+16+i*4) == get32(s_pkt[batch_buf]+16+(i-1)*4)+1);
+    test_clock = s_next_tick; test_stop_call = test_calls + 3; scope_sampler_poll();
+    assert(!s_running && s_produced == 127);
+    reset_test(); test_read_cost = 70;
+    assert(scope_sampler_configure_ticks(144, SCOPE_FLAG_RISCV | SCOPE_FLAG_DISCARD | SCOPE_FLAG_FAST_BATCH, 1, &one) == 0);
+    assert(scope_start_now() == 0); test_clock = UINT32_MAX - 100; s_next_tick = test_clock;
+    scope_sampler_poll(); assert(s_produced == 16);
+    test_fail_read = 1; test_clock = s_next_tick; scope_sampler_poll();
+    assert(s_swd_err == 1 && s_produced == 16 && s_pipe_dst == NULL);
+    assert(scope_sampler_configure_ticks(145, SCOPE_FLAG_RISCV | SCOPE_FLAG_DISCARD | SCOPE_FLAG_FAST_BATCH, 1, &one) == 0);
+    assert(scope_start_now() == 0); test_clock = s_next_tick; scope_sampler_poll(); assert(s_produced == 1);
+    assert(scope_sampler_configure_ticks(96, SCOPE_FLAG_RISCV | SCOPE_FLAG_DISCARD | SCOPE_FLAG_FAST_BATCH, 2, two) == 0);
+    assert(scope_start_now() == 0); test_clock = s_next_tick; scope_sampler_poll(); assert(s_produced == 1 && !s_pipe_ok);
     one.size = 255;
     assert(scope_sampler_configure_ticks(60, 0, 1, &one) == -6 && s_nvars == 0);
     puts("scope host tests: protocol units, pipeline, packet boundary, limits, bounded batching, stop/error, rollover, USB ownership/starvation, DAP yield, multi-span PASS");

@@ -984,13 +984,17 @@ void scope_sampler_poll(void)
     }
 
     /* Keep interrupts enabled. Only amortize main-loop services for an explicitly
-     * enabled, bounded single-word session; slower/multi-span/JTAG plans stay scalar.
+     * enabled, bounded single-word session; slower/multi-span plans stay scalar.
      * STOP/configuration/reset requests interrupt the deadline wait. Only the 2 us
      * mode keeps its remaining budget across packet boundaries: an extra main-loop
      * visit there costs samples even when reads and USB throughput have headroom. */
+    /* JTAG's held SBA read costs about 3 us. Up to 16 samples amortize the
+     * main-loop overhead at 3.25--6 us, returning at packet edges and within
+     * 96 us nominally. The posted DMI status/error checks remain unchanged. */
     uint8_t batched = ((s_flags & SCOPE_FLAG_FAST_BATCH) && s_pipe_ok &&
-                       s_backend == SCOPE_BE_SWD && s_period_ticks <= 72U);
-    uint8_t tight = batched && s_period_ticks <= 48U;
+                       ((s_backend == SCOPE_BE_SWD && s_period_ticks <= 72U) ||
+                        (s_backend == SCOPE_BE_RISCV && s_period_ticks <= 144U)));
+    uint8_t tight = batched && s_backend == SCOPE_BE_SWD && s_period_ticks <= 48U;
     uint8_t budget = batched ? (tight ? 64U : 16U) : 1U;
     while (budget-- != 0U)
     {
