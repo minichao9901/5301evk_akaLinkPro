@@ -709,7 +709,7 @@ static uint32_t sb_pick_sclk(uint32_t want_hz)
 
 /* TX DMA 三件套（实现在下面的 TX DMA 段；这里先声明，因为 sb_spi_hw_init 要用） */
 static void sb_dma_init(void);
-static hpm_stat_t sb_dma_tx_start(const uint8_t *tx, uint32_t len);
+static hpm_stat_t sb_dma_tx_start(const uint8_t *tx, uint32_t len, uint8_t merge);
 static hpm_stat_t sb_dma_tx_wait(void);
 static hpm_stat_t sb_spi_rx_poll(uint8_t *rx, uint32_t rlen);
 /* 硬件重初始化（实现在配置块段；spi_bridge_poll 在它之前就要用） */
@@ -838,13 +838,20 @@ static void sb_dma_init(void)
     s_dma_ok = 1U;
 }
 
-static hpm_stat_t sb_dma_tx_start(const uint8_t *tx, uint32_t len)
+static hpm_stat_t sb_dma_tx_start(const uint8_t *tx, uint32_t len, uint8_t merge)
 {
+    uint8_t width = merge ? DMA_MGR_TRANSFER_WIDTH_WORD : DMA_MGR_TRANSFER_WIDTH_BYTE;
+    if ((dma_mgr_set_chn_src_width(&s_dma, width) != status_success) ||
+        (dma_mgr_set_chn_dst_width(&s_dma, width) != status_success))
+    {
+        return status_fail;
+    }
     if (dma_mgr_set_chn_src_addr(&s_dma, (uint32_t)tx) != status_success)
     {
         return status_fail;
     }
-    if (dma_mgr_set_chn_transize(&s_dma, len) != status_success)
+    /* DMA TRANSIZE counts source-width units; SPI WR_TRANS_CNT still counts bytes. */
+    if (dma_mgr_set_chn_transize(&s_dma, merge ? len / 4U : len) != status_success)
     {
         return status_fail;
     }
@@ -916,6 +923,7 @@ static uint8_t sb_spi_xfer(const sb_xfer_t *x, uint8_t flags, const uint8_t *tx,
     uint8_t lines = (uint8_t)(x->tcfg & SB_TCFG_LINES_MASK);
     uint8_t trans_mode;
     uint8_t use_dma = 0U;
+    uint8_t merge;
     uint32_t wcnt;
     uint32_t rcnt;
     uint32_t t0;
@@ -967,7 +975,13 @@ static uint8_t sb_spi_xfer(const sb_xfer_t *x, uint8_t flags, const uint8_t *tx,
         }
     }
 
+    /* DATAMERGE splits a FIFO word into four 8-bit data units. Limit it to
+     * aligned TX-only DMA: polling/RX and arbitrary tails retain byte semantics.
+     * Never read beyond the frame, and never change wire data-unit length. */
+    merge = (uint8_t)(use_dma && !rlen && !(wlen & 3U) && !((uintptr_t)tx & 3U));
     sb_spi_apply_format(x->addr_len);
+    if (merge) { spi_enable_data_merge(SB_SPI); }
+    else { spi_disable_data_merge(SB_SPI); }
 
     /*
      * ⚠️ 必须先清零再取默认值：SDK 的 `spi_master_get_default_control_config()`
@@ -1021,7 +1035,7 @@ static uint8_t sb_spi_xfer(const sb_xfer_t *x, uint8_t flags, const uint8_t *tx,
         s_dbg[12] = 3U;
         if (stat == status_success)
         {
-            stat = sb_dma_tx_start(tx, wlen);
+            stat = sb_dma_tx_start(tx, wlen, merge);
             s_dbg[12] = 4U;
         }
         if (stat == status_success)
