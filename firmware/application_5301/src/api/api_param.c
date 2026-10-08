@@ -3,6 +3,7 @@
 
 #include "api_param.h"
 #include "usb_composite.h"
+#include "cdc_interface.h"
 #include "rtt_bridge.h"
 #include "riscv_svc.h"
 #include "scope_sampler.h"
@@ -54,6 +55,7 @@ service_gate_t api_param_gate;
 #define CMD_GET_HW_PROD_DATE (0x15)
 #define CMD_GET_FW_COMPILE_DATE (0x16)
 #define CMD_GET_BL_COMPILE_DATE (0x17)
+#define CMD_UART_DIAG (0x18)
 #define CMD_RESET_DEVICE (0xFE)
 #define CMD_ENTER_DFU (0xFF)
 /* Probe-side SEGGER RTT bridge (see src/rtt/rtt_bridge.c). */
@@ -224,6 +226,14 @@ void api_param_proc_hid(uint8_t *req_hid, uint8_t *res_hid)
     uint8_t cmd = req_hid[2];
     switch (cmd)
     {
+    case CMD_UART_DIAG: {
+        uint32_t words[8];
+        uartx_get_diag(words);
+        res_hid[1] = 33U;
+        res_hid[2] = CMD_UART_DIAG;
+        memcpy(&res_hid[3], words, sizeof(words));
+        break;
+    }
     case CMD_GET_CONFIG:
         res_hid[1] = 0x07;
         res_hid[2] = CMD_GET_CONFIG;

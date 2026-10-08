@@ -75,3 +75,6 @@ firmware/application_5301/build_dfu_evklite/*
 firmware/application_5301/build_dfu_evklite/output/*
 !firmware/application_5301/build_dfu_evklite/output/akaLinkPro_App.elf
 
+
+# Isolated UART clock experiments
+firmware/application_5301/build_uart*/

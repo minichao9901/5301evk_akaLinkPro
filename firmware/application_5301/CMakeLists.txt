@@ -85,10 +85,15 @@ if(BOARD STREQUAL "hpm5301evklite")
     )
 endif()
 
-# UART2 clock: default 80 MHz (datasheet max), max baud 10 Mbps.
-# Uncomment the line below to overclock UART2 to 180 MHz (OUT OF SPEC) which
-# reaches 22.5 Mbps and makes 11.25/15/18 Mbps exactly representable.
-# sdk_compile_definitions(-DUART2_OVERCLOCK=1)
+# Default to the user-selected 200 MHz profile (PLL1CLK0 / 4).
+# HPM5300 DS Rev0.11 permits 100 MHz; 180/200 exceed that rating.
+set(UART2_CLOCK_MHZ "" CACHE STRING "CDC UART input clock: 80/100/180/200 MHz")
+if(NOT UART2_CLOCK_MHZ STREQUAL "")
+    if(NOT UART2_CLOCK_MHZ MATCHES "^(80|100|180|200)$")
+        message(FATAL_ERROR "UART2_CLOCK_MHZ must be 80, 100, 180 or 200")
+    endif()
+    sdk_compile_definitions(-DUART2_CLOCK_MHZ=${UART2_CLOCK_MHZ})
+endif()
 
 # Reserve the first 128K of flash for the bootloader when using the DFU layout
 # (flash_dfu => APP linked at 0x80020000). A flash_xip build links at

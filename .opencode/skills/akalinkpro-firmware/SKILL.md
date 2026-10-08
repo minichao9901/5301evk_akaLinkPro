@@ -366,3 +366,10 @@ SWD 目标可为 STM32F1 等；本板 SWD 实跑 20/36/45/60MHz。
 5. 串口回环（RXD-TXD 短接）在 SWD/空闲下能通过，JTAG 下无回显。
 6. HID `0x12`–`0x17` 返回 `version.json` 中配置的版本/时间。
 7. APP 已移除 `build.bat` / `build_zcc.bat`：统一用 `build_dfu.bat` 构建，`program.bat`（dfu-util）或 `flash_jlink.bat`（J-Link）烧录；均使用 `_pack` 产物。
+
+
+## 2026-10-09 UART 默认模式更新
+
+用户已明确选择 CDC UART 默认 PLL1CLK0(800 MHz)/4 = **200 MHz**、最高配置 **25 Mbps**，取代上文历史 80 MHz 默认说明。HPM5300 DS Rev0.11 表 17 的额定 UART 输入上限为 100 MHz，200 MHz 是用户要求的超规格模式。CMake `UART2_CLOCK_MHZ` 可覆盖到 80/100/180/200；未覆盖时默认 200。不要在实验结束后自行恢复旧 80 MHz 探针固件。
+
+当前探针已保留默认 200 MHz 镜像，详细数据和限制见 [测试报告](../../../docs/uart-200mhz-test.md)。HID 0x18 和 `script_test/uart_clock_diag.py` 可只读获取实际时钟、请求/应用波特率、OSR、上限和初始化状态。诊断避免读取 DLL/DLM；应用波特率为传给 SDK 的值，不能代替低速档线路实测。

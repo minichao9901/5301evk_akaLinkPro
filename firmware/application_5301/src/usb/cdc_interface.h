@@ -20,6 +20,8 @@ extern "C"
     void uartx_io_init(void);
 
     void uartx_preinit(void);
+    /* HID 0x18: version, clock, requested/applied baud, OSR, cap, init status, clock register. */
+    void uartx_get_diag(uint32_t words[8]);
 
     /* VCOM pins -> the CDC UART (COM mode): DAP in SWD mode, disconnected or idle.
      * On boards where the UART shares pins with JTAG TDI/TDO this muxes the pads

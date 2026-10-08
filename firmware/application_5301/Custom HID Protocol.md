@@ -700,3 +700,12 @@ Byte[0x03-0x3F] = Command data（可选）
 在未连接状态下，只有连接按钮可用，其他按钮不可用，配置项目不可选
 
 每个配置项和按键，当鼠标指上去的时候需要有提示信息
+
+
+## UART 只读诊断（0x18）
+
+请求 `[ReportID=1, length=1, cmd=0x18]`；响应 `[ReportID=2, length=33, cmd=0x18]`，随后 8 个小端 u32：协议版本（1）、实际 UART 输入时钟 Hz、主机请求波特率、钳制/取整后交给 SDK 的波特率、硬件 OSR（寄存器 0 解码为 32）、编译配置的波特率上限、最后一次 `uart_init` 状态（0 为成功）、原始 SYSCTL CLOCK 寄存器。
+
+此指令不更改 UART 配置，不读取 DLL/DLM（DLAB=0 时会别名到收包寄存器）。初次 SET_LINE_CODING 前，请求/应用波特率为 0、初始化状态为失败，表示尚未配置。返回的应用波特率是 SDK 的输入值；低速率的最终分频还受 SDK 取整容差影响，不能把它视为线速实测。200 MHz 时 OSR=8、25 Mbaud，或 OSR=10、20 Mbaud，均对应 divisor=1。
+
+`script_test/uart_clock_diag.py --serial <SN>` 可只读核对。

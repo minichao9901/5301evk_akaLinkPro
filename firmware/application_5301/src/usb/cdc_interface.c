@@ -75,27 +75,36 @@
 #define UART2_DRIVE_DTR_RTS (0)
 #endif
 
-/* UART2 clock / baud configuration.
- *
- * The HPM5301 datasheet limits the UART input clock to 80 MHz. Keep that by
- * default (PLL0CLK0 720 MHz / 9 = 80 MHz, whose hardware max baud is
- * uart_clk / 8 = 10 Mbps).
- *
- * Define UART2_OVERCLOCK=1 to run the UART at 180 MHz (PLL0CLK0 / 4) instead:
- * that reaches 22.5 Mbps and makes rates like 11.25/15/18 Mbps exactly
- * representable, but it is OUT OF SPEC and may not be stable on every chip.
+/* HPM5300 DS Rev0.11 table 17 permits UART clocks up to 100 MHz.
+ * The user-selected default is PLL1CLK0 / 4 = 200 MHz (above that rating).
+ * PLL1CLK0 is already configured by boot/ROM: do not retune a shared PLL.
  */
 #ifndef UART2_OVERCLOCK
 #define UART2_OVERCLOCK (0)
 #endif
-
+#ifndef UART2_CLOCK_MHZ
 #if UART2_OVERCLOCK
-#define UART2_CLK_DIV (4U)             /* 720 MHz / 4 = 180 MHz (overclock) */
-#define UART2_MAX_BAUDRATE (22500000U) /* uart_clk / 8 */
+#define UART2_CLOCK_MHZ 180
 #else
-#define UART2_CLK_DIV (9U)             /* 720 MHz / 9 = 80 MHz (datasheet max) */
-#define UART2_MAX_BAUDRATE (10000000U) /* uart_clk / 8 */
+#define UART2_CLOCK_MHZ 200
 #endif
+#endif
+#if UART2_CLOCK_MHZ == 200
+#define UART2_CLK_SOURCE clk_src_pll1_clk0
+#define UART2_CLK_DIV (4U) /* PLL1CLK0 800 MHz / 4 */
+#elif UART2_CLOCK_MHZ == 180
+#define UART2_CLK_SOURCE clk_src_pll0_clk0
+#define UART2_CLK_DIV (4U)
+#elif UART2_CLOCK_MHZ == 100
+#define UART2_CLK_SOURCE clk_src_pll1_clk0
+#define UART2_CLK_DIV (8U)
+#elif UART2_CLOCK_MHZ == 80
+#define UART2_CLK_SOURCE clk_src_pll0_clk0
+#define UART2_CLK_DIV (9U)
+#else
+#error Unsupported UART2_CLOCK_MHZ
+#endif
+#define UART2_MAX_BAUDRATE (UART2_CLOCK_MHZ * 1000000U / 8U)
 
 /* Number of bytes of the single RX buffer that were already copied into
  * g_uartrx. Reset whenever the RX DMA is restarted. */
@@ -131,8 +140,24 @@ uint8_t uart_rx_buf[UART_RX_DMA_BUFFER_SIZE];
 
 static dma_resource_t dma_resource_pools[2];
 volatile uint32_t g_uart_tx_transfer_length = 0;
-/* Last baud rate actually programmed into UART2 (after clamping/rounding). */
+/* Clamped/rounded nominal baud passed to the SDK after successful init. */
 volatile uint32_t g_uart2_applied_baud = 0;
+static uint32_t s_uart_requested_baud;
+static hpm_stat_t s_uart_init_status = status_fail;
+
+/* Snapshot only non-destructive registers: DLL/DLM alias RX data when DLAB=0. */
+void uartx_get_diag(uint32_t words[8])
+{
+    words[0] = 1U;
+    words[1] = clock_get_frequency(UART_CLK_NAME);
+    words[2] = s_uart_requested_baud;
+    words[3] = g_uart2_applied_baud;
+    uint32_t osc = UART_OSCR_OSC_GET(UART_BASE->OSCR);
+    words[4] = osc ? osc : 32U;
+    words[5] = UART2_MAX_BAUDRATE;
+    words[6] = (uint32_t)s_uart_init_status;
+    words[7] = HPM_SYSCTL->CLOCK[GET_CLK_NODE_FROM_NAME(UART_CLK_NAME)];
+}
 
 static hpm_stat_t board_uart_dma_config(void);
 static void uartx_mux_to_uart(void);
@@ -479,9 +504,7 @@ void uartx_preinit(void)
 
     uartx_io_init();
 
-    /* UART2 clock from PLL0CLK0 (PLL0 is always initialised).
-     * Default: 720/9 = 80 MHz (datasheet max); UART2_OVERCLOCK: 720/4 = 180 MHz. */
-    clock_set_source_divider(UART_CLK_NAME, clk_src_pll0_clk0, UART2_CLK_DIV);
+    clock_set_source_divider(UART_CLK_NAME, UART2_CLK_SOURCE, UART2_CLK_DIV);
     clock_add_to_group(UART_CLK_NAME, 0);
     intc_m_enable_irq_with_priority(UART_IRQ, 2);
     uart_clear_rxline_idle_flag(UART_BASE);
@@ -564,12 +587,13 @@ void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
     config.src_freq_in_hz = clock_get_frequency(UART_CLK_NAME);
 
     uint32_t requested = line_coding->dwDTERate;
+    s_uart_requested_baud = requested;
     uint32_t applied = uart2_round_baudrate(config.src_freq_in_hz, requested);
     if (applied == 0)
     {
         applied = (requested > UART2_MAX_BAUDRATE) ? UART2_MAX_BAUDRATE : requested;
     }
-    g_uart2_applied_baud = applied;
+
     if (applied != requested)
     {
         printf("uart2 baud: req %lu -> %lu (max %lu)\r\n",
@@ -588,7 +612,14 @@ void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
     config.rxidle_config.detect_irq_enable = true;
     config.rxidle_config.idle_cond = uart_rxline_idle_cond_state_machine_idle;
     config.rxidle_config.threshold = 30U; /* 20bit */
-    uart_init(UART_BASE, &config);
+    s_uart_init_status = uart_init(UART_BASE, &config);
+    if (s_uart_init_status != status_success) {
+        /* SDK may leave DLAB set on a rejected divisor. Never restart DMA there. */
+        UART_BASE->LCR &= ~UART_LCR_DLAB_MASK;
+        g_uart2_applied_baud = 0U;
+        return;
+    }
+    g_uart2_applied_baud = applied;
     uart_clear_rxline_idle_flag(UART_BASE);
     uart_reset_rx_fifo(UART_BASE);
     uart_reset_tx_fifo(UART_BASE);
