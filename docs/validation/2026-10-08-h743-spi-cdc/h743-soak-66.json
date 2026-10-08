@@ -1,0 +1,110 @@
+[
+  {
+    "mhz_requested": 66,
+    "seconds": 30.000451900006738,
+    "module_clock_debug": [
+      0,
+      16777216,
+      240000000,
+      10000000,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "target": {
+      "g_run": 1,
+      "g_core_hz": 400000000,
+      "g_spi_hz": 66000000,
+      "g_clock_err": 0,
+      "g_refill_late": 0,
+      "g_dma_errors": 0,
+      "g_blocks": 16,
+      "g_sequence": 4608,
+      "g_spi_sr": 0
+    },
+    "host": {
+      "bytes": 248507068,
+      "frames": 3882923,
+      "gaps": 0,
+      "reverse": 0,
+      "bad_frames": 0,
+      "bit_errors": 0,
+      "compared_bits": 1739549504,
+      "unaligned_bytes": 0
+    },
+    "before": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 0,
+      "buffer": 16384,
+      "received": 2832322,
+      "forwarded": 2820251,
+      "dropped": 12048,
+      "fifo_overflows": 0,
+      "pending": 23,
+      "cdc_queued": 520,
+      "generation": 46,
+      "dma_errors": 0
+    },
+    "after": {
+      "magic": 826495059,
+      "flags": 3,
+      "rc": 0,
+      "config": 0,
+      "buffer": 16384,
+      "received": 251367828,
+      "forwarded": 251355756,
+      "dropped": 12048,
+      "fifo_overflows": 0,
+      "pending": 24,
+      "cdc_queued": 699,
+      "generation": 46,
+      "dma_errors": 0
+    },
+    "target_after": {
+      "g_run": 0,
+      "g_core_hz": 400000000,
+      "g_spi_hz": 66000000,
+      "g_clock_err": 0,
+      "g_refill_late": 0,
+      "g_dma_errors": 0,
+      "g_blocks": 15388,
+      "g_sequence": 3939840,
+      "g_spi_sr": 0
+    },
+    "stopped": {
+      "magic": 826495059,
+      "flags": 1,
+      "rc": 0,
+      "config": 0,
+      "buffer": 16384,
+      "received": 252131195,
+      "forwarded": 252078097,
+      "dropped": 53098,
+      "fifo_overflows": 0,
+      "pending": 0,
+      "cdc_queued": 0,
+      "generation": 46,
+      "dma_errors": 0
+    },
+    "reader_error": null,
+    "sample_hex": "5350494300000000d2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a1b08392edfccfde29380b1a65744755350494301000000d3c0f1e69784b55a4b78691e0f3c2dd2c3f0e19687b4a54a7b68190e3f2cddc2f3e09186b7a4557a6b18093e2fdccdf2e39081b6a754456a",
+    "MBps": 8.283444157050988,
+    "payload_BER": 0.0,
+    "probe_window": {
+      "received": 248535506,
+      "forwarded": 248535505,
+      "dropped": 0,
+      "fifo_overflows": 0,
+      "dma_errors": 0
+    },
+    "clean": true
+  }
+]

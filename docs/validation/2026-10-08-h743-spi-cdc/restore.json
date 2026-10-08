@@ -1,0 +1,10 @@
+{
+  "bytes": 2097152,
+  "original_sha256": "5d8599dea0b6d2eda69da30d63861bb85f18d1e0acd7930064262e27592dd1da",
+  "restored_sha256": "5d8599dea0b6d2eda69da30d63861bb85f18d1e0acd7930064262e27592dd1da",
+  "match": true,
+  "openocd_program_verify": "passed",
+  "target_reset": "completed",
+  "probe_spi_cdc_stopped": true,
+  "browser_test_overrides": "cleared_by_navigation"
+}

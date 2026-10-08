@@ -9,6 +9,8 @@
 extern service_gate_t spi_bridge_gate;
 static inline uint8_t spi_bridge_needs_service(void) { return service_gate_pending(&spi_bridge_gate); }
 #include "spi_bridge_proto.h"
+/* Establish and verify the shared SPI2 module clock; 0 means failure. */
+uint32_t spi_bridge_configure_clock(void);
 
 /*
  * USB -> SPI/QSPI 转发桥（探针侧）

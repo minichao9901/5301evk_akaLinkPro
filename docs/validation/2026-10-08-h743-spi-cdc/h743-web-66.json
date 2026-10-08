@@ -1,0 +1,103 @@
+{
+  "clocks": {
+    "g_run": 1,
+    "g_core_hz": 400000000,
+    "g_spi_hz": 66000000,
+    "g_clock_err": 0,
+    "g_refill_late": 0,
+    "g_dma_errors": 0,
+    "g_blocks": 16,
+    "g_sequence": 4608,
+    "g_spi_sr": 0
+  },
+  "finalClocks": {
+    "g_run": 0,
+    "g_core_hz": 400000000,
+    "g_spi_hz": 66000000,
+    "g_clock_err": 0,
+    "g_refill_late": 0,
+    "g_dma_errors": 0,
+    "g_blocks": 15627,
+    "g_sequence": 4001024,
+    "g_spi_sr": 0
+  },
+  "serialBuffer": 4096,
+  "seconds": 30.007,
+  "MBps": 8.284595760989102,
+  "before": {
+    "bytes": 4632440,
+    "frames": 72381,
+    "gaps": 189,
+    "bad": 33,
+    "reversed": 0,
+    "time": 1889.0999999940395,
+    "status": {
+      "supported": true,
+      "running": true,
+      "pending": false,
+      "rc": 0,
+      "mode": 0,
+      "lsb": false,
+      "bufferBytes": 16384,
+      "received": 4656845,
+      "forwarded": 4644782,
+      "dropped": 12063,
+      "fifoOverflows": 0,
+      "pendingBytes": 0,
+      "cdcQueued": 496,
+      "generation": 51,
+      "dmaErrors": 0
+    }
+  },
+  "after": {
+    "bytes": 253228305,
+    "time": 31896.09999999404,
+    "frames": 3956691,
+    "gaps": 189,
+    "bad": 33,
+    "reversed": 0,
+    "maxGap": 35.6000000089407,
+    "beats": 1543,
+    "high": true,
+    "raw": 8192,
+    "chars": 0,
+    "errors": [],
+    "status": {
+      "supported": true,
+      "running": true,
+      "pending": false,
+      "rc": 0,
+      "mode": 0,
+      "lsb": false,
+      "bufferBytes": 16384,
+      "received": 253267452,
+      "forwarded": 253255365,
+      "dropped": 12063,
+      "fifoOverflows": 0,
+      "pendingBytes": 24,
+      "cdcQueued": 435,
+      "generation": 51,
+      "dmaErrors": 0
+    }
+  },
+  "stopped": {
+    "status": {
+      "supported": true,
+      "running": false,
+      "pending": false,
+      "rc": 0,
+      "mode": 0,
+      "lsb": false,
+      "bufferBytes": 16384,
+      "received": 256034156,
+      "forwarded": 255980942,
+      "dropped": 53214,
+      "fifoOverflows": 0,
+      "pendingBytes": 0,
+      "cdcQueued": 0,
+      "generation": 51,
+      "dmaErrors": 0
+    },
+    "portOpen": true
+  }
+}

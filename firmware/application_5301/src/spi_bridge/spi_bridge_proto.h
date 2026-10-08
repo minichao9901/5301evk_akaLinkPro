@@ -23,6 +23,7 @@
 #define SPI_BRIDGE_PROTO_H
 
 #include <stdint.h>
+#define SPI_BRIDGE_MODULE_CLOCK_HZ 240000000UL
 
 /* ============================ bulk 端点 ============================ */
 
@@ -206,10 +207,7 @@ typedef struct
     uint16_t in_ring_kb;
     uint16_t max_frame_bytes; /* v1 固定 504 */
     uint16_t reserved1;
-    /* SPI2 模块时钟目标（Hz），0 = 自动。
-     * 自动规则：模块时钟 ≤ 240 MHz，且取能**整除出目标 SCLK 的最小型号**。
-     * 上板实测：模块时钟给到 PLL0 原频 720 MHz 时 SPI 一次都不移位（SCLK 全程不动、
-     * TX FIFO 只进不出），所以绝不能再用 720。这个字段留作在线扫频用。 */
+    /* SPI2 固定 240 MHz；保留协议字段，旧主机写入的提示值统一归一化为 240 MHz。 */
     uint32_t module_clk_hz;
     uint8_t reserved[4];
 } sb_cfg_t;

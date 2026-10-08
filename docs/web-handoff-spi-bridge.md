@@ -215,7 +215,7 @@ CS↓ ─ [cmd] ─ [addr] ─ [dummy] ─ [data(tx/rx, 1/2/4 线)] ─ CS↑
 18: u16 in_ring_kb
 20: u16 max_frame_bytes    固定 504
 22: u16 reserved1
-24: u32 module_clk_hz      **调板旋钮**：SPI2 模块时钟目标。0 = 自动（推荐）
+24: u32 module_clk_hz      SPI2 模块固定为 240000000；旧写入值统一归一化，保留字段布局
 28: u8  reserved[4]
 ```
 

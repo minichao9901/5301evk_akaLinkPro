@@ -1,0 +1,102 @@
+{
+  "clocks": {
+    "g_run": 1,
+    "g_core_hz": 400000000,
+    "g_spi_hz": 64000000,
+    "g_clock_err": 0,
+    "g_refill_late": 0,
+    "g_dma_errors": 0,
+    "g_blocks": 16,
+    "g_sequence": 4864,
+    "g_spi_sr": 0
+  },
+  "finalClocks": {
+    "g_run": 0,
+    "g_core_hz": 400000000,
+    "g_spi_hz": 64000000,
+    "g_clock_err": 0,
+    "g_refill_late": 0,
+    "g_dma_errors": 0,
+    "g_blocks": 15233,
+    "g_sequence": 3900160,
+    "g_spi_sr": 0
+  },
+  "seconds": 30.01590000000596,
+  "MBps": 8.032758138185166,
+  "before": {
+    "bytes": 4604191,
+    "frames": 71939,
+    "gaps": 180,
+    "bad": 93,
+    "reversed": 0,
+    "time": 2065.7000000029802,
+    "status": {
+      "supported": true,
+      "running": true,
+      "pending": false,
+      "rc": 0,
+      "mode": 0,
+      "lsb": false,
+      "bufferBytes": 16384,
+      "received": 4640420,
+      "forwarded": 4628967,
+      "dropped": 11427,
+      "fifoOverflows": 0,
+      "pendingBytes": 26,
+      "cdcQueued": 488,
+      "generation": 49,
+      "dmaErrors": 0
+    }
+  },
+  "after": {
+    "bytes": 245714656,
+    "time": 32081.60000000894,
+    "frames": 3839290,
+    "gaps": 180,
+    "bad": 93,
+    "reversed": 0,
+    "maxGap": 33.599999994039536,
+    "beats": 1545,
+    "high": true,
+    "raw": 8192,
+    "chars": 0,
+    "errors": [],
+    "status": {
+      "supported": true,
+      "running": true,
+      "pending": false,
+      "rc": 0,
+      "mode": 0,
+      "lsb": false,
+      "bufferBytes": 16384,
+      "received": 245758184,
+      "forwarded": 245746735,
+      "dropped": 11427,
+      "fifoOverflows": 0,
+      "pendingBytes": 22,
+      "cdcQueued": 3153,
+      "generation": 49,
+      "dmaErrors": 0
+    }
+  },
+  "stopped": {
+    "status": {
+      "supported": true,
+      "running": false,
+      "pending": false,
+      "rc": 0,
+      "mode": 0,
+      "lsb": false,
+      "bufferBytes": 16384,
+      "received": 249593144,
+      "forwarded": 249544996,
+      "dropped": 48148,
+      "fifoOverflows": 0,
+      "pendingBytes": 0,
+      "cdcQueued": 0,
+      "generation": 49,
+      "dmaErrors": 0
+    },
+    "portOpen": true
+  }
+}

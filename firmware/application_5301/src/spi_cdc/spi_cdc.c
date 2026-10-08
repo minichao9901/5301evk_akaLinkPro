@@ -91,7 +91,7 @@ static int32_t start(void)
     restore_global_irq(lock);
     if (!claimed) { return -2; }
     s_claimed = 1U;
-    clock_add_to_group(clock_spi2, 0);
+    if (!spi_bridge_configure_clock()) { stop(); return -4; }
     init_spi2_bridge_pins(0U, 1U); /* same pins, hardware CS input in slave mode */
     spi_format_config_t format = {0};
     spi_slave_get_default_format_config(&format);

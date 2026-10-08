@@ -1,0 +1,31 @@
+# H743 SPI 转发测速发送端
+
+用于 SPI1 主机 → akaLinkPro SPI2 从机 → USB CDC 的吞吐量与数据完整性实测。此夹具会替换目标 Flash；使用前完整备份，测试完成后恢复原固件。
+
+接线：PA4 → 探针 PB10 / CS，PA5 → PB11 / SCK，PA7 → PB13 / MOSI，两板共地。PA6 / MISO 本轮不读取。使用 Mode 0、MSB first、3.3 V。
+
+## 编译和运行
+
+在本目录执行 `pwsh -File build.ps1`，生成供下载和版本管理的 `fw.elf`，以及忽略目录 `build/fw.bin`。默认工具链路径与仓库其他 STM32 夹具相同。
+
+发送端从 HSI 64 MHz 配置 PLL1，CPU 为标称 400 MHz，HCLK 200 MHz。PLL2P 单独供应 SPI1 内核时钟，SPI 分频为 /2。内部 RC 的误差会影响实际 SCK；`g_spi_hz` 是依据 PLL 配置计算的标称值，并非示波器测量值。`g_mhz=133` 对应标称 133.333 MHz。奇数 MHz 使用 PLL 小数分频。
+
+上电后 `g_run=0`，CS 保持高。通过 SWD 设置 `g_mhz`，再令 `g_run=1` 开始连续发送；令其为 0 停止。改变速率前必须先停。I-cache 开启，D-cache 关闭，32 KiB 数据缓冲位于 DMA 可访问的 AXI SRAM。DMA 循环发送 32 位打包数据，半满/满事件补充空闲半区；`g_refill_late`、`g_dma_errors` 用于排除发送端不足。
+
+每个 64 字节帧：`SPIC` 魔数、32 位小端连续序号、56 字节已知变化数据，第 i 字节为 `((sequence + 17*i) ^ 0x5a) & 255`，i=8..63。
+
+## 主机测速
+
+仓库根目录运行：
+
+```powershell
+py -u script_test/spi_cdc_h743_hw.py --mhz 60,64,66,67,68 --module-mhz 240 --seconds 10 --json build/h743-spi.json
+```
+
+脚本分别记录主机实收字节、帧序号缺失、乱序、有效帧数据位错误、无法对齐字节、探针丢弃/FIFO/DMA 状态，以及发送端供数状态。失步字节没有可信 BER 分母，不能把 BER 为 null 或有效帧数为 0 解读成零误码。高频失步时，依据已损坏序号估计的 gaps/BER 也不应作为准确物理误码统计。
+
+测速窗口排除用 SWD 启动/停止目标的阶段；该阶段的探针累计丢弃计数仍保留在 before/after/stopped 中。`probe_window` 是纯转发计时窗口内的增量。高速数据下，SWD 命令处理可能造成共享主循环延迟并溢出 16 KiB 接收环，这与 SPI 输入采样错误分别统计。
+
+`--module-mhz` 用于旧固件的时钟对照，使用 SPI 主机配置接口设置时钟，然后用 USB ZLP 退休主机 OUT 端点，再交给从机接收。2026-10-08 新固件固定 SPI2 模块时钟为 240 MHz，会忽略该旧提示值；复测使用 `--module-mhz 0`，直接启动从机即可。
+
+真实 Web 校验使用 web 工程 `tools/selftest/spi-cdc-hw.mjs`：设置 `SPI_TARGET=h743`、`SPI_MHZ=66`、`SECONDS=30`。新版无需预先设置模块时钟。确认浏览器具有该探针 HID/Serial 授权；脚本不会替用户选择硬件。

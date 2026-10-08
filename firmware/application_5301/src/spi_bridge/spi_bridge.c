@@ -72,6 +72,7 @@ uint8_t spi_bridge_slave_claim(uint8_t **receive, uint32_t *size) {
     (void)receive; (void)size; return 0U;
 }
 void spi_bridge_slave_release(void) {}
+uint32_t spi_bridge_configure_clock(void) { return 0U; }
 
 void spi_bridge_hid(uint8_t *req_hid, uint8_t *res_hid)
 {
@@ -504,207 +505,52 @@ static void sb_spi_apply_format(uint8_t addr_len_bytes)
     s_fmt_addr_len = alen;
 }
 
-/*
- * 选 SPI2 的模块时钟与分频，使 SCLK 尽量贴近 want_hz，返回**实际**得到的 SCLK。
- *
- * 两条硬约束（drivers/src/hpm_spi_drv.c:348）：SCLK = 模块时钟 / N，N 必须整除且为
- * **偶数**，N ≤ 510。
- *
- * ⚠️ 2026-09-29 上板教训：**不要再把模块时钟直接顶到 PLL0 原频 720 MHz**。
- * 之前这里是把 720/600/400 MHz 逐个试、取能整除的那个 —— 结果 20 MHz 落在
- * 720/36 上，然后 SPI 一次都不移位：LA 抓到的波形里 CS 拉了 614 µs、MOSI 只有
- * 几个毛刺、**SCLK 全程不动**，`spi_write_read_data` 卡在 5000 次重试后超时。
- * 板级默认（SDK 的 board_init_spi_clock 也只做 clock_add_to_group，不动源）其实是
- * 24 MHz，所以拿 720 MHz 喂这个 IP 是超出它工作范围的。
- *
- * 现在改成：在「时钟源 × 整数分频」里搜**能整除出目标 SCLK 的最小模块时钟**
- * （上限 SB_MAX_MODULE_CLK_HZ），既避开超频，又保留 20/40/60/100 MHz 这些档。
+/* SPI2 uses one verified 240MHz module clock in master and slave modes.
+ * SCK remains a separate even divider and never exceeds the requested rate.
+ * Query the PLL source before selecting it: never briefly feed SPI at 720MHz.
  */
-#define SB_MAX_MODULE_CLK_HZ 240000000UL
 #define SB_MAX_SCLK_HZ 100000000UL
-#define SB_DEF_MODULE_CLK_HZ 24000000UL
 
-static const clk_src_t s_clk_cands[] = {
-    clk_src_pll0_clk0, clk_src_pll0_clk1, clk_src_pll0_clk2,
-    clk_src_pll1_clk0, clk_src_pll1_clk1, clk_src_pll1_clk2, clk_src_pll1_clk3,
-};
-
-/* 给定模块时钟，返回它能给出的、最接近 want 的 "偶数 N" SCLK；0 = 给不出 */
-static uint32_t sb_sclk_from_module(uint32_t module, uint32_t want)
+uint32_t spi_bridge_configure_clock(void)
 {
-    uint32_t n;
-
-    if (module < 2U)
-    {
+    uint32_t source = get_frequency_for_source(clock_source_pll0_clk0);
+    if (source < SPI_BRIDGE_MODULE_CLOCK_HZ || source % SPI_BRIDGE_MODULE_CLOCK_HZ) {
         return 0U;
     }
-    n = (module + want - 1U) / want; /* 向上取整 */
-    if (n < 2U)
-    {
-        n = 2U;
+    uint32_t div = source / SPI_BRIDGE_MODULE_CLOCK_HZ;
+    if (div > 256U || clock_set_source_divider(SB_SPI_CLK_NAME, clk_src_pll0_clk0, div) != status_success) {
+        return 0U;
     }
-    if ((n & 1U) != 0U)
-    {
-        n++;
-    }
-    for (uint32_t k = 0U; (k < 16U) && (n <= 510U); k++, n += 2U)
-    {
-        if ((module % n) != 0U)
-        {
-            continue;
-        }
-        return module / n;
+    clock_add_to_group(SB_SPI_CLK_NAME, 0);
+    uint32_t actual = clock_get_frequency(SB_SPI_CLK_NAME);
+    return actual == SPI_BRIDGE_MODULE_CLOCK_HZ ? actual : 0U;
+}
+
+/* The SDK accepts only exact integer-Hz, even divisors, N <= 510. */
+static uint32_t sb_sclk_from_module(uint32_t module, uint32_t want)
+{
+    if (module < 2U || want == 0U) { return 0U; }
+    uint32_t n = module / want + (module % want != 0U);
+    if (n < 2U) { n = 2U; }
+    if (n & 1U) { n++; }
+    for (; n <= 510U; n += 2U) {
+        if (module % n == 0U) { return module / n; }
     }
     return 0U;
 }
 
 static uint32_t sb_pick_sclk(uint32_t want_hz)
 {
-    uint32_t best_sclk = 0U;
-    uint32_t best_module = 0U;
-    uint32_t best_diff = 0xFFFFFFFFUL;
-    uint32_t best_div = 1U;
-    clk_src_t best_src = clk_src_invalid;
-
-    if (want_hz == 0U)
-    {
-        want_hz = SB_DEF_SCLK_HZ;
-    }
-    if (want_hz > SB_MAX_SCLK_HZ)
-    {
-        want_hz = SB_MAX_SCLK_HZ;
-    }
-
-    /* 显式指定的模块时钟：只试这一个目标，不用扫 */
-    if (s_cfg.module_clk_hz != 0U)
-    {
-        uint32_t want_mod = s_cfg.module_clk_hz;
-        for (uint32_t i = 0U; i < (sizeof(s_clk_cands) / sizeof(s_clk_cands[0])); i++)
-        {
-            if (clock_set_source_divider(SB_SPI_CLK_NAME, s_clk_cands[i], 1U) != status_success)
-            {
-                continue;
-            }
-            uint32_t src = clock_get_frequency(SB_SPI_CLK_NAME);
-            if (src == 0U)
-            {
-                continue;
-            }
-            uint32_t d = (src + (want_mod / 2U)) / want_mod;
-            if (d == 0U)
-            {
-                d = 1U;
-            }
-            uint32_t mod = src / d;
-            uint32_t diff = (mod > want_mod) ? (mod - want_mod) : (want_mod - mod);
-            if ((best_src == clk_src_invalid) || (diff < best_diff))
-            {
-                uint32_t sc = sb_sclk_from_module(mod, want_hz);
-                if (sc != 0U)
-                {
-                    best_diff = diff;
-                    best_module = mod;
-                    best_src = s_clk_cands[i];
-                    best_div = d;
-                    best_sclk = sc;
-                }
-            }
-        }
-    }
-    else
-    {
-        /* 自动：找能整除出目标 SCLK 的**最小**模块时钟（同分优先取更小的模块时钟） */
-        for (uint32_t i = 0U; i < (sizeof(s_clk_cands) / sizeof(s_clk_cands[0])); i++)
-        {
-            if (clock_set_source_divider(SB_SPI_CLK_NAME, s_clk_cands[i], 1U) != status_success)
-            {
-                continue;
-            }
-            uint32_t src = clock_get_frequency(SB_SPI_CLK_NAME);
-            if (src < 2U)
-            {
-                continue;
-            }
-            for (uint32_t d = 1U; d <= 32U; d++)
-            {
-                uint32_t mod = src / d;
-                if (mod > SB_MAX_MODULE_CLK_HZ)
-                {
-                    continue;
-                }
-                if (mod < (want_hz * 2U))
-                {
-                    break; /* 再小就给不出这个 SCLK 了 */
-                }
-                uint32_t sc = sb_sclk_from_module(mod, want_hz);
-                if (sc == 0U)
-                {
-                    continue;
-                }
-                uint32_t diff = (sc > want_hz) ? (sc - want_hz) : (want_hz - sc);
-                if ((best_src == clk_src_invalid) || (diff < best_diff) ||
-                    ((diff == best_diff) && (mod < best_module)))
-                {
-                    best_diff = diff;
-                    best_sclk = sc;
-                    best_module = mod;
-                    best_src = s_clk_cands[i];
-                    best_div = d;
-                }
-            }
-        }
-        if (best_src == clk_src_invalid)
-        {
-            /* 兜底：板级默认的 24 MHz（SDK 例程用的就是它） */
-            for (uint32_t i = 0U; i < (sizeof(s_clk_cands) / sizeof(s_clk_cands[0])); i++)
-            {
-                if (clock_set_source_divider(SB_SPI_CLK_NAME, s_clk_cands[i], 1U) != status_success)
-                {
-                    continue;
-                }
-                uint32_t src = clock_get_frequency(SB_SPI_CLK_NAME);
-                if (src < 2U)
-                {
-                    continue;
-                }
-                uint32_t d = src / SB_DEF_MODULE_CLK_HZ;
-                if (d == 0U)
-                {
-                    d = 1U;
-                }
-                uint32_t mod = src / d;
-                uint32_t sc = sb_sclk_from_module(mod, want_hz);
-                if (sc != 0U)
-                {
-                    best_src = s_clk_cands[i];
-                    best_div = d;
-                    best_module = mod;
-                    best_sclk = sc;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (best_src == clk_src_invalid)
-    {
-        s_module_clk = 0U;
-        return 0U;
-    }
-
-    (void)clock_set_source_divider(SB_SPI_CLK_NAME, best_src, best_div);
-    s_module_clk = clock_get_frequency(SB_SPI_CLK_NAME);
-
+    if (!want_hz) { want_hz = SB_DEF_SCLK_HZ; }
+    if (want_hz > SB_MAX_SCLK_HZ) { want_hz = SB_MAX_SCLK_HZ; }
+    s_module_clk = spi_bridge_configure_clock();
+    uint32_t actual = sb_sclk_from_module(s_module_clk, want_hz);
+    if (!actual) { return 0U; }
     spi_timing_config_t timing;
     spi_master_get_default_timing_config(&timing);
     timing.master_config.clk_src_freq_in_hz = s_module_clk;
-    timing.master_config.sclk_freq_in_hz = best_sclk;
-    if (spi_master_timing_init(SB_SPI, &timing) != status_success)
-    {
-        return 0U;
-    }
-
-    return best_sclk;
+    timing.master_config.sclk_freq_in_hz = actual;
+    return spi_master_timing_init(SB_SPI, &timing) == status_success ? actual : 0U;
 }
 
 /* TX DMA 三件套（实现在下面的 TX DMA 段；这里先声明，因为 sb_spi_hw_init 要用） */
@@ -1983,6 +1829,9 @@ static uint8_t sb_pad_ok(uint8_t idx, uint8_t quad_on)
 static uint8_t sb_cfg_validate(const sb_cfg_t *c)
 {
     uint8_t quad = (s_prof.profile == SB_PROFILE_QSPI) ? 1U : 0U;
+    uint32_t want = c->sclk_hz ? c->sclk_hz : SB_DEF_SCLK_HZ;
+    if (want > SB_MAX_SCLK_HZ) { want = SB_MAX_SCLK_HZ; }
+    if (!sb_sclk_from_module(SPI_BRIDGE_MODULE_CLOCK_HZ, want)) { return 0U; }
 
     if (c->bits != 8U)
     {
@@ -2090,6 +1939,10 @@ static void sb_apply_aux_pins(void)
 static void sb_hw_apply(void)
 {
     sb_spi_hw_init();
+    if (!s_actual_sclk) {
+        s_last_err = SB_E_RANGE; s_enabled = 0U; s_reset_req = 1U;
+        return;
+    }
     sb_apply_aux_pins();
 }
 
@@ -2126,6 +1979,7 @@ void spi_bridge_init(void)
     memset(&s_st, 0, sizeof(s_st));
     memset(&spi_bridge_gate, 0, sizeof(spi_bridge_gate));
 
+    s_cfg.module_clk_hz = SPI_BRIDGE_MODULE_CLOCK_HZ;
     s_cfg.sclk_hz = 0U; /* 0 = 板级默认 20 MHz */
     s_cfg.mode = 0U;
     s_cfg.bits = 8U;
@@ -2420,6 +2274,7 @@ void spi_bridge_hid(uint8_t *req_hid, uint8_t *res_hid)
             break;
         }
         c.max_frame_bytes = SB_FRAME_MAX;
+        c.module_clk_hz = SPI_BRIDGE_MODULE_CLOCK_HZ; /* Legacy hint is read-only now. */
         s_cfg = c;
         if (s_enabled != 0U)
         {

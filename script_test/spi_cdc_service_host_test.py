@@ -62,6 +62,7 @@ static void uartx_set_cdc_source(uint8_t v){source=v;}
 static void chry_dap_usb2uart_set_enabled(uint8_t v){enabled=v;}
 static uint8_t spi_bridge_slave_claim(uint8_t **p,uint32_t *size){if(claimed||other_owner)return 0;claimed=1;*p=ring;*size=sizeof(ring);return 1;}
 static void spi_bridge_slave_release(void){assert(!dma_active);claimed=0;}
+static uint32_t spi_bridge_configure_clock(void){return fail_stage==4?0:240000000;}
 static void spi_disable_rx_dma(void *p){(void)p;}
 static void spi_enable_rx_dma(void *p){(void)p;assert(dma_active);}
 static void dma_mgr_disable_channel(dma_resource_t *r){(void)r;dma_active=0;}
@@ -97,9 +98,9 @@ int main(void){
  assert(!spi_cdc_needs_service());assert(cmd(0)==0);
  req[4]=4;assert(cmd(1)==-5&&!spi_cdc_needs_service());req[4]=0;
 #if BOARD_HAS_SPI_BRIDGE
- for(unsigned stage=1;stage<=3;stage++){
+ for(unsigned stage=1;stage<=4;stage++){
   fail_stage=stage;assert(cmd(1)==-100&&spi_cdc_needs_service());spi_cdc_poll();
-  assert(cmd(0)==(stage==1?-4:-3));assert(!claimed&&!dma_active&&!spi_cdc_needs_service());
+  assert(cmd(0)==((stage==1||stage==4)?-4:-3));assert(!claimed&&!dma_active&&!spi_cdc_needs_service());
  }
  fail_stage=0;source=CDC_SOURCE_RTT;cmd(1);spi_cdc_poll();assert(cmd(0)==-2&&source==CDC_SOURCE_RTT&&!claimed);source=0;
  other_owner=1;cmd(1);spi_cdc_poll();assert(cmd(0)==-2&&!claimed);other_owner=0;

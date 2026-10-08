@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "requested_sclk_hz": 0,
+      "actual_sclk_hz": 20000000,
+      "legacy_module_hint_hz": 120000000,
+      "module_clock_hz": 240000000,
+      "cfg_hex": "0000000000080064000000000600010000000000f8010000001c4e0e00000000"
+    },
+    {
+      "requested_sclk_hz": 10000000,
+      "actual_sclk_hz": 10000000,
+      "legacy_module_hint_hz": 120000000,
+      "module_clock_hz": 240000000,
+      "cfg_hex": "8096980000080064000000000600010000000000f8010000001c4e0e00000000"
+    },
+    {
+      "requested_sclk_hz": 20000000,
+      "actual_sclk_hz": 20000000,
+      "legacy_module_hint_hz": 120000000,
+      "module_clock_hz": 240000000,
+      "cfg_hex": "002d310100080064000000000600010000000000f8010000001c4e0e00000000"
+    },
+    {
+      "requested_sclk_hz": 40000000,
+      "actual_sclk_hz": 40000000,
+      "legacy_module_hint_hz": 120000000,
+      "module_clock_hz": 240000000,
+      "cfg_hex": "005a620200080064000000000600010000000000f8010000001c4e0e00000000"
+    },
+    {
+      "requested_sclk_hz": 60000000,
+      "actual_sclk_hz": 60000000,
+      "legacy_module_hint_hz": 120000000,
+      "module_clock_hz": 240000000,
+      "cfg_hex": "0087930300080064000000000600010000000000f8010000001c4e0e00000000"
+    },
+    {
+      "requested_sclk_hz": 75000000,
+      "actual_sclk_hz": 60000000,
+      "legacy_module_hint_hz": 120000000,
+      "module_clock_hz": 240000000,
+      "cfg_hex": "c068780400080064000000000600010000000000f8010000001c4e0e00000000"
+    },
+    {
+      "requested_sclk_hz": 100000000,
+      "actual_sclk_hz": 60000000,
+      "legacy_module_hint_hz": 120000000,
+      "module_clock_hz": 240000000,
+      "cfg_hex": "00e1f50500080064000000000600010000000000f8010000001c4e0e00000000"
+    }
+  ],
+  "low_rate_rejected": true
+}
