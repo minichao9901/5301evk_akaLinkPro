@@ -34,6 +34,8 @@ SPI/QSPI、I2C 和高速 ADC 当前面向 **HPM5301EVKLite** 板型。HPM5301 �
 
 **查看工作台界面：** [J-Scope、烧录器、RTT 转发、源码调试器、SPI/QSPI 发图与 ADC 示波器](https://github.com/minichao9901/web-serial-rtt-tools#界面预览)。Web 主页提供当前页面截图，并标明模拟目标、虚拟信号和烧录准备场景；下方性能表引用独立板上验收结果。
 
+工作台另提供 [ARM / RV32 异常诊断与 J-Scope / RTT 采集质量报告](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/diagnostics.md)：区分目标读错、探针跳拍、USB 缓冲丢样与网页显示／落盘状态。此功能复用现有探针接口，本轮无需升级探针固件。
+
 ## 实测性能
 
 下面是代表性板上结果。目标时钟、接线、变量布局和主机负载会影响速率；峰值采样率与无损采样率分别报告。
@@ -106,6 +108,7 @@ make test-host    # 无硬件的固件逻辑回归
 | 2026-10-06 | ADC 硬件触发与 USB 流水线完成 1 / 2 MSa/s 持续采集测试 |
 | 2026-10-07 | SWD 与 RISC-V 高速采样优化，建立双仓库基线标签 [`milestone-2026-10-07`](https://github.com/minichao9901/5301evk_akaLinkPro/tree/milestone-2026-10-07) |
 | 2026-10-08 | SPI转发完成 H743 高频与完整性测试，SPI2 模块统一固定 240 MHz |
+| 2026-10-08 | 异常诊断与采集质量开发前建立双仓库基线标签 [`milestone-2026-10-08-pre-diagnostics`](https://github.com/minichao9901/5301evk_akaLinkPro/tree/milestone-2026-10-08-pre-diagnostics) |
 
 完整研发过程、历史测量与问题定因见 [开发与调试记录](docs/development-history.md)。里程碑表示阶段成果，具体测试条件与未覆盖场景保留在验收文档中。
 
