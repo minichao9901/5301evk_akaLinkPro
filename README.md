@@ -36,6 +36,8 @@ SPI/QSPI、I2C 和高速 ADC 当前面向 **HPM5301EVKLite** 板型。HPM5301 �
 
 工作台另提供 [ARM / RV32 异常诊断与 J-Scope / RTT 采集质量报告](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/diagnostics.md)：区分目标读错、探针跳拍、USB 缓冲丢样与网页显示／落盘状态。此功能复用现有探针接口，本轮无需升级探针固件。
 
+[H743 真机验收](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/validation/2026-10-08-h743-diagnostics.md)覆盖 8 个故障场景及正常调试、J-Scope、RTT 性能对照；同档位未观察到明显吞吐下降。可复现的[异常测试固件及 ELF](script_test/stm32h743_fault/README.md)随仓库保存。
+
 ## 实测性能
 
 下面是代表性板上结果。目标时钟、接线、变量布局和主机负载会影响速率；峰值采样率与无损采样率分别报告。
