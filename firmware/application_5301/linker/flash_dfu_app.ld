@@ -116,11 +116,8 @@ SECTIONS
     __data_load_addr__ = etext;
     .data : AT(__data_load_addr__) ALIGN(8) {
         __data_start__ = .;
-        __global_pointer$ = . + 0x800;
         *(.data)
         *(.data*)
-        *(.sdata)
-        *(.sdata*)
 
         KEEP(*(.jcr))
         KEEP(*(.dynamic))
@@ -158,11 +155,45 @@ SECTIONS
         KEEP(*(SORT(.dtors.*)))
         KEEP(*(.dtors))
         . = ALIGN(8);
+        /* Keep initialized small data at the end of the copy range, directly
+         * before small BSS. Large buffers must not split the gp window. */
+        __sdata_start__ = .;
+        *(.sdata)
+        *(.sdata*)
+        __sdata_end__ = .;
+        . = ALIGN(8);
         __data_end__ = .;
         PROVIDE (__edata = .);
         PROVIDE (_edata = .);
         PROVIDE (edata = .);
     } > DLM
+
+    /* Same contiguous startup zero range; only its internal order changes.
+     * Place it before TLS / explicitly initialized RAM so .sdata and .sbss
+     * stay adjacent even when those optional sections become nonempty. */
+    .bss (NOLOAD) : {
+        . = ALIGN(8);
+        __bss_start__ = .;
+        __sbss_start__ = .;
+        *(.sbss*)
+        *(.scommon)
+        *(.scommon*)
+        *(.dynsbss*)
+        __sbss_end__ = .;
+        . = ALIGN(8);
+        *(.bss)
+        *(.bss*)
+        *(COMMON)
+        . = ALIGN(8);
+        _end = .;
+        __bss_end__ = .;
+    } > DLM
+
+    /* Signed 12-bit gp offsets cover [gp - 2048, gp + 2047]. */
+    __global_pointer$ = (__sdata_start__ + __sbss_end__) / 2;
+    ASSERT((__sdata_start__ >= (__global_pointer$ - 0x800)) &&
+           (__sbss_end__ <= (__global_pointer$ + 0x800)),
+           "sdata/sbss exceed the 4 KiB gp window")
 
     __fast_load_addr__ = etext + SIZEOF(.data);
     .fast : AT(__fast_load_addr__) ALIGN(8) {
@@ -218,20 +249,6 @@ SECTIONS
         KEEP(*(.ahb_sram.*))
     } > AHB_SRAM
 
-    .bss (NOLOAD) : {
-        . = ALIGN(8);
-        __bss_start__ = .;
-        *(.bss)
-        *(.bss*)
-        *(.sbss*)
-        *(.scommon)
-        *(.scommon*)
-        *(.dynsbss*)
-        *(COMMON)
-        . = ALIGN(8);
-        _end = .;
-        __bss_end__ = .;
-    } > DLM
 
     .framebuffer (NOLOAD) : {
         . = ALIGN(8);
