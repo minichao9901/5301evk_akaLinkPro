@@ -85,12 +85,12 @@ if(BOARD STREQUAL "hpm5301evklite")
     )
 endif()
 
-# Default to the user-selected 200 MHz profile (PLL1CLK0 / 4).
-# HPM5300 DS Rev0.11 permits 100 MHz; 180/200 exceed that rating.
-set(UART2_CLOCK_MHZ "" CACHE STRING "CDC UART input clock: 80/100/180/200 MHz")
+# Default to the user-selected 240 MHz profile (existing PLL0CLK0 / 3).
+# HPM5300 DS Rev0.11 permits 100 MHz; 180/200/240 exceed that rating.
+set(UART2_CLOCK_MHZ "" CACHE STRING "CDC UART input clock: 80/100/180/200/240 MHz")
 if(NOT UART2_CLOCK_MHZ STREQUAL "")
-    if(NOT UART2_CLOCK_MHZ MATCHES "^(80|100|180|200)$")
-        message(FATAL_ERROR "UART2_CLOCK_MHZ must be 80, 100, 180 or 200")
+    if(NOT UART2_CLOCK_MHZ MATCHES "^(80|100|180|200|240)$")
+        message(FATAL_ERROR "UART2_CLOCK_MHZ must be 80, 100, 180, 200 or 240")
     endif()
     sdk_compile_definitions(-DUART2_CLOCK_MHZ=${UART2_CLOCK_MHZ})
 endif()
@@ -141,6 +141,7 @@ sdk_app_src(src/dfu/hpm_dfu_trigger.c)
 sdk_app_src(src/usb/usb_composite.c)
 sdk_app_src(src/usb/hid_interface.c)
 sdk_app_src(src/usb/cdc_interface.c)
+sdk_app_src(src/usb/swo_rx_clock.c)
 sdk_app_src(src/usb/msc_interface.c)
 sdk_app_src(src/api/api_param.c)
 sdk_app_src(src/led/led_state.c)

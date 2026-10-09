@@ -368,8 +368,14 @@ SWD 目标可为 STM32F1 等；本板 SWD 实跑 20/36/45/60MHz。
 7. APP 已移除 `build.bat` / `build_zcc.bat`：统一用 `build_dfu.bat` 构建，`program.bat`（dfu-util）或 `flash_jlink.bat`（J-Link）烧录；均使用 `_pack` 产物。
 
 
-## 2026-10-09 UART 默认模式更新
+## 2026-10-09 UART 默认模式更新（早期 200 MHz）
 
 用户已明确选择 CDC UART 默认 PLL1CLK0(800 MHz)/4 = **200 MHz**、最高配置 **25 Mbps**，取代上文历史 80 MHz 默认说明。HPM5300 DS Rev0.11 表 17 的额定 UART 输入上限为 100 MHz，200 MHz 是用户要求的超规格模式。CMake `UART2_CLOCK_MHZ` 可覆盖到 80/100/180/200；未覆盖时默认 200。不要在实验结束后自行恢复旧 80 MHz 探针固件。
 
 当前探针已保留默认 200 MHz 镜像，详细数据和限制见 [测试报告](../../../docs/uart-200mhz-test.md)。HID 0x18 和 `script_test/uart_clock_diag.py` 可只读获取实际时钟、请求/应用波特率、OSR、上限和初始化状态。诊断避免读取 DLL/DLM；应用波特率为传给 SDK 的值，不能代替低速档线路实测。
+
+## 2026-10-09 后续要求：240 MHz 默认与 SWO 时钟会话
+
+用户后续明确把默认改为 **PLL0CLK0 720 MHz /3=240 MHz**，最高 **30 Mbaud**。上述 80/200 MHz 默认说明是历史配置；不要自行恢复。CPU 仍是 PLL0CLK0 /2=360 MHz，SPI2 保持原 240 MHz 配置，不修改 PLL0 根频率。CMake 可覆盖 80/100/180/200/240，未覆盖时为 240。
+
+精细调频只使用受消费者检查约束的 PLL1；切换/恢复执行于 ILM，有超时和回读。HID 0x19 提供 token 租约、5 秒无心跳恢复及 RX 错误诊断。240 MHz 为用户指定的超规格模式，30 Mbaud 真机连续 6 秒通过。当前协议、验收与限制见 [SWO 时钟会话](../../../docs/swo-clock-lease.md)。当前探针保留最终 240 MHz 镜像。

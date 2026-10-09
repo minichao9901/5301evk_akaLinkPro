@@ -14,6 +14,7 @@
 #include "hpm_sysctl_drv.h"
 #include "usb_composite.h"
 #include "cdc_interface.h"
+#include "swo_rx_clock.h"
 #include "led_state.h"
 #include "api_param.h"
 
@@ -76,8 +77,8 @@
 #endif
 
 /* HPM5300 DS Rev0.11 table 17 permits UART clocks up to 100 MHz.
- * The user-selected default is PLL1CLK0 / 4 = 200 MHz (above that rating).
- * PLL1CLK0 is already configured by boot/ROM: do not retune a shared PLL.
+ * The user-selected default is PLL0CLK0 / 3 = 240 MHz (above that rating).
+ * Use the same existing 720 MHz root as SPI/QSPI; no PLL retune at boot.
  */
 #ifndef UART2_OVERCLOCK
 #define UART2_OVERCLOCK (0)
@@ -86,10 +87,13 @@
 #if UART2_OVERCLOCK
 #define UART2_CLOCK_MHZ 180
 #else
-#define UART2_CLOCK_MHZ 200
+#define UART2_CLOCK_MHZ 240
 #endif
 #endif
-#if UART2_CLOCK_MHZ == 200
+#if UART2_CLOCK_MHZ == 240
+#define UART2_CLK_SOURCE clk_src_pll0_clk0
+#define UART2_CLK_DIV (3U) /* Existing PLL0CLK0 720 MHz / 3, same as SPI */
+#elif UART2_CLOCK_MHZ == 200
 #define UART2_CLK_SOURCE clk_src_pll1_clk0
 #define UART2_CLK_DIV (4U) /* PLL1CLK0 800 MHz / 4 */
 #elif UART2_CLOCK_MHZ == 180
@@ -144,6 +148,8 @@ volatile uint32_t g_uart_tx_transfer_length = 0;
 volatile uint32_t g_uart2_applied_baud = 0;
 static uint32_t s_uart_requested_baud;
 static hpm_stat_t s_uart_init_status = status_fail;
+static volatile uint32_t s_rx_diag[5];
+void uartx_get_rx_diag(uint32_t words[5]){for(unsigned i=0;i<5;i++)words[i]=s_rx_diag[i];}
 
 /* Snapshot only non-destructive registers: DLL/DLM alias RX data when DLAB=0. */
 void uartx_get_diag(uint32_t words[8])
@@ -205,6 +211,13 @@ static void uartx_rx_flush_locked(void)
         return; /* the RTT bridge is the CDC producer right now */
     }
 
+    if(swo_rx_active()){
+        uint32_t line=UART_BASE->LSR;
+        if(line&UART_LSR_OE_MASK)s_rx_diag[0]++;
+        if(line&UART_LSR_FE_MASK)s_rx_diag[1]++;
+        if(line&UART_LSR_PE_MASK)s_rx_diag[2]++;
+        if(line&UART_LSR_LBREAK_MASK)s_rx_diag[3]++;
+    }
     written = uartx_rx_written();
 
     if (written == rb_write_pos)
@@ -215,7 +228,7 @@ static void uartx_rx_flush_locked(void)
     if (written > rb_write_pos)
     {
         copied = written - rb_write_pos;
-        chry_ringbuffer_write(&g_uartrx, &uart_rx_buf[rb_write_pos], copied);
+        s_rx_diag[4]+=copied-chry_ringbuffer_write(&g_uartrx, &uart_rx_buf[rb_write_pos], copied);
     }
     else
     {
@@ -223,12 +236,12 @@ static void uartx_rx_flush_locked(void)
         if (rb_write_pos < UART_RX_DMA_BUFFER_SIZE)
         {
             uint32_t len = UART_RX_DMA_BUFFER_SIZE - rb_write_pos;
-            chry_ringbuffer_write(&g_uartrx, &uart_rx_buf[rb_write_pos], len);
+            s_rx_diag[4]+=len-chry_ringbuffer_write(&g_uartrx, &uart_rx_buf[rb_write_pos], len);
             copied += len;
         }
         if (written > 0)
         {
-            chry_ringbuffer_write(&g_uartrx, &uart_rx_buf[0], written);
+            s_rx_diag[4]+=written-chry_ringbuffer_write(&g_uartrx, &uart_rx_buf[0], written);
             copied += written;
         }
     }
@@ -587,6 +600,9 @@ void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
     config.src_freq_in_hz = clock_get_frequency(UART_CLK_NAME);
 
     uint32_t requested = line_coding->dwDTERate;
+    if(swo_rx_active() && (requested!=swo_rx_baud() || line_coding->bDataBits!=8 || line_coding->bParityType || line_coding->bCharFormat)) {
+        s_uart_init_status=status_invalid_argument;g_uart2_applied_baud=0;return;
+    }
     s_uart_requested_baud = requested;
     uint32_t applied = uart2_round_baudrate(config.src_freq_in_hz, requested);
     if (applied == 0)
@@ -619,6 +635,19 @@ void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
         g_uart2_applied_baud = 0U;
         return;
     }
+    if(swo_rx_active()) {
+        uint32_t div,osr;swo_rx_uart_dividers(&div,&osr);
+        uint32_t irq=disable_global_irq(CSR_MSTATUS_MIE_MASK);
+        UART_BASE->LCR |= UART_LCR_DLAB_MASK;
+        UART_BASE->OSCR=(UART_BASE->OSCR&~UART_OSCR_OSC_MASK)|UART_OSCR_OSC_SET(osr);
+        UART_BASE->DLL=div&255U;UART_BASE->DLM=div>>8;
+        uint32_t read_div=(UART_BASE->DLL&255U)|((UART_BASE->DLM&255U)<<8);
+        uint32_t read_osr=UART_OSCR_OSC_GET(UART_BASE->OSCR);
+        UART_BASE->LCR &= ~UART_LCR_DLAB_MASK;
+        restore_global_irq(irq);
+        if(read_div!=div||read_osr!=osr){s_uart_init_status=status_fail;g_uart2_applied_baud=0;return;}
+        applied=config.src_freq_in_hz/(div*osr);
+    }
     g_uart2_applied_baud = applied;
     uart_clear_rxline_idle_flag(UART_BASE);
     uart_reset_rx_fifo(UART_BASE);
@@ -628,6 +657,14 @@ void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
     uart_flush_timer_set_baud(applied);
 
     uartx_rx_dma_restart();
+}
+
+void uartx_swo_reconfigure(uint32_t baud)
+{
+    struct cdc_line_coding coding={0};
+    coding.dwDTERate=baud?baud:(s_uart_requested_baud?s_uart_requested_baud:115200U);
+    coding.bDataBits=8;
+    chry_dap_usb2uart_uart_config_callback(&coding);
 }
 
 void chry_dap_usb2uart_uart_send_bydma(uint8_t *data, uint16_t len)

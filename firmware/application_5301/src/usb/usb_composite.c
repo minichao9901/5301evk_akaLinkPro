@@ -6,6 +6,7 @@
 #include "hpm_otp_drv.h"
 #include "DAP.h"
 #include "cdc_interface.h"
+#include "swo_rx_clock.h"
 #include "scope_sampler.h"
 #include "spi_bridge.h"
 #include "spi_cdc.h"
@@ -557,6 +558,7 @@ void usbd_event_handler(uint8_t busid, uint8_t event)
     switch (event)
     {
     case USBD_EVENT_RESET:
+        swo_rx_usb_reset();
         spi_cdc_usb_reset();
         /* 先记代数：主循环据此判断"我手上这条命令是不是已经被复位作废了" */
         USB_ResetGen++;
@@ -592,6 +594,7 @@ void usbd_event_handler(uint8_t busid, uint8_t event)
     case USBD_EVENT_CONNECTED:
         break;
     case USBD_EVENT_DISCONNECTED:
+        swo_rx_usb_reset();
         bus_periodic_reset();
         adc_stream_reset(0U);
         break;

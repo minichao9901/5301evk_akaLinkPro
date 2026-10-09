@@ -4,6 +4,7 @@
 #include "api_param.h"
 #include "usb_composite.h"
 #include "cdc_interface.h"
+#include "swo_rx_clock.h"
 #include "rtt_bridge.h"
 #include "riscv_svc.h"
 #include "scope_sampler.h"
@@ -226,6 +227,7 @@ void api_param_proc_hid(uint8_t *req_hid, uint8_t *res_hid)
     uint8_t cmd = req_hid[2];
     switch (cmd)
     {
+    case 0x19: swo_rx_command(req_hid,res_hid); break;
     case CMD_UART_DIAG: {
         uint32_t words[8];
         uartx_get_diag(words);

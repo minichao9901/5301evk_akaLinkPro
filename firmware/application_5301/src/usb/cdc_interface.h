@@ -20,6 +20,8 @@ extern "C"
     void uartx_io_init(void);
 
     void uartx_preinit(void);
+    void uartx_swo_reconfigure(uint32_t baud);
+void uartx_get_rx_diag(uint32_t words[5]);
     /* HID 0x18: version, clock, requested/applied baud, OSR, cap, init status, clock register. */
     void uartx_get_diag(uint32_t words[8]);
 

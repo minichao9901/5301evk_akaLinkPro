@@ -1,5 +1,7 @@
 # UART 默认 200 MHz 与 SWO 网页验收（2026-10-09）
 
+本页为早期 200 MHz 验收记录。用户后续已把默认改为 240 MHz、上限 30 Mbaud，当前实现和结果见 [SWO 时钟会话](swo-clock-lease.md)。
+
 按用户最终要求，CDC UART 默认使用 **PLL1CLK0 800 MHz / 4 = 200 MHz**，配置最高波特率 **25 Mbps**；已重新构建烧录并保持运行（APP 编译时间 `2026/10/09 07:46:41`）。代码位于独立 `codex/uart-200mhz` 分支，主 checkout 未改动。
 
 ## 时钟配置

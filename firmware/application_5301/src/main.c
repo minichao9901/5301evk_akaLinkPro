@@ -16,6 +16,7 @@
 #include "hpm_dfu_trigger.h"
 #include "api_param.h"
 #include "usb_composite.h"
+#include "swo_rx_clock.h"
 #include "riscv_svc.h"
 #include "scope_sampler.h"
 #include "spi_bridge.h"
@@ -108,6 +109,7 @@ int main(void)
     while (1)
     {
         chry_dap_handle();
+        swo_rx_poll();
         /* CDC/串口桥：每轮两次关中断 + 三次环形缓冲查询 + 一次 DMA 寄存器读。
          * HID 0x34 可以把它整个关掉（采样器要跑满周期时缺的就是这几百周期）。 */
         if (usb2uart_bridge_enabled)
