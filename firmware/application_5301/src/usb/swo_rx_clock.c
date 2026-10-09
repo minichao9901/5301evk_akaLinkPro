@@ -11,8 +11,9 @@
 #define NODE GET_CLK_NODE_FROM_NAME(BOARD_CDC_UART_CLK_NAME)
 #define LEASE_TICKS (5000ULL*24000ULL)
 #define FAST __attribute__((section(".fast"),noinline))
+swo_rx_work_t swo_rx_work;
 static struct {
-  volatile uint32_t pending,token,mode,baud;
+  volatile uint32_t mode,baud;
   volatile uint64_t heartbeat;
   uint32_t active,changed,pllChanged,seq;
   int32_t rc;
@@ -118,12 +119,12 @@ chosen:
 static void release(void){
   int dirty=s.changed||s.active;
   if(s.changed){int rc=rollback();if(rc){s.rc=rc;return;}}
-  s.changed=s.pllChanged=0;s.active=0;s.token=0;s.pllHz=0;
+  s.changed=s.pllChanged=0;s.active=0;swo_rx_work.token=0;s.pllHz=0;
   if(dirty)uartx_swo_reconfigure(s.oldBaud?s.oldBaud:115200U);s.rc=0;
 }
 void swo_rx_poll(void){
-  if(!s.pending&&!s.token)return; /* No IRQ or timer overhead outside a SWO lease. */
-  uint32_t irq=disable_global_irq(CSR_MSTATUS_MIE_MASK),p=s.pending;s.pending=0;restore_global_irq(irq);
+  if(!swo_rx_needs_service())return; /* No IRQ or timer overhead outside a SWO lease. */
+  uint32_t irq=disable_global_irq(CSR_MSTATUS_MIE_MASK),p=swo_rx_work.pending;swo_rx_work.pending=0;restore_global_irq(irq);
   if(p==1){
     for(unsigned n=0;n<36;n++)s.nextClock[n]=s.oldClock[n]=HPM_SYSCTL->CLOCK[n];
     uint32_t diag[8];uartx_get_diag(diag);s.oldBaud=diag[2];
@@ -134,7 +135,7 @@ void swo_rx_poll(void){
       if(diag[6]||diag[3]!=s.actual||diag[4]!=s.osr)error=-8;
     }}
     if(error&&s.changed){release();if(s.rc<0)error=s.rc;}
-    if(error&&!s.changed)s.token=0;
+    if(error&&!s.changed)swo_rx_work.token=0;
     s.rc=error; /* Publish success only after UART readback is complete. */
   }else if(p==2)release();
   /* Heartbeat updates run in the USB ISR. Snapshot both timestamps atomically:
@@ -143,28 +144,28 @@ void swo_rx_poll(void){
    */
   irq=disable_global_irq(CSR_MSTATUS_MIE_MASK);
   uint64_t now=mchtmr_get_count(HPM_MCHTMR),last=s.heartbeat;
-  int expired=s.token&&now>=last&&(now-last)>LEASE_TICKS;
+  int expired=swo_rx_work.token&&now>=last&&(now-last)>LEASE_TICKS;
   restore_global_irq(irq);
   if(expired)release();
 }
 int swo_rx_active(void){return s.active;}
 uint32_t swo_rx_baud(void){return s.active?s.baud:0;}
 void swo_rx_uart_dividers(uint32_t *div,uint32_t *osr){*div=s.div;*osr=s.osr;}
-void swo_rx_usb_reset(void){if(s.token)s.pending=2;}
+void swo_rx_usb_reset(void){if(swo_rx_work.token)swo_rx_work.pending=2;}
 void swo_rx_command(const uint8_t *req,uint8_t *res){
   uint32_t arg=0,mode=0;uint8_t act=req[3];int32_t rc=s.rc;
   if(req[1]>=6)memcpy(&arg,req+4,4);
   if(req[1]>=10)memcpy(&mode,req+8,4);
   if(act==1){
     if(req[1]<10)rc=-1;
-    else if(s.token||s.pending)rc=-2;
-    else {s.baud=arg;s.mode=mode;s.token=++s.seq;if(!s.token)s.token=++s.seq;s.heartbeat=mchtmr_get_count(HPM_MCHTMR);s.pending=1;s.rc=1;rc=1;}
-  }else if(act==2){if(s.token&&arg!=s.token)rc=-2;else if(s.token){s.pending=2;s.rc=1;rc=1;}else{s.rc=0;rc=0;}}
-  else if(act==3){if(!s.token||arg!=s.token)rc=-2;else s.heartbeat=mchtmr_get_count(HPM_MCHTMR);}
+    else if(swo_rx_work.token||swo_rx_work.pending)rc=-2;
+    else {s.baud=arg;s.mode=mode;swo_rx_work.token=++s.seq;if(!swo_rx_work.token)swo_rx_work.token=++s.seq;s.heartbeat=mchtmr_get_count(HPM_MCHTMR);swo_rx_work.pending=1;s.rc=1;rc=1;}
+  }else if(act==2){if(swo_rx_work.token&&arg!=swo_rx_work.token)rc=-2;else if(swo_rx_work.token){swo_rx_work.pending=2;s.rc=1;rc=1;}else{s.rc=0;rc=0;}}
+  else if(act==3){if(!swo_rx_work.token||arg!=swo_rx_work.token)rc=-2;else s.heartbeat=mchtmr_get_count(HPM_MCHTMR);}
   else if(act>6)rc=-1;
-  uint32_t w[14]={1,(uint32_t)rc,s.token,s.active?s.mode+1:0,s.baud,s.active?s.actual:0,
+  uint32_t w[14]={1,(uint32_t)rc,swo_rx_work.token,s.active?s.mode+1:0,s.baud,s.active?s.actual:0,
     clock_get_frequency(BOARD_CDC_UART_CLK_NAME),s.sysdiv,s.mux,s.osr,s.div,
-    pllctlv2_get_pll_freq_in_hz(HPM_PLLCTLV2,pllctlv2_pll1),s.token?(uint32_t)(5000U-((mchtmr_get_count(HPM_MCHTMR)-s.heartbeat)/24000U>5000U?5000U:(mchtmr_get_count(HPM_MCHTMR)-s.heartbeat)/24000U)):0,s.blocker};
+    pllctlv2_get_pll_freq_in_hz(HPM_PLLCTLV2,pllctlv2_pll1),swo_rx_work.token?(uint32_t)(5000U-((mchtmr_get_count(HPM_MCHTMR)-s.heartbeat)/24000U>5000U?5000U:(mchtmr_get_count(HPM_MCHTMR)-s.heartbeat)/24000U)):0,s.blocker};
   if(act==4){w[1]=arg<3?0:(uint32_t)-1;for(unsigned n=0;n<12;n++)w[n+2]=arg<3?HPM_SYSCTL->CLOCK[arg*12+n]:0;}
   if(act==5){w[1]=0;for(unsigned n=0;n<8;n++)w[n+2]=source_freq(n);w[10]=HPM_SYSCTL->CLOCK_CPU[0];w[11]=HPM_PLLCTLV2->PLL[1].MFI;w[12]=HPM_PLLCTLV2->PLL[1].MFN;w[13]=HPM_PLLCTLV2->PLL[1].MFD;}
   if(act==6){w[1]=0;uartx_get_rx_diag(w+2);}

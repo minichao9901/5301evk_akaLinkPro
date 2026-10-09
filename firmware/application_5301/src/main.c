@@ -83,7 +83,8 @@ static void dfu_key_poll(void)
 }
 #endif
 
-int main(void)
+/* Keep idle service dispatch out of the sampler's XIP instruction working set. */
+__attribute__((section(".fast"), noinline)) int main(void)
 {
     board_init();
     api_param_load();
@@ -109,7 +110,10 @@ int main(void)
     while (1)
     {
         chry_dap_handle();
-        swo_rx_poll();
+        if (swo_rx_needs_service())
+        {
+            swo_rx_poll();
+        }
         /* CDC/串口桥：每轮两次关中断 + 三次环形缓冲查询 + 一次 DMA 寄存器读。
          * HID 0x34 可以把它整个关掉（采样器要跑满周期时缺的就是这几百周期）。 */
         if (usb2uart_bridge_enabled)
