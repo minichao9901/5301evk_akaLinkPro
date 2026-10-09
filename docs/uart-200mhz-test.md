@@ -16,7 +16,7 @@ CMake 参数 `UART2_CLOCK_MHZ` 可指定 80/100/180/200，不指定时源码默�
 
 ## 板上结果
 
-使用 STM32F103CB PB3 SWO → probe PB07 VCOM RX 和 SWD/GND，复杂 F103 测试 ELF 与源码在配套 Web 分支 `codex/swo-pc-trace`。
+使用 STM32F103CB PB3 SWO → HPM5301 EVKLite probe PB09 / J3[3] VCOM RX 和 SWD/GND（更正此前 PB07 标注），复杂 F103 测试 ELF 与源码在配套 Web 分支 `codex/swo-pc-trace`。
 
 | 发端 / 请求 | 接收端取整配置 | 结果 |
 | ---: | ---: | --- |
