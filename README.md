@@ -1,10 +1,10 @@
 # akaLinkPro
 
-**开源 USB 高速调试探针 · ARM / RISC-V · 浏览器工作台**
+**开源 USB 高速调试探针 · ARM / RISC-V · SWO PC 采样 · 浏览器工作台**
 
 [在线工作台](https://minichao9901.github.io/web-serial-rtt-tools/) · [Web 源码](https://github.com/minichao9901/web-serial-rtt-tools) · [快速开始](#快速开始) · [实测性能](#实测性能) · [Apache-2.0](LICENSE)
 
-akaLinkPro 基于 HPM5301，将目标调试、固件烧录、串口、RTT、变量采样和常用总线测试集成到一条 USB 连接。既可作为 CMSIS-DAP 探针配合 OpenOCD 等桌面工具，也可搭配纯静态 Web 工作台，在浏览器中完成日常嵌入式开发。
+akaLinkPro 基于 HPM5301，将目标调试、固件烧录、串口、RTT、SWO PC 采样、变量采样和常用总线测试集成到一条 USB 连接。既可作为 CMSIS-DAP 探针配合 OpenOCD 等桌面工具，也可搭配纯静态 Web 工作台，在浏览器中完成日常嵌入式开发。
 
 本仓库包含探针应用固件、DFU Bootloader、板级适配与测试夹具。完整产品由本仓库和 [web-serial-rtt-tools](https://github.com/minichao9901/web-serial-rtt-tools) 共同组成。
 
@@ -13,6 +13,7 @@ akaLinkPro 基于 HPM5301，将目标调试、固件烧录、串口、RTT、变�
 - **一条 USB 连接，多种开发工具。** 调试、串口日志、RTT、变量波形、SPI/QSPI、I2C 和 ADC 共用一个探针。
 - **浏览器直接操作硬件。** WebUSB / WebHID / Web Serial 通路无需安装专用上位机；打开工作台、授权设备即可使用。
 - **把实时工作交给探针。** RTT 轮询、HSS 周期采样和硬件 ADC 采集在探针端执行，浏览器负责控制、显示与记录。
+- **高速接收 SWO，离线回看源码。** 目标 SWO 经 VCOM 接收，配合 Web 完成 PC 热点、逐样本源码回放及完整 `.c` / `.txt` 导出。
 - **ARM 与 RISC-V 双通路。** ARM 目标走 SWD/JTAG；RISC-V 目标使用 JTAG、DMI 与 SBA，已在 HPM6800EVK 验证。
 - **开源且可复现。** 固件、网页、协议和测试夹具开放，性能数字附带目标条件和验收记录。
 
@@ -24,6 +25,7 @@ akaLinkPro 基于 HPM5301，将目标调试、固件烧录、串口、RTT、变�
 | 固件烧录 | 配合 Web flashloader 完成擦除、写入、校验和复位；也可使用桌面调试工具 |
 | 串口与 RTT | USB CDC 串口；探针端 RTT→CDC 转发，减少主机逐次读内存的开销 |
 | J-Scope / HSS | 从目标 RAM 周期读取 1–8 个变量，支持不同宽度、结构体成员及数组元素，无需加入采样协议代码 |
+| SWO PC 采样 | UART 接收 NRZ SWO 并转为 CDC；双端波特率匹配、可恢复接收时钟会话，配合 Web 录制和 ELF / 源码离线分析 |
 | USB→SPI/QSPI | 单/双/四线事务、命令与地址相位；外设寄存器、NOR Flash、LCD 初始化与发图 |
 | SPI转发 | 外部 SPI 主机 → 探针从机 DMA → USB CDC，用于高速数据接收 |
 | USB→I2C | 100 kHz / 400 kHz / 1 MHz，总线扫描、寄存器读写、重复起始及恢复 |
@@ -38,6 +40,18 @@ SPI/QSPI、I2C 和高速 ADC 当前面向 **HPM5301EVKLite** 板型。HPM5301 �
 
 [H743 真机验收](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/validation/2026-10-08-h743-diagnostics.md)覆盖 8 个故障场景及正常调试、J-Scope、RTT 性能对照；同档位未观察到明显吞吐下降。可复现的[异常测试固件及 ELF](script_test/stm32h743_fault/README.md)随仓库保存。
 
+## SWO 高速接收与源码分析
+
+EVKLite 将 **目标 SWO 接到 PB09 / J3[3]（VCOM RX）**，另接 SWD 和 GND；STM32F103 的 SWO 输出为 PB3。探针通过 UART 接收 NRZ / 8N1 原始数据并转发到 USB CDC，Web 通过 SWD 配置目标 DWT / ITM / Trace，录制后结合匹配 ELF 和源码分析。
+
+- **接收与时钟。** 默认 UART 输入 240 MHz，最高请求 30 Mbaud；自动选择现有时钟源与分频，必要时尝试 PLL1 精细调频，以实际回读和匹配校验为准。实现不调整共享 PLL0 或 CPU 主频。
+- **会话与恢复。** 记录期间维持接收时钟租约，停止释放并恢复；续期超时也执行恢复。报告 UART 接收错误及缓冲丢弃，支持 Web 标记采集缺口。
+- **配套 Web 功能。** PC 间隔含 64 / 128 周期，带宽计算器可加入时间戳、异常和 ITM；提供函数热点、逐样本源码回放、`.swopc` 离线记录和完整 `.c` / `.txt` 阅读报告。
+
+F103CB 已完成实机验收；Web 还提供 F407/F405、H743 与 H7B0 型号组适配，目前这些适配的验证为寄存器模拟与恢复测试。目标主频由目标程序管理，外部晶振需按板子提供。PC 是离散采样落点，不能恢复每条指令、完整分支和调用栈。
+
+240 MHz UART 是当前实验默认配置，超过此前核查的 UART 100 MHz 额定输入；30 Mbaud 的有限实测不代表所有板子和波特率组合均可可靠接收。接线、时钟恢复和验收条件见 [SWO 接收时钟说明](docs/swo-clock-lease.md)，页面操作与示例见 [Web SWO 使用说明](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/SWO-PC-SAMPLING.md)及[固定主频实机验收](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/validation/2026-10-09-swo-ports-calculator.md)。
+
 ## 实测性能
 
 下面是代表性板上结果。目标时钟、接线、变量布局和主机负载会影响速率；峰值采样率与无损采样率分别报告。
@@ -49,6 +63,7 @@ SPI/QSPI、I2C 和高速 ADC 当前面向 **HPM5301EVKLite** 板型。HPM5301 �
 | RISC-V SRAM / RTT | HPM6800EVK：SRAM 读/写约 **1504 / 1512 KiB/s**；RTT 约 **1385 KiB/s** | [JTAG 验证](docs/hpm6800evk-jtag.md) |
 | HSS 单变量 / SWD | F103CB @72 MHz、SWD 60 MHz：名义 400 kHz 实得约 **399.97 kHz**，调度跳拍约 **0.008%**；500 kHz 档实得约 **496 kHz**，跳拍约 **0.8%** | [采样优化与边界](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/validation/2026-10-07-f103cb-hss-optimization.md) |
 | HSS / RISC-V | HPM6800EVK：单 u32 名义 200 kHz 实得约 **200 kHz**、跳拍约 **0.00275%**；8 个连续 u32 在 **25 kHz** 窗口内跳拍与 USB 丢样均为 0 | [HPM HSS 复测](docs/validation/2026-10-07-hpm6800-hss-rate.md) |
+| SWO→VCOM→Web | F103CB @72 MHz，256 周期、纯 PC、实际 18 Mbaud；1 秒收到 **252,198 PC**，236 个不同 PC 的函数 / 文件 / 行号与 GNU 定位全部一致，SWO 溢出及已检测 UART 错误为 0 | [固定主频验收](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/validation/2026-10-09-swo-ports-calculator.md) |
 | SPI / QSPI 发图 | 实际 SCK 60 MHz、32 KiB 批次：单线 SPI **6.29 MB/s**，四线 QSPI **16.77 MB/s** | [固定 240 MHz 实测](docs/validation/2026-10-08-spi-fixed240.md) |
 | SPI转发→CDC | H743 标称 SCK 67 MHz，原生 CDC 接收 **8.41 MB/s**；15 秒稳定窗口完整性检查通过 | [转发与 Web 缓冲对照](docs/validation/2026-10-08-spi-fixed240.md) |
 | ADC 采集 | EVKLite，8/10/12/16 位在 **1 / 2 MSa/s** 各测 30 秒，计数一致、无溢出 | [采集实现与验收入口](docs/adc-bulk-stream.md) |
@@ -111,6 +126,7 @@ make test-host    # 无硬件的固件逻辑回归
 | 2026-10-07 | SWD 与 RISC-V 高速采样优化，建立双仓库基线标签 [`milestone-2026-10-07`](https://github.com/minichao9901/5301evk_akaLinkPro/tree/milestone-2026-10-07) |
 | 2026-10-08 | SPI转发完成 H743 高频与完整性测试，SPI2 模块统一固定 240 MHz |
 | 2026-10-08 | 异常诊断与采集质量开发前建立双仓库基线标签 [`milestone-2026-10-08-pre-diagnostics`](https://github.com/minichao9901/5301evk_akaLinkPro/tree/milestone-2026-10-08-pre-diagnostics) |
+| 2026-10-09 | 默认 UART 240 MHz / 最高请求 30 Mbaud、可恢复 SWO 接收时钟会话合入主线，配套 Web 完成 F103CB 录制与源码分析验收 |
 
 完整研发过程、历史测量与问题定因见 [开发与调试记录](docs/development-history.md)。里程碑表示阶段成果，具体测试条件与未覆盖场景保留在验收文档中。
 
@@ -120,6 +136,7 @@ make test-host    # 无硬件的固件逻辑回归
 | --- | --- |
 | [Web 工程](https://github.com/minichao9901/web-serial-rtt-tools) | 页面功能、设备授权、本地运行和兼容性 |
 | [EVKLite 板级文档](docs/HPM5301EVKLite_port.md) | 引脚、构建、升级和自调试 |
+| [SWO 接收时钟](docs/swo-clock-lease.md) / [Web 录制与分析](https://github.com/minichao9901/web-serial-rtt-tools/blob/main/docs/SWO-PC-SAMPLING.md) | VCOM 接线、波特率匹配、时钟恢复、源码回放与完整导出 |
 | [SPI/QSPI 接线](docs/spi-bridge-wiring.md) / [SPI转发](docs/spi-cdc.md) | 外设与高速接收使用说明 |
 | [I2C 协议与接线](docs/web-handoff-i2c-bridge.md) | I2C 控制与事务约定 |
 | [ADC 数据流](docs/adc-bulk-stream.md) | 硬件触发、采集流程和性能范围 |
