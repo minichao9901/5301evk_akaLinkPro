@@ -51,16 +51,16 @@
 DAP_Data_t DAP_Data; // DAP Data
 
 #ifdef BOARD_PIN_nRESET2
-volatile uint8_t dap_trst_open_drain = 1U;
+volatile uint8_t dap_nrst_open_drain = 1U;
 #else
-volatile uint8_t dap_trst_open_drain = 0U;
+volatile uint8_t dap_nrst_open_drain = 0U;
 #endif
 
 uint8_t DAP_SetResetOutputMode(uint8_t open_drain)
 {
 #ifdef BOARD_PIN_nRESET2
-	PIN_nRESET_OUT(1U); /* never switch the electrical mode while holding reset low */
-	dap_trst_open_drain = open_drain ? 1U : 0U;
+	/* Preserve the output latch: changing mode must not release an asserted reset. */
+	dap_nrst_open_drain = open_drain ? 1U : 0U;
 	DAP_APPLY_RESET_PAD_CONFIG();
 	return 1U;
 #else
@@ -71,7 +71,7 @@ uint8_t DAP_SetResetOutputMode(uint8_t open_drain)
 
 uint8_t DAP_GetResetOutputMode(void)
 {
-	return dap_trst_open_drain ? 1U : 0U;
+	return dap_nrst_open_drain ? 1U : 0U;
 }
 
 uint8_t DAP_ResetOutputModeSupported(void)

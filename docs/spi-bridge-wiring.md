@@ -53,7 +53,7 @@
 | 15 / 16 / 18 / 22 / 35 / 40 | NC | — | — |
 | 19 | SPI_MOSI | PA29 | ⛔ USB0_OC 网络（AP2151 的 nFAULT + R6 10k 上拉）：当输出会被它拉，别用 |
 | 21 | SPI_MISO | PA28 | ○ 空闲 |
-| 23 | SPI_SCLK | PA27 | ○ 空闲 |
+| 23 | SPI_SCLK | PA27 | ✗ 目标 NRST 专用（可切换开漏/推挽） |
 | 24 | SPI_CS0 | PA26 | ○ 空闲 |
 | **26** | SPI_CS1 | **PB10** | ★ **CS**（SPI2 的 CS0） |
 | **27** | GPIO | **PB12** | ★ **D1 / MISO**（注意：PB12 是 MISO，PB13 才是 MOSI） |
@@ -143,7 +143,7 @@ J3[28] MOSI ──跳线── J3[27] MISO       一根线，别的都不用接
   就干净利落）⇒ 想用它得先让固件里的 `led_write()` 避让；
 - **14~17（PA26/PA27/PA28/PA29）曾释放**：SPI1 时代显示接口的那四根
   （板丝印 SPI_CS0 / SCLK / MISO / MOSI），桥搬到 SPI2 后不再承担显示功能；其中
-  **PA27/J3[23] 现专用于第二路目标 nRESET**，因此从辅助脚列表中拒绝；其余候选按固件资源判定。
+  **PA27/J3[23] 现专用于目标 nRESET**，因此从辅助脚列表中拒绝；其余候选按固件资源判定。
   ⚠️ 若切到 `boards/akaLinkPro` 板级构建，PA26(nRESET/break)/PA27(SWCLK)/PA28(SWDIO) 会被占；
 - 推荐：**RST = 5（PA02，J3[7]）**、**BL = 13（PA31，J3[11]）**。
 

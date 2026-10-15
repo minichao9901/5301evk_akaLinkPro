@@ -1,4 +1,5 @@
 @echo off
+@cd /d "%~dp0"
 @REM ---------------------------------------------------------------------------
 @REM Application build for HPM5301EVKLite (BOARD=hpm5301evklite).
 @REM
@@ -23,7 +24,9 @@
 @set "HPM_BUILD_TYPE=flash_xip"
 
 @cmake -G Ninja -DBOARD=%BOARD% -DHPM_BUILD_TYPE=%HPM_BUILD_TYPE% -DCMAKE_BUILD_TYPE=debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B=./build_dfu_evklite -S .
+@if errorlevel 1 exit /b %errorlevel%
 @cmake --build ./build_dfu_evklite
+@if errorlevel 1 exit /b %errorlevel%
 
 @echo.
 @echo [build_dfu_evklite] APP image (flash this): build_dfu_evklite\output\akaLinkPro_App_pack.hex / _pack.bin (linked at 0x80020000, entry 0x80020100)

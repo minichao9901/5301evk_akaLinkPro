@@ -127,7 +127,7 @@ service_gate_t api_param_gate;
  */
 #define CMD_RESET_IO (0x3A)
 #define RESET_IO_ACT_GET 0U
-#define RESET_IO_ACT_SET_TRST_MODE 1U
+#define RESET_IO_ACT_SET_NRST_MODE 1U
 
 #define PARAM_MAGIC_NUMBER (0x0D000721UL)
 /* EasyFlash ENV key that stores the whole api_param_t blob. */
@@ -685,9 +685,11 @@ void api_param_proc_hid(uint8_t *req_hid, uint8_t *res_hid)
     {
         int8_t rc = 0;
         const uint8_t supported = DAP_ResetOutputModeSupported();
-        if (req_hid[3] == RESET_IO_ACT_SET_TRST_MODE)
+        if (req_hid[1] < 2U) rc = -2;
+        else if (req_hid[3] == RESET_IO_ACT_SET_NRST_MODE)
         {
             if (!supported) rc = -1;
+            else if (req_hid[1] < 3U || req_hid[4] > 1U) rc = -2;
             else (void)DAP_SetResetOutputMode(req_hid[4] ? 1U : 0U);
         }
         else if (req_hid[3] != RESET_IO_ACT_GET)
@@ -699,7 +701,8 @@ void api_param_proc_hid(uint8_t *req_hid, uint8_t *res_hid)
         res_hid[2] = CMD_RESET_IO;
         res_hid[3] = (uint8_t)rc;
         res_hid[4] = DAP_GetResetOutputMode();
-        res_hid[5] = supported ? 0x03U : 0x00U;
+        /* bit2 distinguishes PA27-selectable firmware from the old PA08 mapping. */
+        res_hid[5] = supported ? 0x07U : 0x00U;
         break;
     }
 

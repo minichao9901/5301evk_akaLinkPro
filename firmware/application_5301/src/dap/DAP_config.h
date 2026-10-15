@@ -59,9 +59,9 @@
 #define __STATIC_FORCEINLINE static inline
 #endif
 
-/* Runtime mode is changed by custom HID 0x37. HPM5301EVKLite uses PA08/J5.3
- * as the legacy nRESET output; PA27/J3.23 is an always-open-drain second path. */
-extern volatile uint8_t dap_trst_open_drain;
+/* Custom HID 0x3A changes PA27/J3.23 nRESET mode on EVKLite.
+ * PA08/J5.3 is the fixed-open-drain compatibility output. */
+extern volatile uint8_t dap_nrst_open_drain;
 
 #ifndef BOARD_NRESET_ACTIVE_LOW
 #define BOARD_NRESET_ACTIVE_LOW (0)
@@ -79,7 +79,7 @@ __STATIC_INLINE void DAP_APPLY_RESET_PAD_CONFIG(void)
 #endif
         IOC_PAD_PAD_CTL_KE_SET(0) |
 #ifdef BOARD_PIN_nRESET2
-        IOC_PAD_PAD_CTL_OD_SET(dap_trst_open_drain ? 1U : 0U) |
+        IOC_PAD_PAD_CTL_OD_SET(dap_nrst_open_drain ? 1U : 0U) |
 #else
         IOC_PAD_PAD_CTL_OD_SET(0) |
 #endif
@@ -392,8 +392,15 @@ __STATIC_INLINE void PORT_JTAG_SETUP(void)
     gpio_set_pin_output(HPM_FGPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTDI), GPIO_GET_PIN_INDEX(BOARD_PIN_JTDI));
     gpio_set_pin_output(HPM_FGPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS));
 
+#ifdef BOARD_PIN_nRESET2
+    /* A reconnect may start with reset asserted: release the fixed OD route
+     * before preloading the configurable push-pull route high. */
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
+#endif
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), (BOARD_NRESET_ACTIVE_LOW ? 1U : 0U));
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET));
 #ifdef BOARD_PIN_nRESET2
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2));
 #endif
 #if BOARD_HAS_SWDIO_DIR
@@ -412,7 +419,7 @@ __STATIC_INLINE void PORT_JTAG_SETUP(void)
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS_DIR), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS_DIR), 1); // output
 #endif
 #ifdef BOARD_PIN_nRESET2
-    /* Release the always-open-drain path before PA08 can drive high push-pull. */
+    /* Release the always-open-drain path before PA27 can drive high push-pull. */
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
 #endif
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), NRESET_RELEASE_LEVEL);
@@ -464,8 +471,15 @@ __STATIC_INLINE void PORT_SWD_SETUP(void)
 #endif
     gpio_set_pin_output(HPM_FGPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS));
 
+#ifdef BOARD_PIN_nRESET2
+    /* A reconnect may start with reset asserted: release the fixed OD route
+     * before preloading the configurable push-pull route high. */
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
+#endif
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), (BOARD_NRESET_ACTIVE_LOW ? 1U : 0U));
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET));
 #ifdef BOARD_PIN_nRESET2
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2));
 #endif
 #if BOARD_HAS_JTRST
@@ -484,7 +498,7 @@ __STATIC_INLINE void PORT_SWD_SETUP(void)
     gpio_write_pin(HPM_FGPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS), 1);
 
 #ifdef BOARD_PIN_nRESET2
-    /* Release the always-open-drain path before PA08 can drive high push-pull. */
+    /* Release the always-open-drain path before PA27 can drive high push-pull. */
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
 #endif
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), (BOARD_NRESET_ACTIVE_LOW ? 1U : 0U));
@@ -685,6 +699,8 @@ __STATIC_FORCEINLINE void PIN_nTRST_OUT(uint32_t bit)
 */
 __STATIC_FORCEINLINE uint32_t PIN_nRESET_IN(void)
 {
+    /* This GPIO output reports the commanded latch, not target reboot success.
+     * A real system-reset test must observe the target reset cause / PC. */
     uint32_t level = gpio_get_pin_output_status(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET));
 #if BOARD_NRESET_ACTIVE_LOW
     /* Direct wire: pin high = reset released. */
@@ -719,7 +735,7 @@ __STATIC_FORCEINLINE void PIN_nRESET_OUT(uint32_t bit)
 #ifdef BOARD_PIN_nRESET2
     if (!(bit & 0x01U))
     {
-        /* Assert the J3 route only after PA08 has driven low. */
+        /* Assert the open-drain route after the configurable route drives low. */
         gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 0U);
     }
 #endif
@@ -876,6 +892,7 @@ __STATIC_INLINE void DAP_SETUP(void)
 #ifdef BOARD_PIN_nRESET2
     HPM_IOC->PAD[BOARD_PIN_nRESET2].FUNC_CTL = IOC_PAD_FUNC_CTL_ALT_SELECT_SET(0);
     gpiom_config_pin_to_gpio0(BOARD_PIN_nRESET2);
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2));
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
 #endif

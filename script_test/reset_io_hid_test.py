@@ -4,8 +4,8 @@ Usage:
   python script_test/reset_io_hid_test.py                 # query only
   python script_test/reset_io_hid_test.py --exercise      # test push-pull/open-drain and restore original mode
 
-The exercise changes PA08/J5[3] electrical mode, but does not assert reset or
-write target memory. PA27/J3[23] remains open-drain in both modes.
+The exercise changes PA27/J3[23] electrical mode, but does not assert reset or
+write target memory. PA08/J5[3] remains open-drain in both modes.
 """
 import argparse
 import sys
@@ -18,7 +18,7 @@ PID = 0x0204
 USAGE_PAGE = 0xFF00
 CMD_RESET_IO = 0x3A
 ACT_GET = 0
-ACT_SET_TRST_MODE = 1
+ACT_SET_NRST_MODE = 1
 
 
 def transfer(device, action, mode=0):
@@ -58,12 +58,12 @@ def main():
         state = transfer(device, ACT_GET)
         original = state["openDrain"]
         caps = state["capabilities"]
-        if (caps & 3) != 3:
+        if (caps & 7) != 7:
             raise RuntimeError("dual-reset and drive-mode capabilities missing: 0x%02X" % caps)
         print("GET: mode=%s capabilities=0x%02X" % ("open-drain" if original else "push-pull", caps))
         if args.exercise:
             for mode in (False, True):
-                state = transfer(device, ACT_SET_TRST_MODE, int(mode))
+                state = transfer(device, ACT_SET_NRST_MODE, int(mode))
                 readback = transfer(device, ACT_GET)
                 if state["openDrain"] != mode or readback["openDrain"] != mode:
                     raise RuntimeError("mode readback mismatch for %s" % ("open-drain" if mode else "push-pull"))
@@ -71,7 +71,7 @@ def main():
     finally:
         if args.exercise and original is not None:
             try:
-                transfer(device, ACT_SET_TRST_MODE, int(original))
+                transfer(device, ACT_SET_NRST_MODE, int(original))
                 restored = transfer(device, ACT_GET)
                 if restored["openDrain"] != original:
                     raise RuntimeError("failed to restore original drive mode")
