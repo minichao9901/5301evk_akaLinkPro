@@ -14,6 +14,7 @@
 #include "bus_periodic.h"
 #include "analog_bridge.h"
 #include "SW_DP.h"
+#include "DAP.h"
 #include "led_state.h"
 #include "hpm_dfu_trigger.h"
 #include "board.h"
@@ -118,6 +119,15 @@ service_gate_t api_param_gate;
  * 响应形状同上：res_hid[3] = 动作号回显，res_hid[4..7] = 状态字，res_hid[8..] = 数据。
  * 动作表/状态字/XFER 布局见 src/i2c_bridge/i2c_bridge_proto.h 与 docs/web-handoff-i2c-bridge.md。 */
 #define CMD_I2C (I2C_HID_CMD)
+
+/* ---- CMD 0x3A RESET I/O：目标复位输出选择（仅 EVKLite 有双路/可选电气模式）----
+ * req_hid[3] = action (0=GET, 1=SET_TRST_OPEN_DRAIN), req_hid[4] = mode (0=push-pull, 1=open-drain)
+ * response: res_hid[3] = rc (0=ok, -1=unsupported, -2=bad action),
+ *           res_hid[4] = current mode, res_hid[5] = capabilities (bit0=mode, bit1=dual reset).
+ */
+#define CMD_RESET_IO (0x3A)
+#define RESET_IO_ACT_GET 0U
+#define RESET_IO_ACT_SET_TRST_MODE 1U
 
 #define PARAM_MAGIC_NUMBER (0x0D000721UL)
 /* EasyFlash ENV key that stores the whole api_param_t blob. */
@@ -669,6 +679,27 @@ void api_param_proc_hid(uint8_t *req_hid, uint8_t *res_hid)
         /* USB→I2C 转发桥（动作见 src/i2c_bridge/i2c_bridge_proto.h）。
          * 控制面与数据面都在这一条 HID 上：中断里只登记请求，主循环执行事务。 */
         i2c_bridge_hid(req_hid, res_hid);
+        break;
+    }
+    case CMD_RESET_IO:
+    {
+        int8_t rc = 0;
+        const uint8_t supported = DAP_ResetOutputModeSupported();
+        if (req_hid[3] == RESET_IO_ACT_SET_TRST_MODE)
+        {
+            if (!supported) rc = -1;
+            else (void)DAP_SetResetOutputMode(req_hid[4] ? 1U : 0U);
+        }
+        else if (req_hid[3] != RESET_IO_ACT_GET)
+        {
+            rc = -2;
+        }
+
+        res_hid[1] = 1U + 1U + 2U;
+        res_hid[2] = CMD_RESET_IO;
+        res_hid[3] = (uint8_t)rc;
+        res_hid[4] = DAP_GetResetOutputMode();
+        res_hid[5] = supported ? 0x03U : 0x00U;
         break;
     }
 

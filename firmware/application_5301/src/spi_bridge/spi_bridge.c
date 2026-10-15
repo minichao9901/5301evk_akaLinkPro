@@ -1853,7 +1853,8 @@ static uint8_t sb_cfg_validate(const sb_cfg_t *c)
     }
     /* 辅助脚不能撞 SPI2 的固定脚（PB10~PB15 全是桥的信号线） */
     static const uint16_t reserved[] = {IOC_PAD_PB10, IOC_PAD_PB11, IOC_PAD_PB12,
-                                        IOC_PAD_PB13, IOC_PAD_PB14, IOC_PAD_PB15};
+                                        IOC_PAD_PB13, IOC_PAD_PB14, IOC_PAD_PB15,
+                                        IOC_PAD_PA27};
     const uint8_t aux[5] = {c->pad_dc, c->pad_rst, c->pad_cs_aux, c->pad_bl, c->pad_te};
     for (uint32_t i = 0U; i < 5U; i++)
     {
@@ -1885,7 +1886,7 @@ static uint8_t sb_pad_usable(uint16_t pad)
     }
     static const uint16_t reserved[] = {IOC_PAD_PB10, IOC_PAD_PB11, IOC_PAD_PB12,
                                         IOC_PAD_PB13, IOC_PAD_PB14, IOC_PAD_PB15,
-                                        IOC_PAD_PA30};
+                                        IOC_PAD_PA27, IOC_PAD_PA30};
     for (uint32_t i = 0U; i < (sizeof(reserved) / sizeof(reserved[0])); i++)
     {
         if (pad == reserved[i])

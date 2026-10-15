@@ -11,6 +11,7 @@
  *   J5.9  TCK   -> PA06 (SWCLK)
  *   J5.13 TDO   -> PA04
  *   J5.3  nTRST -> PA08 (driven as the DAP nRESET output)
+ *   J3.23 PA27 -> second target nRESET output
  *   J5.15 nSRST -> chip RESET_N (input only, cannot be driven by firmware)
  *
  * The same pins are the SoC's own JTAG port, so the board stays debuggable
@@ -118,6 +119,9 @@
 #define BOARD_PIN_JTDI          IOC_PAD_PA05
 #define BOARD_PIN_JTDO          IOC_PAD_PA04
 #define BOARD_PIN_nRESET        IOC_PAD_PA08
+/* J3[23] is dedicated to target nRESET on the EVKLite wiring.  PA08/J5[3]
+ * remains available in parallel for compatibility with the 20-pin header. */
+#define BOARD_PIN_nRESET2       IOC_PAD_PA27
 
 /* CDC VCOM bridge: UART2 on PB08 (TXD, J3.5) / PB09 (RXD, J3.3) - the pins
  * labelled I2C_SCL/I2C_SDA on the EVKLite J3 header (only R21/R22 10k pull-ups

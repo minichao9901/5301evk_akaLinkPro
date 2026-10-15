@@ -28,6 +28,8 @@
 #ifndef __DAP_H__
 #define __DAP_H__
 
+#include <stdint.h>
+
 
 // DAP Firmware Version
 #ifdef  DAP_FW_V1
@@ -54,6 +56,11 @@
 #define ID_DAP_SWD_Configure            0x13U
 #define ID_DAP_SWD_Sequence             0x1DU
 #define ID_DAP_JTAG_Sequence            0x14U
+
+/* akaLinkPro board reset output electrical mode (custom HID 0x37). */
+uint8_t DAP_SetResetOutputMode(uint8_t open_drain);
+uint8_t DAP_GetResetOutputMode(void);
+uint8_t DAP_ResetOutputModeSupported(void);
 #define ID_DAP_JTAG_Configure           0x15U
 #define ID_DAP_JTAG_IDCODE              0x16U
 #define ID_DAP_SWO_Transport            0x17U

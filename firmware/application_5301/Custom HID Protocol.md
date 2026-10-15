@@ -709,3 +709,12 @@ Byte[0x03-0x3F] = Command data（可选）
 此指令不更改 UART 配置，不读取 DLL/DLM（DLAB=0 时会别名到收包寄存器）。初次 SET_LINE_CODING 前，请求/应用波特率为 0、初始化状态为失败，表示尚未配置。返回的应用波特率是 SDK 的输入值；低速率的最终分频还受 SDK 取整容差影响，不能把它视为线速实测。200 MHz 时 OSR=8、25 Mbaud，或 OSR=10、20 Mbaud，均对应 divisor=1。
 
 `script_test/uart_clock_diag.py --serial <SN>` 可只读核对。
+
+## 目标复位输出模式（0x3A）
+
+EVKLite 固件使用两个并行复位输出：J5[3]/PA08 保留兼容现有 20-pin 接线，J3[23]/PA27 是第二路目标 nRESET。两路在 CMSIS-DAP nRESET 拉低时同步拉低；释放时 PA27 始终开漏，PA08 的输出方式由网页选择。PA27/J3[23] 不再作为 SPI 桥辅助 GPIO。
+
+- 请求 `req_hid[3] = 0` 查询当前模式，或 `1` 设置 J5[3]/TRST 输出方式；`req_hid[4] = 0` 推挽、`1` 开漏。
+- 响应 `res_hid[3]` 是返回码（0 成功、-1 当前板型不支持、-2 动作非法）；`res_hid[4]` 是当前模式；`res_hid[5]` 能力位 bit0 表示可切换模式，bit1 表示双路复位输出。
+- 命令使用 HID `0x3A`（`0x37` 已分配给周期总线采样）。新旧固件兼容性由网页检查能力位；旧固件返回通用“不支持”响应。
+- 该设置仅在当前探针上生效，探针固件默认开漏；全局硬复位使用标准 CMSIS-DAP `SWJ_Pins` nRESET 脉冲，不依赖网页自定义复位序列。

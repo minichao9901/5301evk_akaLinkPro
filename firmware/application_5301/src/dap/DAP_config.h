@@ -59,6 +59,47 @@
 #define __STATIC_FORCEINLINE static inline
 #endif
 
+/* Runtime mode is changed by custom HID 0x37. HPM5301EVKLite uses PA08/J5.3
+ * as the legacy nRESET output; PA27/J3.23 is an always-open-drain second path. */
+extern volatile uint8_t dap_trst_open_drain;
+
+#ifndef BOARD_NRESET_ACTIVE_LOW
+#define BOARD_NRESET_ACTIVE_LOW (0)
+#endif
+
+__STATIC_INLINE void DAP_APPLY_RESET_PAD_CONFIG(void)
+{
+    HPM_IOC->PAD[BOARD_PIN_nRESET].PAD_CTL =
+        IOC_PAD_PAD_CTL_HYS_SET(0) |
+        IOC_PAD_PAD_CTL_PRS_SET(0) |
+#if BOARD_NRESET_ACTIVE_LOW
+        IOC_PAD_PAD_CTL_PS_SET(1) | IOC_PAD_PAD_CTL_PE_SET(1) |
+#else
+        IOC_PAD_PAD_CTL_PS_SET(0) | IOC_PAD_PAD_CTL_PE_SET(1) |
+#endif
+        IOC_PAD_PAD_CTL_KE_SET(0) |
+#ifdef BOARD_PIN_nRESET2
+        IOC_PAD_PAD_CTL_OD_SET(dap_trst_open_drain ? 1U : 0U) |
+#else
+        IOC_PAD_PAD_CTL_OD_SET(0) |
+#endif
+        IOC_PAD_PAD_CTL_SR_SET(0) |
+        IOC_PAD_PAD_CTL_SPD_SET(1) |
+        IOC_PAD_PAD_CTL_DS_SET(4);
+#ifdef BOARD_PIN_nRESET2
+    HPM_IOC->PAD[BOARD_PIN_nRESET2].PAD_CTL =
+        IOC_PAD_PAD_CTL_HYS_SET(0) |
+        IOC_PAD_PAD_CTL_PRS_SET(0) |
+        IOC_PAD_PAD_CTL_PS_SET(1) |
+        IOC_PAD_PAD_CTL_PE_SET(1) |
+        IOC_PAD_PAD_CTL_KE_SET(0) |
+        IOC_PAD_PAD_CTL_OD_SET(1) |
+        IOC_PAD_PAD_CTL_SR_SET(0) |
+        IOC_PAD_PAD_CTL_SPD_SET(1) |
+        IOC_PAD_PAD_CTL_DS_SET(4);
+#endif
+}
+
 // clang-format off
 
 /// 调试探针单元中使用的 Cortex-M MCU 的处理器时钟。
@@ -334,6 +375,9 @@ __STATIC_INLINE void PORT_JTAG_SETUP(void)
     gpiom_config_pin_to_fgpio(BOARD_PIN_JTMS);
 
     gpiom_config_pin_to_gpio0(BOARD_PIN_nRESET);
+#ifdef BOARD_PIN_nRESET2
+    gpiom_config_pin_to_gpio0(BOARD_PIN_nRESET2);
+#endif
 #if BOARD_HAS_SWDIO_DIR
     gpiom_config_pin_to_gpio0(BOARD_PIN_JTMS_DIR);
 #endif
@@ -349,6 +393,9 @@ __STATIC_INLINE void PORT_JTAG_SETUP(void)
     gpio_set_pin_output(HPM_FGPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS));
 
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET));
+#ifdef BOARD_PIN_nRESET2
+    gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2));
+#endif
 #if BOARD_HAS_SWDIO_DIR
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS_DIR), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS_DIR));
 #endif
@@ -363,6 +410,10 @@ __STATIC_INLINE void PORT_JTAG_SETUP(void)
 
 #if BOARD_HAS_SWDIO_DIR
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS_DIR), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS_DIR), 1); // output
+#endif
+#ifdef BOARD_PIN_nRESET2
+    /* Release the always-open-drain path before PA08 can drive high push-pull. */
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
 #endif
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), NRESET_RELEASE_LEVEL);
 #if BOARD_HAS_JTRST
@@ -392,6 +443,9 @@ __STATIC_INLINE void PORT_SWD_SETUP(void)
 #endif
 
     gpiom_config_pin_to_gpio0(BOARD_PIN_nRESET);
+#ifdef BOARD_PIN_nRESET2
+    gpiom_config_pin_to_gpio0(BOARD_PIN_nRESET2);
+#endif
 #if BOARD_HAS_JTRST
     gpiom_config_pin_to_gpio0(BOARD_PIN_JTRST);
 #endif
@@ -411,6 +465,9 @@ __STATIC_INLINE void PORT_SWD_SETUP(void)
     gpio_set_pin_output(HPM_FGPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS));
 
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET));
+#ifdef BOARD_PIN_nRESET2
+    gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2));
+#endif
 #if BOARD_HAS_JTRST
     gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_JTRST), GPIO_GET_PIN_INDEX(BOARD_PIN_JTRST));
 #endif
@@ -426,6 +483,10 @@ __STATIC_INLINE void PORT_SWD_SETUP(void)
 #endif
     gpio_write_pin(HPM_FGPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS), 1);
 
+#ifdef BOARD_PIN_nRESET2
+    /* Release the always-open-drain path before PA08 can drive high push-pull. */
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
+#endif
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), (BOARD_NRESET_ACTIVE_LOW ? 1U : 0U));
 #if BOARD_HAS_JTRST
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_JTRST), GPIO_GET_PIN_INDEX(BOARD_PIN_JTRST), 1);
@@ -449,7 +510,12 @@ __STATIC_INLINE void PORT_OFF(void)
     // gpio_write_pin(PIN_GPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTCK), GPIO_GET_PIN_INDEX(BOARD_PIN_JTCK), 1);
     // gpio_write_pin(PIN_GPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS_DIR), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS_DIR), 1);
     // gpio_write_pin(PIN_GPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTMS_OUT), GPIO_GET_PIN_INDEX(BOARD_PIN_JTMS_OUT), 1);
-    // gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), 0);
+    /* Never leave either target reset path asserted when the DAP port closes. */
+#ifdef BOARD_PIN_nRESET2
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
+#endif
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET),
+                   (BOARD_NRESET_ACTIVE_LOW ? 1U : 0U));
     // gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_JTRST), GPIO_GET_PIN_INDEX(BOARD_PIN_JTRST), 1);
 
     // gpio_write_pin(PIN_GPIO, GPIO_GET_PORT_INDEX(BOARD_PIN_JTDI), GPIO_GET_PIN_INDEX(BOARD_PIN_JTDI), 1);
@@ -636,12 +702,26 @@ __STATIC_FORCEINLINE uint32_t PIN_nRESET_IN(void)
 */
 __STATIC_FORCEINLINE void PIN_nRESET_OUT(uint32_t bit)
 {
+#ifdef BOARD_PIN_nRESET2
+    if (bit & 0x01U)
+    {
+        /* Avoid push-pull-high vs open-drain-low contention on the shared NRST net. */
+        gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
+    }
+#endif
 #if BOARD_NRESET_ACTIVE_LOW
     /* Direct wire, active low: released = drive high. */
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), (bit & 0x01));
 #else
     /* Inverted drive: released = drive low. */
     gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET), !(bit & 0x01));
+#endif
+#ifdef BOARD_PIN_nRESET2
+    if (!(bit & 0x01U))
+    {
+        /* Assert the J3 route only after PA08 has driven low. */
+        gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 0U);
+    }
 #endif
 }
 
@@ -792,21 +872,13 @@ __STATIC_INLINE void DAP_SETUP(void)
 #endif
     /* nRESET idle level = released: direct-wire boards (active low) idle high
      * with pull-up; inverted-drive boards idle low with pull-down. */
-    HPM_IOC->PAD[BOARD_PIN_nRESET].PAD_CTL =
-        IOC_PAD_PAD_CTL_HYS_SET(0) | // 施密特触发器 失效
-        IOC_PAD_PAD_CTL_PRS_SET(0) | // 上下拉强度 100k
-#if BOARD_NRESET_ACTIVE_LOW
-        IOC_PAD_PAD_CTL_PS_SET(1) |  // 上拉
-        IOC_PAD_PAD_CTL_PE_SET(1) |  // 上拉使能
-#else
-        IOC_PAD_PAD_CTL_PS_SET(0) |  // 下拉
-        IOC_PAD_PAD_CTL_PE_SET(1) |  // 下拉使能
+    DAP_APPLY_RESET_PAD_CONFIG();
+#ifdef BOARD_PIN_nRESET2
+    HPM_IOC->PAD[BOARD_PIN_nRESET2].FUNC_CTL = IOC_PAD_FUNC_CTL_ALT_SELECT_SET(0);
+    gpiom_config_pin_to_gpio0(BOARD_PIN_nRESET2);
+    gpio_set_pin_output(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2));
+    gpio_write_pin(HPM_GPIO0, GPIO_GET_PORT_INDEX(BOARD_PIN_nRESET2), GPIO_GET_PIN_INDEX(BOARD_PIN_nRESET2), 1U);
 #endif
-        IOC_PAD_PAD_CTL_KE_SET(0) |  // 保持能力 失效
-        IOC_PAD_PAD_CTL_OD_SET(0) |  // 开漏输出 失效
-        IOC_PAD_PAD_CTL_SR_SET(0) |  // 压摆率 慢速
-        IOC_PAD_PAD_CTL_SPD_SET(1) | // 较慢压摆率
-        IOC_PAD_PAD_CTL_DS_SET(4);   // 驱动能力 39 ohm(3.3V)
     HPM_IOC->PAD[BOARD_PIN_JTDO].PAD_CTL =
         IOC_PAD_PAD_CTL_HYS_SET(0) | // 施密特触发器 失效
         IOC_PAD_PAD_CTL_PRS_SET(0) | // 上下拉强度 100k
